@@ -1,0 +1,112 @@
+# ==============================================================================
+# AI ROOM DECOR — .gitignore
+# Chỉ lưu trữ mã nguồn, cấu hình mẫu, tài liệu và migration schema an toàn.
+# ==============================================================================
+
+# ===== Dependencies =====
+node_modules/
+.venv/
+venv/
+env/
+
+# ===== Python & Caches =====
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.mypy_cache/
+.pytest_cache/
+.pytest-temp/
+.pytest_temp/
+*/.pytest-temp/
+*/.pytest_temp/
+
+# ===== Next.js & Frontend Build =====
+.next/
+out/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ===== Environment & Credentials (KHÔNG bao giờ commit) =====
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# ===== Storage & Runtime User Uploads / AI Generations =====
+storage/
+test_storage/
+
+# ===== Backups & Archive Files =====
+backups/
+frontend_backup/
+report_backup_*/
+report_new_backup/
+report_new_pre_audit_backup/
+report/
+report_new/
+*.snapshot*
+*.snapshot_*
+*.backup*
+*.bak
+*.swp
+*~
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# ===== Database Dumps & Local Database Files =====
+*.sql
+*.db
+*.sqlite
+*.sqlite3
+
+# ===== Logs & Temporary Files =====
+*.log
+.tmp/
+*/.tmp/
+*.tmp
+write_check.tmp
+tmppwueyhiw/
+tmp*/
+
+# ===== LaTeX Build Artifacts & QA Previews =====
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.loa
+*.lof
+*.lot
+*.out
+*.toc
+*.xdv
+*.synctex.gz
+report_new/qa_code_listings/
+report_new/qa_previews/
+report_new/qa_tables_figures/
+report_new/figures_bw_preview/
+report_new/check_*.png
+report_new/test_pos_fig2_6.*
+
+# ===== Local IDE & Agent Tooling =====
+.agents/
+.commandcode/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ===== Test & Audit Image Artifacts =====
+phase_9_1_product_audit.jpg
