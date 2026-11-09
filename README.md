@@ -147,77 +147,217 @@ AI-Room-Decor/
 
 ## 6. Hướng dẫn cài đặt & Khởi chạy
 
-### Lựa chọn 1: Chạy nhanh bằng Docker Compose
-
-Yêu cầu máy đã cài **Docker** và **Docker Compose**.
-
-```bash
-# 1. Sao chép file cấu hình mẫu
-copy .env.example .env
-
-# 2. Khởi tạo toàn bộ dịch vụ (MySQL 8, FastAPI backend, Next.js frontend)
-docker compose up --build -d
-
-# 3. Theo dõi trạng thái log
-docker compose logs -f
-```
-- Frontend: `http://localhost:3000`
-- Backend API Docs (Swagger): `http://localhost:8000/docs`
+Người phát triển mới hoặc thành viên nghiệm thu khi clone mã nguồn từ GitHub về có thể thiết lập và chạy hệ thống theo hai phương thức dưới đây.
 
 ---
 
-### Lựa chọn 2: Cài đặt từng phần trên môi trường cục bộ
+### Phương thức 1: Cài đặt từng bước trên môi trường cục bộ (Khuyến nghị cho phát triển)
 
-#### Bước 1: Khởi tạo Cơ sở dữ liệu (MariaDB / MySQL)
-Chạy dịch vụ MariaDB (qua XAMPP hoặc MySQL Workbench), tạo cơ sở dữ liệu:
-```sql
-CREATE DATABASE ai_room_decor CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE DATABASE ai_room_decor_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+#### 1. Yêu cầu hệ thống & Phần mềm tiên quyết
+Trước khi bắt đầu, hãy đảm bảo máy tính đã cài đặt các công cụ sau:
+- **Git**: [Tải Git](https://git-scm.com/) để quản lý mã nguồn.
+- **Python**: Phiên bản **3.12** hoặc **3.13** (kèm `pip` và `venv`). Kiểm tra: `python --version`.
+- **Node.js**: Phiên bản **18.x** hoặc **20.x+** LTS (kèm `npm`). Kiểm tra: `node -v` và `npm -v`.
+- **Hệ quản trị CSDL MariaDB / MySQL**: **MariaDB 10.4+** hoặc **MySQL 8.0/8.4** (có thể dùng qua XAMPP, Laragon, MySQL Server độc lập hoặc Docker).
+
+---
+
+#### 2. Bước 1 — Clone mã nguồn Repository
+Mở terminal (PowerShell, Command Prompt hoặc Bash) và clone repository về máy:
+```bash
+git clone https://github.com/<your-username>/AI-Room-Decor.git
+cd AI-Room-Decor
 ```
 
-#### Bước 2: Thiết lập Backend FastAPI
-```bash
-cd backend
+---
 
-# Khởi tạo môi trường ảo Python
-python -m venv .venv
-.venv\Scripts\activate          # Trên Windows
-# source .venv/bin/activate     # Trên Linux/macOS
+#### 3. Bước 2 — Thiết lập Biến môi trường (`.env`) từ file mẫu
+Hệ thống sử dụng file `.env` ở thư mục gốc (backend kế thừa) và `frontend/.env.local` cho frontend:
 
-# Cài đặt thư viện phụ thuộc
-pip install -r requirements.txt
+**Trên Windows (PowerShell):**
+```powershell
+Copy-Item .env.example .env
+Copy-Item frontend/.env.example frontend/.env.local
+```
 
-# Tạo file cấu hình môi trường
+**Trên Windows (CMD):**
+```cmd
 copy .env.example .env
-# Chỉnh sửa .env: cấu hình DATABASE_URL, JWT_SECRET_KEY, API keys...
+copy frontend\.env.example frontend\.env.local
+```
 
-# Chạy migration để khởi tạo cấu trúc bảng
-alembic upgrade head
+**Trên Linux / macOS:**
+```bash
+cp .env.example .env
+cp frontend/.env.example frontend/.env.local
+```
 
-# Nạp dữ liệu mẫu ban đầu (Catalog & Ảnh sản phẩm)
-python -m app.seed_catalog
-python -m app.seed_product_images
+---
 
-# Khởi chạy server FastAPI
+#### 4. Bước 3 — Tự thiết lập `JWT_SECRET_KEY` và mật khẩu Admin an toàn
+Mở file `.env` vừa tạo và cập nhật các khóa bảo mật quan trọng:
+
+1. **Sinh khóa bảo mật JWT ngẫu nhiên:**
+   Chạy lệnh Python sau để tạo chuỗi ngẫu nhiên bảo mật cao (64 ký tự hex):
+   ```bash
+   python -c "import secrets; print(secrets.token_hex(32))"
+   ```
+   Sao chép kết quả và gán vào `JWT_SECRET_KEY` trong `.env`:
+   ```env
+   JWT_SECRET_KEY=chuoi_khoa_ngau_nhien_vua_sinh_o_tren
+   ```
+
+2. **Thiết lập tài khoản Quản trị viên (Admin Seed):**
+   Trong `.env`, điền email và mật khẩu an toàn tự chọn của bạn:
+   ```env
+   ADMIN_EMAIL=admin@yourdomain.com
+   ADMIN_PASSWORD=MatKhauBaoMat@2026!
+   ADMIN_FULL_NAME=AI Room Decor Admin
+   ```
+   > [!WARNING]
+   > - Tuyệt đối không để trống hoặc dùng mật khẩu mặc định yếu.
+   > - Tuyệt đối không commit file `.env` chứa mật khẩu thật lên GitHub (đã được cấu hình loại trừ tự động trong `.gitignore`).
+
+3. **Cấu hình chuỗi kết nối Database (`DATABASE_URL`):**
+   Chỉnh sửa user/password phù hợp với MariaDB/MySQL trên máy bạn. Ví dụ:
+   - Dùng XAMPP (mặc định user `root`, không mật khẩu):
+     ```env
+     DATABASE_URL=mysql+pymysql://root:@127.0.0.1:3306/ai_room_decor?charset=utf8mb4
+     TEST_DATABASE_URL=mysql+pymysql://root:@127.0.0.1:3306/ai_room_decor_test?charset=utf8mb4
+     ```
+   - Dùng MySQL Server có mật khẩu `MySecretPass123`:
+     ```env
+     DATABASE_URL=mysql+pymysql://root:MySecretPass123@127.0.0.1:3306/ai_room_decor?charset=utf8mb4
+     TEST_DATABASE_URL=mysql+pymysql://root:MySecretPass123@127.0.0.1:3306/ai_room_decor_test?charset=utf8mb4
+     ```
+
+---
+
+#### 5. Bước 4 — Khởi tạo Database mới bằng Alembic
+1. **Tạo Database trên MariaDB/MySQL:**
+   Mở công cụ quản lý cơ sở dữ liệu (HeidiSQL, phpMyAdmin, MySQL Workbench, DBeaver) hoặc MySQL CLI và thực thi câu lệnh SQL:
+   ```sql
+   CREATE DATABASE ai_room_decor CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   CREATE DATABASE ai_room_decor_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   ```
+
+2. **Cài đặt môi trường ảo và thư viện Backend:**
+   ```bash
+   cd backend
+   python -m venv .venv
+
+   # Kích hoạt môi trường ảo:
+   # Trên Windows PowerShell:
+   .venv\Scripts\Activate.ps1
+   # Hoặc Windows CMD:
+   .venv\Scripts\activate.bat
+   # Hoặc Linux / macOS:
+   source .venv/bin/activate
+
+   # Cài đặt toàn bộ thư viện:
+   pip install -r requirements.txt
+   ```
+
+3. **Chạy Migration để tạo cấu trúc 15 bảng cơ sở dữ liệu:**
+   ```bash
+   alembic upgrade head
+   ```
+   *Lệnh này sẽ tự động đọc schema từ thư mục `alembic/versions/` và tạo đầy đủ các bảng, quan hệ khóa ngoại và chỉ mục (indexes).*
+
+---
+
+#### 6. Bước 5 — Nạp dữ liệu Catalog mẫu và tạo ảnh demo
+Trong thư mục `backend` (môi trường ảo `.venv` đang kích hoạt):
+
+1. **Nạp dữ liệu Catalog mẫu (30 sản phẩm nội thất chuẩn):**
+   ```bash
+   python -m app.seed_catalog
+   ```
+   *Lệnh này tạo các danh mục (`Sofa`, `Table`, `Chair`, ...), vật liệu, phong cách, màu sắc, 30 sản phẩm nội thất và đồng thời tự động khởi tạo các vai trò `CUSTOMER`, `ADMIN` cùng tài khoản Admin theo cấu hình trong `.env`.*
+
+2. **Tạo ảnh minh họa demo cho sản phẩm:**
+   ```bash
+   python -m app.seed_product_images
+   ```
+   *Script sử dụng Pillow để sinh tự động ảnh vẽ minh họa chuẩn kích thước 800x800 cho từng món nội thất vào thư mục `storage/products/generated-demo/` và liên kết vào cơ sở dữ liệu.*
+
+   > [!NOTE]
+   > **Cơ chế an toàn của `seed_product_images.py`:**
+   > Script được tích hợp hàng rào bảo vệ đa lớp (Layered Safety Guard):
+   > - Chỉ cho phép thực thi trên cơ sở dữ liệu phát triển cục bộ (`ai_room_decor` hoặc `ai_room_decor_dev`) tại máy trạm (`127.0.0.1` / `localhost`).
+   > - Tuyệt đối từ chối chạy khi phát hiện môi trường `production`, storage `cloudinary`, host đám mây từ xa (TiDB Cloud, AWS RDS), hoặc cơ sở dữ liệu kiểm thử `test`.
+
+---
+
+#### 7. Bước 6 — Khởi chạy Backend FastAPI
+Vẫn tại thư mục `backend` (đang kích hoạt `.venv`):
+```bash
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
+- API Server sẽ lắng nghe tại: `http://127.0.0.1:8000`
+- Kiểm tra tài liệu Swagger UI: **`http://127.0.0.1:8000/docs`**
+- Kiểm tra endpoint tình trạng: **`http://127.0.0.1:8000/health`** (trả về `{"status":"OK"}`)
 
-#### Bước 3: Thiết lập Frontend Next.js
-Mở một cửa sổ dòng lệnh mới:
+---
+
+#### 8. Bước 7 — Cài đặt và khởi chạy Frontend Next.js
+Mở một cửa sổ dòng lệnh (terminal) **mới**:
 ```bash
 cd frontend
 
-# Cài đặt gói npm
+# Cài đặt các gói phụ thuộc npm
 npm install
 
-# Tạo cấu hình môi trường frontend
-copy .env.example .env.local
+# Đảm bảo frontend/.env.local có URL trỏ về backend:
+# NEXT_PUBLIC_API_URL=http://localhost:8000
 
-# Khởi chạy ứng dụng Next.js ở chế độ phát triển
+# Khởi chạy server phát triển Next.js
 npm run dev
 ```
+- Ứng dụng web sẽ khởi chạy tại: **`http://localhost:3000`**
 
-Truy cập hệ thống tại: **`http://localhost:3000`**
+---
+
+#### 9. Bước 8 — Kiểm tra Website & Nghiệm thu chức năng
+Mở trình duyệt web truy cập `http://localhost:3000` và kiểm tra các chức năng:
+1. **Trang chủ & Khám phá Catalog (`/products`):**
+   - Kiểm tra danh sách 30 sản phẩm hiển thị đầy đủ tên, giá, kích thước và ảnh demo vẽ isometric.
+   - Thử nghiệm lọc sản phẩm theo danh mục (`Sofa`, `Table`, `Lighting`), khoảng giá và phong cách.
+2. **Đăng ký & Đăng nhập khách hàng (`/register`, `/login`):**
+   - Tạo tài khoản khách hàng mới để kiểm tra luồng xác thực JWT.
+   - Thử thêm sản phẩm vào giỏ hàng (`/cart`), cập nhật số lượng và kiểm tra tính toán tổng tiền.
+3. **Trang Quản trị Admin (`/admin`):**
+   - Đăng nhập bằng tài khoản `ADMIN_EMAIL` và `ADMIN_PASSWORD` đã thiết lập tại Bước 3.
+   - Kiểm tra bảng điều khiển: Quản lý danh mục, Quản lý sản phẩm, Quản lý đơn hàng và Giám sát AI usage.
+4. **Quy trình Decor phòng bằng AI (`/room-projects`):**
+   - Tạo dự án phòng mới (`/room-projects/new`), tải ảnh không gian phòng mẫu.
+   - Thiết lập phong cách, màu sắc, ngân sách mong muốn.
+   - Kiểm tra bảng gợi ý sản phẩm phù hợp dựa trên thuật toán chấm điểm 7 tiêu chí.
+
+---
+
+### Phương thức 2: Chạy trọn gói nhanh bằng Docker Compose
+
+Dành cho người dùng muốn khởi chạy nhanh bằng container mà không cần cài đặt cục bộ MariaDB, Python hay Node.js:
+
+1. **Yêu cầu:** Máy tính đã cài đặt và đang chạy **Docker Desktop** (hoặc Docker Engine + Docker Compose).
+2. **Cấu hình môi trường:**
+   ```bash
+   copy .env.example .env
+   ```
+   *(Điền `JWT_SECRET_KEY` ngẫu nhiên và `ADMIN_PASSWORD` trong `.env` như hướng dẫn ở Bước 3).*
+3. **Khởi chạy hệ thống:**
+   ```bash
+   docker compose up --build -d
+   ```
+   *Docker Compose sẽ tự động khởi tạo 3 container: MySQL 8.4 (`ai-room-decor-mysql`), FastAPI Backend (`ai-room-decor-backend` tự chạy migration khi khởi động), và Next.js Frontend (`ai-room-decor-frontend`). Kết nối CSDL giữa backend và MySQL container được cấu hình tự động thông qua Docker Network.*
+4. **Theo dõi logs:**
+   ```bash
+   docker compose logs -f
+   ```
+5. **Truy cập:**
+   - Frontend: `http://localhost:3000`
+   - Backend API Docs: `http://localhost:8000/docs`
 
 ---
 

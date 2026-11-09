@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFont
@@ -39,9 +40,45 @@ COLOR_HEX = {
 
 
 def assert_development_database() -> None:
-    database = make_url(settings.database_url).database
-    if database != "ai_room_decor":
-        raise RuntimeError(f"Refusing to seed product images outside ai_room_decor. Current database: {database}")
+    # 1. Chặn tuyệt đối nếu môi trường được cấu hình là production hoặc staging
+    if (settings.app_env or "").lower() in {"production", "prod", "staging"}:
+        raise RuntimeError(
+            f"Refusing to seed demo product images in production environment (APP_ENV={settings.app_env})."
+        )
+
+    # 2. Chặn nếu đang cấu hình lưu trữ đám mây (Cloudinary) để tránh upload ảnh demo lên CDN thật
+    if (settings.storage_backend or "").lower() == "cloudinary":
+        raise RuntimeError(
+            "Refusing to seed demo product images when STORAGE_BACKEND is configured for Cloudinary."
+        )
+
+    url = make_url(settings.database_url)
+    database = url.database
+    host = (url.host or "").lower()
+
+    # 3. Chặn kết nối tới cơ sở dữ liệu từ xa (remote cloud host như TiDB Cloud, AWS RDS, Render, ...)
+    allowed_hosts = {"localhost", "127.0.0.1", "mysql", "mariadb", "host.docker.internal", ""}
+    if host not in allowed_hosts:
+        raise RuntimeError(
+            f"Refusing to seed product images to remote host '{host}'. "
+            "Demo seeding is strictly limited to local development databases."
+        )
+
+    # 4. Chặn ghi nhầm vào cơ sở dữ liệu test
+    if not database or "test" in database.lower():
+        raise RuntimeError(
+            f"Refusing to seed demo product images to test database: {database}"
+        )
+
+    # 5. Kiểm tra tên database phát triển hợp lệ (mặc định: ai_room_decor, ai_room_decor_dev)
+    # Cho phép cờ môi trường ALLOW_DEMO_SEED=1 nếu lập trình viên dùng tên DB local tùy biến
+    allowed_databases = {"ai_room_decor", "ai_room_decor_dev"}
+    if database not in allowed_databases and not os.getenv("ALLOW_DEMO_SEED"):
+        raise RuntimeError(
+            f"Refusing to seed product images outside allowed development databases ({allowed_databases}). "
+            f"Current database: '{database}'. If this is a local development database, "
+            f"set environment variable ALLOW_DEMO_SEED=1 to permit execution."
+        )
 
 
 def storage_root() -> Path:

@@ -23,6 +23,8 @@ services:
     container_name: ai-room-decor-backend
     env_file:
       - .env
+    environment:
+      DATABASE_URL: mysql+pymysql://ai_room_user:ai_room_password@mysql:3306/ai_room_decor?charset=utf8mb4
     ports:
       - "8000:8000"
     depends_on:
