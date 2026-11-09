@@ -7,6 +7,7 @@ from app.schemas.product import ProductRead
 
 class DesignGenerationCreate(BaseModel):
     product_ids: list[int] = Field(..., min_length=1, max_length=12)
+    force: bool = Field(False, description="Bắt buộc tạo mới, bỏ qua cache nếu đã tồn tại")
 
     @field_validator("product_ids")
     @classmethod

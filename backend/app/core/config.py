@@ -58,6 +58,14 @@ class Settings(BaseSettings):
     trusted_proxies: str = "127.0.0.1,localhost"
     rate_limit_enabled: bool = True
 
+    # AI Cloud Quota & Protection settings
+    enable_cloud_ai: bool = True
+    gemini_daily_user_limit: int = 3
+    gemini_daily_system_limit: int = 50
+    cloudflare_daily_user_limit: int = 1
+    cloudflare_daily_system_limit: int = 10
+    ai_in_flight_timeout_seconds: int = 300
+
     model_config = SettingsConfigDict(
         env_file=(PROJECT_ROOT / ".env", BACKEND_ROOT / ".env"),
         env_file_encoding="utf-8",

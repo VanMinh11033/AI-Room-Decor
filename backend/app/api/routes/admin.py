@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -5,6 +6,7 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.api.deps import require_admin
+from app.core.config import settings
 from app.core.database import get_db
 from app.models.entities import (
     AIUsageLog,
@@ -186,6 +188,25 @@ def list_ai_usage(
     items = query.order_by(AIUsageLog.created_at.desc(), AIUsageLog.id.desc()).offset((page - 1) * page_size).limit(page_size).all()
 
     summary_base = db.query(AIUsageLog)
+    now_utc = datetime.now(UTC)
+    today_start = datetime(now_utc.year, now_utc.month, now_utc.day, tzinfo=UTC)
+
+    today_gemini_calls = summary_base.filter(
+        AIUsageLog.provider == "gemini",
+        AIUsageLog.created_at >= today_start,
+        AIUsageLog.status.in_(["SUCCESS", "RESERVED", "TIMEOUT_SUSPECTED"]),
+    ).count()
+
+    today_cloudflare_calls = summary_base.filter(
+        AIUsageLog.provider == "cloudflare",
+        AIUsageLog.created_at >= today_start,
+        AIUsageLog.status.in_(["SUCCESS", "RESERVED", "TIMEOUT_SUSPECTED"]),
+    ).count()
+
+    composite_calls = summary_base.filter(AIUsageLog.provider == "composite").count()
+    gemini_limit = settings.gemini_daily_system_limit
+    cf_limit = settings.cloudflare_daily_system_limit
+
     summary = AdminAIUsageSummary(
         total_calls=summary_base.count(),
         success_calls=summary_base.filter(AIUsageLog.status == "SUCCESS").count(),
@@ -193,8 +214,17 @@ def list_ai_usage(
         gemini_calls=summary_base.filter(AIUsageLog.provider == "gemini").count(),
         cloudflare_calls=summary_base.filter(AIUsageLog.provider == "cloudflare").count(),
         local_fallback_calls=summary_base.filter(AIUsageLog.provider == "local_fallback").count(),
+        composite_fallback_calls=composite_calls,
         total_tokens=int(summary_base.with_entities(func.coalesce(func.sum(AIUsageLog.total_tokens), 0)).scalar() or 0),
         total_cost=Decimal(str(summary_base.with_entities(func.coalesce(func.sum(AIUsageLog.estimated_cost), 0)).scalar() or 0)),
+        cloud_ai_enabled=settings.enable_cloud_ai,
+        today_gemini_calls=today_gemini_calls,
+        today_cloudflare_calls=today_cloudflare_calls,
+        gemini_daily_system_limit=gemini_limit,
+        cloudflare_daily_system_limit=cf_limit,
+        gemini_system_quota_remaining=max(0, gemini_limit - today_gemini_calls),
+        cloudflare_system_quota_remaining=max(0, cf_limit - today_cloudflare_calls),
+        cost_disclaimer="Chi phí ước tính dựa trên cấu hình, chưa có dữ liệu billing thực tế từ Cloudflare/Gemini",
     )
     return AdminAIUsageListResponse(total=total, summary=summary, items=[_serialize_ai_usage(item) for item in items])
 

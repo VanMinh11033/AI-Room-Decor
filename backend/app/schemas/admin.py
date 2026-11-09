@@ -96,8 +96,17 @@ class AdminAIUsageSummary(BaseModel):
     gemini_calls: int
     cloudflare_calls: int
     local_fallback_calls: int
+    composite_fallback_calls: int = 0
     total_tokens: int
     total_cost: Decimal
+    cloud_ai_enabled: bool = True
+    today_gemini_calls: int = 0
+    today_cloudflare_calls: int = 0
+    gemini_daily_system_limit: int = 50
+    cloudflare_daily_system_limit: int = 10
+    gemini_system_quota_remaining: int = 50
+    cloudflare_system_quota_remaining: int = 10
+    cost_disclaimer: str = "Chi phí ước tính dựa trên cấu hình, chưa có dữ liệu billing thực tế từ Cloudflare/Gemini"
 
 
 class AdminAIUsageListResponse(BaseModel):

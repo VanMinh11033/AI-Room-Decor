@@ -8,6 +8,7 @@ from app.ai.vision.base import VisionProvider, VisionProviderError
 from app.ai.vision.fallback_provider import LocalFallbackProvider
 from app.models.entities import AIUsageLog, RoomAnalysis, RoomProject, User
 from app.schemas.room_project import RoomAnalysisResult, RoomProjectCreate
+from app.services.ai_quota_service import AIQuotaService
 from app.services.storage_service import RoomImageStorageService
 
 
@@ -107,18 +108,47 @@ class RoomAnalysisService:
         if provider is None:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Vision provider dependency is missing")
 
-        analysis = RoomAnalysis(
-            room_project_id=project.id,
-            user_id=current_user.id,
-            image_checksum=project.image_checksum,
-            status="ANALYZING",
-            provider=provider.provider_name,
-            model=provider.model_name,
-        )
-        project.status = "ANALYZING"
-        self.db.add(analysis)
-        self.db.commit()
-        self.db.refresh(analysis)
+        quota_service = AIQuotaService(self.db)
+        is_cloud = provider.provider_name in ("gemini", "openai")
+        reservation = None
+
+        with quota_service.project_lock(project.id):
+            # 1. Chống spam / Concurrency check: Chặn nhiều request đồng thời trên cùng dự án
+            quota_service.check_in_flight_concurrency(project.id, "ROOM_IMAGE_ANALYSIS")
+
+            analysis = RoomAnalysis(
+                room_project_id=project.id,
+                user_id=current_user.id,
+                image_checksum=project.image_checksum,
+                status="ANALYZING",
+                provider=provider.provider_name,
+                model=provider.model_name,
+            )
+            project.status = "ANALYZING"
+            self.db.add(analysis)
+            self.db.commit()
+            self.db.refresh(analysis)
+
+            # 2. Emergency Kill Switch check
+            if is_cloud and not quota_service.is_cloud_ai_enabled():
+                fallback = self._try_local_fallback(current_user, project, analysis, latency_ms=0, reason="CLOUD_AI_DISABLED")
+                if fallback is not None:
+                    self.db.commit()
+                    self.db.refresh(analysis)
+                    return fallback
+
+            # 3. Quota check & Atomic reservation
+            if is_cloud:
+                reservation = quota_service.reserve_quota(
+                    current_user.id, project.id, provider.provider_name, provider.model_name, "ROOM_IMAGE_ANALYSIS"
+                )
+                if reservation is None:
+                    # Vượt hạn mức ngày (User hoặc System) -> Tự động chuyển Fallback offline
+                    fallback = self._try_local_fallback(current_user, project, analysis, latency_ms=0, reason="QUOTA_EXCEEDED")
+                    if fallback is not None:
+                        self.db.commit()
+                        self.db.refresh(analysis)
+                        return fallback
 
         started_at = perf_counter()
         try:
@@ -126,59 +156,135 @@ class RoomAnalysisService:
             provider_result = provider.analyze_room(image_path, project.image_content_type)
             result = RoomAnalysisResult.model_validate(provider_result.result)
             latency_ms = int((perf_counter() - started_at) * 1000)
-            self._apply_success(analysis, project, result, provider_result.raw_response)
-            usage = provider_result.usage
-            self._log_usage(
-                current_user=current_user,
-                project=project,
-                provider=provider.provider_name,
-                model=provider.model_name,
-                status="SUCCESS",
-                latency_ms=latency_ms,
-                input_tokens=usage.input_tokens if usage else 0,
-                output_tokens=usage.output_tokens if usage else 0,
-                total_tokens=usage.total_tokens if usage else 0,
-                estimated_cost=usage.estimated_cost if usage else 0,
+
+            # Fencing token check: Kiểm tra xem analysis có còn là ANALYZING không
+            # (Ngăn request chạy quá chậm ghi đè lên request mới sau khi bị Stale Recovery thu hồi)
+            affected = (
+                self.db.query(RoomAnalysis)
+                .filter(
+                    RoomAnalysis.id == analysis.id,
+                    RoomAnalysis.status == "ANALYZING",
+                )
+                .update(
+                    {
+                        RoomAnalysis.status: "COMPLETED",
+                        RoomAnalysis.room_type: result.room_type,
+                        RoomAnalysis.dominant_colors: [color.model_dump() for color in result.dominant_colors],
+                        RoomAnalysis.existing_objects: [obj.model_dump() for obj in result.existing_objects],
+                        RoomAnalysis.empty_areas: [area.model_dump() for area in result.empty_areas],
+                        RoomAnalysis.lighting: result.lighting.model_dump() if result.lighting else None,
+                        RoomAnalysis.design_characteristics: result.design_characteristics,
+                        RoomAnalysis.layout_summary: result.layout_summary,
+                        RoomAnalysis.confidence: result.confidence,
+                        RoomAnalysis.raw_response: provider_result.raw_response,
+                        RoomAnalysis.completed_at: datetime.now(UTC),
+                        RoomAnalysis.error_code: None,
+                        RoomAnalysis.error_message: None,
+                    },
+                    synchronize_session="fetch",
+                )
             )
+
+            if affected == 0:
+                logger.warning(
+                    "Fencing token check failed for analysis id=%s: task was superseded or stale-recovered. Dropping completion.",
+                    analysis.id,
+                )
+                if reservation is not None:
+                    quota_service.release_reservation(reservation, error_code="SUPERSEDED_STALE_TASK")
+                self.db.commit()
+                return self.get_current_analysis(current_user, project.id)
+
+            project.status = "ANALYZED"
+            usage = provider_result.usage
+
+            if reservation is not None:
+                quota_service.finalize_success(
+                    reservation=reservation,
+                    latency_ms=latency_ms,
+                    input_tokens=usage.input_tokens if usage else 0,
+                    output_tokens=usage.output_tokens if usage else 0,
+                    total_tokens=usage.total_tokens if usage else 0,
+                    estimated_cost=usage.estimated_cost if usage else 0,
+                )
+            else:
+                self._log_usage(
+                    current_user=current_user,
+                    project=project,
+                    provider=provider.provider_name,
+                    model=provider.model_name,
+                    status="SUCCESS",
+                    latency_ms=latency_ms,
+                    input_tokens=usage.input_tokens if usage else 0,
+                    output_tokens=usage.output_tokens if usage else 0,
+                    total_tokens=usage.total_tokens if usage else 0,
+                    estimated_cost=usage.estimated_cost if usage else 0,
+                )
             self.db.commit()
             self.db.refresh(analysis)
             return analysis
         except VisionProviderError as exc:
             latency_ms = int((perf_counter() - started_at) * 1000)
-            self._log_usage(
-                current_user=current_user,
-                project=project,
-                provider=provider.provider_name,
-                model=provider.model_name,
-                status="FAILED",
-                latency_ms=latency_ms,
-                error_code=exc.code,
-                error_message=exc.message,
+            is_timeout = (
+                exc.code in ("TIMEOUT", "GATEWAY_TIMEOUT", "DEADLINE_EXCEEDED")
+                or "timeout" in (exc.code or "").lower()
+                or "timeout" in (exc.message or "").lower()
             )
-            if exc.code in ("GEMINI_PROVIDER_UNAVAILABLE", "GEMINI_PROVIDER_QUOTA_ERROR"):
-                fallback = self._try_local_fallback(current_user, project, analysis, latency_ms)
+            if reservation is not None:
+                quota_service.release_reservation(
+                    reservation,
+                    error_code=exc.code,
+                    error_message=exc.message,
+                    is_timeout=is_timeout,
+                )
+            else:
+                self._log_usage(
+                    current_user=current_user,
+                    project=project,
+                    provider=provider.provider_name,
+                    model=provider.model_name,
+                    status="TIMEOUT_SUSPECTED" if is_timeout else "FAILED",
+                    latency_ms=latency_ms,
+                    error_code=exc.code,
+                    error_message=exc.message,
+                )
+
+            # Auto-fallback to local Pillow Vision for unavailable or quota errors (KHÔNG retry tự động khi timeout không rõ kết quả)
+            if not is_timeout and exc.code in ("GEMINI_PROVIDER_UNAVAILABLE", "GEMINI_PROVIDER_QUOTA_ERROR"):
+                fallback = self._try_local_fallback(current_user, project, analysis, latency_ms, reason=exc.code)
                 if fallback is not None:
                     self.db.commit()
                     self.db.refresh(analysis)
                     return fallback
-            self._apply_failure(analysis, project, exc.code, exc.message)
+
+            self._apply_failure(analysis, project, "TIMEOUT_SUSPECTED" if is_timeout else exc.code, exc.message)
             self.db.commit()
-            raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=exc.code) from exc
+            status_code = status.HTTP_504_GATEWAY_TIMEOUT if is_timeout else status.HTTP_503_SERVICE_UNAVAILABLE
+            raise HTTPException(status_code=status_code, detail=exc.code) from exc
         except Exception as exc:
             latency_ms = int((perf_counter() - started_at) * 1000)
-            self._apply_failure(analysis, project, "AI_ANALYSIS_FAILED", str(exc))
+            is_timeout = "timeout" in str(exc).lower() or isinstance(exc, TimeoutError)
+            if reservation is not None:
+                quota_service.release_reservation(
+                    reservation,
+                    error_code="AI_ANALYSIS_FAILED",
+                    error_message=str(exc),
+                    is_timeout=is_timeout,
+                )
+            self._apply_failure(analysis, project, "TIMEOUT_SUSPECTED" if is_timeout else "AI_ANALYSIS_FAILED", str(exc))
             self._log_usage(
                 current_user=current_user,
                 project=project,
                 provider=provider.provider_name,
                 model=provider.model_name,
-                status="FAILED",
+                status="TIMEOUT_SUSPECTED" if is_timeout else "FAILED",
                 latency_ms=latency_ms,
                 error_code="AI_ANALYSIS_FAILED",
                 error_message=str(exc),
             )
             self.db.commit()
-            raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail="AI_ANALYSIS_FAILED") from exc
+            status_code = status.HTTP_504_GATEWAY_TIMEOUT if is_timeout else status.HTTP_500_INTERNAL_SERVER_ERROR
+            raise HTTPException(status_code=status_code, detail="AI_ANALYSIS_FAILED") from exc
 
     def _try_local_fallback(
         self,
@@ -186,15 +292,25 @@ class RoomAnalysisService:
         project: RoomProject,
         analysis: RoomAnalysis,
         latency_ms: int,
+        reason: str = "GEMINI_PROVIDER_UNAVAILABLE",
     ) -> RoomAnalysis | None:
         try:
             image_path = RoomImageStorageService().resolve(project.room_image_path)
             fallback_provider = LocalFallbackProvider(room_type=project.room_type)
             provider_result = fallback_provider.analyze_room(image_path, project.image_content_type)
             result = RoomAnalysisResult.model_validate(provider_result.result)
+
+            # Hiển thị rõ ràng cho người dùng biết kết quả offline
+            result.layout_summary = (
+                f"[Chế độ Offline - {reason}] Phân tích phòng cục bộ bằng Pillow Engine. Không sử dụng AI Cloud."
+            )
+
+            raw_response = dict(provider_result.raw_response or {})
+            raw_response["reason"] = reason
+
             analysis.provider = fallback_provider.provider_name
             analysis.model = fallback_provider.model_name
-            self._apply_success(analysis, project, result, provider_result.raw_response)
+            self._apply_success(analysis, project, result, raw_response)
             self._log_usage(
                 current_user=current_user,
                 project=project,
@@ -208,7 +324,8 @@ class RoomAnalysisService:
                 estimated_cost=0,
             )
             return analysis
-        except Exception:
+        except Exception as exc:
+            logger.error("Local fallback vision failed: %s", exc)
             return None
 
     def _apply_success(

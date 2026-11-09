@@ -38,18 +38,21 @@ export default function AdminAIUsagePage() {
     ["Tổng lượt gọi AI", summary?.total_calls],
     ["Thành công", summary?.success_calls],
     ["Thất bại", summary?.failed_calls],
-    ["Gemini", summary?.gemini_calls],
-    ["Cloudflare", summary?.cloudflare_calls],
-    ["Local fallback", summary?.local_fallback_calls],
-    ["Tổng token", summary?.total_tokens],
-    ["Tổng chi phí", summary ? money(summary.total_cost) : "-"],
+    ["Gemini Cloud (Hôm nay)", summary ? `${summary.today_gemini_calls ?? 0}/${summary.gemini_daily_system_limit ?? 50}` : "-"],
+    ["Cloudflare AI (Hôm nay)", summary ? `${summary.today_cloudflare_calls ?? 0}/${summary.cloudflare_daily_system_limit ?? 10}` : "-"],
+    ["Local Vision Fallback", summary?.local_fallback_calls],
+    ["Composite 2D Fallback", summary?.composite_fallback_calls ?? 0],
+    ["Cloud AI Status", summary?.cloud_ai_enabled ? "BẬT (Active)" : "NGẮT (Kill Switch)"],
   ];
 
   return (
     <section className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-ink">Theo dõi AI</h1>
-        <p className="mt-2 text-sm text-black/60">Giám sát lượt gọi AI, token, chi phí và lỗi provider.</p>
+        <h1 className="text-3xl font-bold text-ink">Theo dõi AI & Quota</h1>
+        <p className="mt-2 text-sm text-black/60">Giám sát lượt gọi AI, hạn mức ngày, fallback và bảo vệ ngân sách.</p>
+        {summary?.cost_disclaimer && (
+          <p className="mt-1 text-xs italic text-black/50">* {summary.cost_disclaimer}</p>
+        )}
       </div>
 
       {error && <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">{error}</div>}

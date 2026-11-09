@@ -260,8 +260,17 @@ export type AdminAIUsageSummary = {
   gemini_calls: number;
   cloudflare_calls: number;
   local_fallback_calls: number;
+  composite_fallback_calls?: number;
   total_tokens: number;
   total_cost: string;
+  cloud_ai_enabled?: boolean;
+  today_gemini_calls?: number;
+  today_cloudflare_calls?: number;
+  gemini_daily_system_limit?: number;
+  cloudflare_daily_system_limit?: number;
+  gemini_system_quota_remaining?: number;
+  cloudflare_system_quota_remaining?: number;
+  cost_disclaimer?: string;
 };
 
 export type AdminAIUsageListResponse = {
