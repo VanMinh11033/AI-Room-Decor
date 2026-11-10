@@ -16,6 +16,12 @@ def build_connect_args(url: str, ssl_verify: bool = False, ssl_ca: str | None = 
         args["ssl_verify_identity"] = True
         if ssl_ca:
             args["ssl_ca"] = ssl_ca
+        else:
+            try:
+                import certifi
+                args["ssl_ca"] = certifi.where()
+            except ImportError:
+                pass
     return args
 
 

@@ -9,9 +9,11 @@ nothing is written to the catalog until approval.
 from hashlib import sha256
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote
 
 from sqlalchemy.orm import Session, joinedload
 
+from app.core.config import settings
 from app.models.entities import Product, ProductImage, ProductImageCandidate, ProductImageCandidateStatus
 from app.services.google_images_provider import GoogleImagesProvider
 from app.services.product_image_collector import validate_image_bytes
@@ -33,8 +35,30 @@ def _sha256(data: bytes) -> str:
     return sha256(data).hexdigest()
 
 
-def _public_url(local_path: str) -> str:
-    return f"/storage/{local_path}"
+def _public_url(local_path: str | None) -> str:
+    if not local_path:
+        return ""
+    raw = str(local_path).strip()
+    if raw.startswith("http://") or raw.startswith("https://"):
+        return raw
+
+    cleaned = raw.replace("\\", "/").lstrip("/")
+    if cleaned.startswith("storage/"):
+        cleaned = cleaned[len("storage/"):].lstrip("/")
+
+    local_file = (PROJECT_ROOT / "storage" / cleaned).resolve()
+    if local_file.is_file():
+        return f"/storage/{quote(cleaned, safe='/')}"
+
+    if settings.cloudinary_cloud_name:
+        folder = (settings.cloudinary_folder or "ai_room_decor").strip("/")
+        encoded_path = quote(cleaned, safe="/")
+        return f"https://res.cloudinary.com/{settings.cloudinary_cloud_name}/image/upload/{folder}/{encoded_path}"
+
+    return f"/storage/{quote(cleaned, safe='/')}"
+
+
+resolve_candidate_public_url = _public_url
 
 
 class ProductImageCandidateService:

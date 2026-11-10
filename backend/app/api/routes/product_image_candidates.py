@@ -11,7 +11,7 @@ from app.schemas.product_image_candidate import (
     ProductImageCandidateSearchResponse,
 )
 from app.services.google_images_provider import GoogleImagesNotConfiguredError
-from app.services.product_image_candidate_service import ProductImageCandidateService
+from app.services.product_image_candidate_service import ProductImageCandidateService, _public_url
 from app.services.stock_image_providers import UpstreamRequestError
 
 router = APIRouter(prefix="/admin/product-image-candidates", tags=["admin-product-image-candidates"])
@@ -29,7 +29,7 @@ def _serialize(candidate: ProductImageCandidate) -> ProductImageCandidateRead:
         source=candidate.source,
         source_page_url=candidate.source_page_url,
         image_url=candidate.image_url,
-        public_url=f"/storage/{candidate.local_path}" if candidate.local_path else None,
+        public_url=_public_url(candidate.local_path) if candidate.local_path else None,
         license=candidate.license,
         license_url=candidate.license_url,
         attribution=candidate.attribution,

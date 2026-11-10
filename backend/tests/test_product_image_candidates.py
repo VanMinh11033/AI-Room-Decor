@@ -6,13 +6,21 @@ so no network or external API is touched.
 
 from decimal import Decimal
 from io import BytesIO
+from pathlib import Path
+from unittest.mock import patch
 
 import httpx
 import pytest
 from PIL import Image
 
+from app.api.routes.product_image_candidates import _serialize
+from app.core.config import settings
 from app.models.entities import Category, Product, ProductImage, ProductImageCandidate, ProductStatus
-from app.services.product_image_candidate_service import ProductImageCandidateService
+from app.services.product_image_candidate_service import (
+    PROJECT_ROOT,
+    ProductImageCandidateService,
+    _public_url,
+)
 from app.services.stock_image_providers import OpenverseProvider
 
 
@@ -155,3 +163,82 @@ def test_openverse_download_rejects_private_ip():
     )
     with pytest.raises(ValueError, match="unsafe address"):
         provider.download("https://example.com/a.jpg")
+
+
+def test_public_url_local_mode_when_file_exists(monkeypatch, tmp_path):
+    # When file exists locally, it returns the local /storage/... path
+    monkeypatch.setattr(settings, "cloudinary_cloud_name", "test_cloud")
+    test_file = PROJECT_ROOT / "storage" / "products" / "test-exists.jpg"
+    test_file.parent.mkdir(parents=True, exist_ok=True)
+    test_file.write_bytes(b"dummy")
+    try:
+        url = _public_url("products/test-exists.jpg")
+        assert url == "/storage/products/test-exists.jpg"
+    finally:
+        if test_file.exists():
+            test_file.unlink()
+
+
+def test_public_url_cloudinary_fallback_when_file_missing(monkeypatch):
+    monkeypatch.setattr(settings, "cloudinary_cloud_name", "test_cloud_name")
+    monkeypatch.setattr(settings, "cloudinary_folder", "ai_room_decor")
+    missing_rel = "products/candidate-staging/999/candidate-missing.jpg"
+    url = _public_url(missing_rel)
+    assert url == "https://res.cloudinary.com/test_cloud_name/image/upload/ai_room_decor/products/candidate-staging/999/candidate-missing.jpg"
+
+
+def test_public_url_empty_and_http_passthrough(monkeypatch):
+    monkeypatch.setattr(settings, "cloudinary_cloud_name", "test_cloud_name")
+    assert _public_url("") == ""
+    assert _public_url(None) == ""
+    assert _public_url("https://res.cloudinary.com/demo/image.jpg") == "https://res.cloudinary.com/demo/image.jpg"
+    assert _public_url("http://example.com/img.png") == "http://example.com/img.png"
+
+
+def test_serialize_candidate_uses_cloudinary_fallback(monkeypatch, db_session):
+    monkeypatch.setattr(settings, "cloudinary_cloud_name", "test_cloud_name")
+    monkeypatch.setattr(settings, "cloudinary_folder", "ai_room_decor")
+    product = make_product(db_session)
+    candidate = ProductImageCandidate(
+        product_id=product.id,
+        source="google",
+        image_url="https://example.com/candidate.jpg",
+        local_path="products/candidate-staging/9999/candidate-serialized.jpg",
+        status="PENDING",
+    )
+    db_session.add(candidate)
+    db_session.commit()
+    db_session.refresh(candidate)
+
+    serialized = _serialize(candidate)
+    assert serialized.public_url == "https://res.cloudinary.com/test_cloud_name/image/upload/ai_room_decor/products/candidate-staging/9999/candidate-serialized.jpg"
+
+
+def test_approve_candidate_with_cloudinary_fallback(monkeypatch, tmp_path, db_session):
+    monkeypatch.setattr(settings, "cloudinary_cloud_name", "test_cloud_name")
+    monkeypatch.setattr(settings, "cloudinary_folder", "ai_room_decor")
+
+    product = make_product(db_session)
+    provider = FakeOpenverseProvider(
+        [make_candidate()],
+        {"https://example.com/sofa.jpg": (jpeg_bytes(), "image/jpeg")},
+    )
+    service = ProductImageCandidateService(db_session, staging_root=tmp_path, provider=provider, min_side=400)
+    service.search_and_stage(product.id, max_images=3)
+
+    candidate = db_session.query(ProductImageCandidate).one()
+    # Point candidate to a path that does NOT exist in PROJECT_ROOT/storage to simulate container
+    candidate.local_path = "products/candidate-staging/9999/candidate-cloud.jpg"
+    db_session.commit()
+
+    approved = service.approve_candidate(candidate.id)
+
+    assert approved.status == "APPROVED"
+    # candidate.local_path must remain intact
+    assert approved.local_path == "products/candidate-staging/9999/candidate-cloud.jpg"
+
+    # ProductImage gets the Cloudinary HTTPS URL
+    images = db_session.query(ProductImage).filter(ProductImage.product_id == product.id).all()
+    assert len(images) == 1
+    expected_url = "https://res.cloudinary.com/test_cloud_name/image/upload/ai_room_decor/products/candidate-staging/9999/candidate-cloud.jpg"
+    assert images[0].image_url == expected_url
