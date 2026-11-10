@@ -2,9 +2,10 @@ import logging
 from pathlib import Path
 
 from app.ai.image.base import GeneratedImage, ImageProviderError, ImageGenerationUsage
+from app.ai.image.composite_provider import CompositeImageProvider
 from app.ai.image.factory import get_image_provider
-from app.models.entities import AIUsageLog, RoomDesignGeneration, RoomProject
-from app.services.storage_service import GeneratedDesignStorageService, RoomImageStorageService
+from app.models.entities import AIUsageLog, ProductImage, RoomDesignGeneration, RoomProject
+from app.services.storage_service import GeneratedDesignStorageService, ProductImageStorageService, RoomImageStorageService
 from test_recommendations import auth_headers, create_project, setup_recommendation_case
 
 PNG_BYTES = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR"
@@ -430,4 +431,271 @@ def test_design_generation_logging_failure_does_not_mask_original_error(client, 
     # The original error should still result in 500 without crashing unhandled
     assert response.status_code == 500
     assert response.json()["detail"] == "INTERNAL_GENERATION_ERROR"
+
+
+# ---------------------------------------------------------------------------
+# Composite 2D Fallback & Product Image Selection Tests
+# ---------------------------------------------------------------------------
+
+def make_valid_room_image(db_session, project: dict) -> None:
+    from PIL import Image
+    storage = RoomImageStorageService()
+    relative_path = Path(str(project["user_id"])) / str(project["id"]) / "source.png"
+    absolute_path = storage.storage_root / relative_path
+    absolute_path.parent.mkdir(parents=True, exist_ok=True)
+    img = Image.new("RGB", (400, 300), (240, 235, 225))
+    img.save(absolute_path, format="PNG")
+
+    room_project = db_session.get(RoomProject, project["id"])
+    room_project.room_image_url = f"/storage/rooms/{project['user_id']}/{project['id']}/source.png"
+    room_project.room_image_path = str(relative_path).replace("\\", "/")
+    room_project.image_original_filename = "source.png"
+    room_project.image_content_type = "image/png"
+    room_project.image_size_bytes = absolute_path.stat().st_size
+    room_project.image_checksum = "validroomchecksum"
+    room_project.status = "COMPLETED"
+    db_session.commit()
+
+
+def create_test_product_image_file(filename: str, kind: str = "isolated") -> str:
+    from PIL import Image, ImageDraw
+    storage = ProductImageStorageService()
+    dest = storage.storage_root / filename
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    img = Image.new("RGB", (200, 200), (255, 255, 255) if kind == "isolated" else (100, 100, 100))
+    draw = ImageDraw.Draw(img)
+    if kind == "isolated":
+        draw.rectangle([60, 60, 140, 140], fill=(200, 30, 30))
+    else:
+        # Scene image: distinct top wall and bottom floor colors
+        draw.rectangle([0, 0, 200, 110], fill=(200, 180, 160))
+        draw.rectangle([0, 110, 200, 200], fill=(120, 90, 70))
+        draw.rectangle([60, 60, 140, 140], fill=(30, 60, 30))
+    img.save(dest, format="PNG")
+    return f"/storage/products/{filename}"
+
+
+def test_composite_fallback_picks_isolated_when_primary_is_scene(client, db_session):
+    """Case 1: Sản phẩm có ảnh chính là SCENE, ảnh phụ là ISOLATED -> chọn đúng ảnh phụ."""
+    provider = CompositeImageProvider()
+    override_image_provider(client.app, provider)
+    headers, project, _catalog, best, _lamp, _mismatch, _inactive = setup_recommendation_case(client, db_session)
+    make_valid_room_image(db_session, project)
+
+    db_session.query(ProductImage).filter(ProductImage.product_id == best.id).delete()
+    scene_url = create_test_product_image_file("best_scene_1.png", kind="scene")
+    iso_url = create_test_product_image_file("best_iso_1.png", kind="isolated")
+    img_scene = ProductImage(product_id=best.id, image_url=scene_url, is_primary=True, sort_order=0)
+    img_iso = ProductImage(product_id=best.id, image_url=iso_url, is_primary=False, sort_order=1)
+    db_session.add_all([img_scene, img_iso])
+    db_session.commit()
+    db_session.refresh(best)
+
+    response = client.post(
+        f"/api/room-projects/{project['id']}/design-generations",
+        json={"product_ids": [best.id]},
+        headers=headers,
+    )
+
+    assert response.status_code == 201
+    body = response.json()
+    assert body["status"] == "COMPLETED"
+    assert body["provider"] == "composite"
+    assert [p["id"] for p in body["products"]] == [best.id]
+
+    # Database invariant: is_primary and sort_order must NOT be modified in DB
+    db_session.refresh(img_scene)
+    db_session.refresh(img_iso)
+    assert img_scene.is_primary is True
+    assert img_scene.sort_order == 0
+    assert img_iso.is_primary is False
+    assert img_iso.sort_order == 1
+
+
+def test_composite_fallback_uses_primary_when_isolated(client, db_session):
+    """Case 2: Sản phẩm có ảnh chính là ISOLATED -> dùng ảnh chính."""
+    provider = CompositeImageProvider()
+    override_image_provider(client.app, provider)
+    headers, project, _catalog, best, _lamp, _mismatch, _inactive = setup_recommendation_case(client, db_session)
+    make_valid_room_image(db_session, project)
+
+    db_session.query(ProductImage).filter(ProductImage.product_id == best.id).delete()
+    iso_url = create_test_product_image_file("best_iso_2.png", kind="isolated")
+    img_iso = ProductImage(product_id=best.id, image_url=iso_url, is_primary=True, sort_order=0)
+    db_session.add(img_iso)
+    db_session.commit()
+
+    response = client.post(
+        f"/api/room-projects/{project['id']}/design-generations",
+        json={"product_ids": [best.id]},
+        headers=headers,
+    )
+
+    assert response.status_code == 201
+    body = response.json()
+    assert body["status"] == "COMPLETED"
+    assert body["provider"] == "composite"
+    assert [p["id"] for p in body["products"]] == [best.id]
+
+
+def test_composite_fallback_skips_uncompositible_product(client, db_session):
+    """Case 3: Chọn 2 sản phẩm (1 hợp lệ ISOLATED, 1 toàn SCENE) -> ghép sản phẩm hợp lệ, metadata chỉ gồm sản phẩm thực tế ghép."""
+    provider = CompositeImageProvider()
+    override_image_provider(client.app, provider)
+    headers, project, _catalog, best, lamp, _mismatch, _inactive = setup_recommendation_case(client, db_session)
+    make_valid_room_image(db_session, project)
+
+    # best: has isolated image
+    db_session.query(ProductImage).filter(ProductImage.product_id == best.id).delete()
+    iso_url = create_test_product_image_file("best_iso_3.png", kind="isolated")
+    db_session.add(ProductImage(product_id=best.id, image_url=iso_url, is_primary=True, sort_order=0))
+
+    # lamp: ONLY has scene image
+    db_session.query(ProductImage).filter(ProductImage.product_id == lamp.id).delete()
+    scene_url = create_test_product_image_file("lamp_scene_3.png", kind="scene")
+    db_session.add(ProductImage(product_id=lamp.id, image_url=scene_url, is_primary=True, sort_order=0))
+    db_session.commit()
+
+    response = client.post(
+        f"/api/room-projects/{project['id']}/design-generations",
+        json={"product_ids": [best.id, lamp.id]},
+        headers=headers,
+    )
+
+    assert response.status_code == 201
+    body = response.json()
+    assert body["status"] == "COMPLETED"
+    assert body["provider"] == "composite"
+    # Metadata products must strictly reflect the actually composited product (best only)
+    assert [p["id"] for p in body["products"]] == [best.id]
+
+
+def test_composite_fallback_rejects_when_all_products_uncompositible(client, db_session):
+    """Case 4: Chọn toàn bộ sản phẩm không hợp lệ -> trả HTTP 409 có kiểm soát, FAILED, không tạo ảnh giả."""
+    provider = CompositeImageProvider()
+    override_image_provider(client.app, provider)
+    headers, project, _catalog, best, _lamp, _mismatch, _inactive = setup_recommendation_case(client, db_session)
+    make_valid_room_image(db_session, project)
+
+    # best: ONLY scene image
+    db_session.query(ProductImage).filter(ProductImage.product_id == best.id).delete()
+    scene_url = create_test_product_image_file("best_scene_4.png", kind="scene")
+    db_session.add(ProductImage(product_id=best.id, image_url=scene_url, is_primary=True, sort_order=0))
+    db_session.commit()
+
+    response = client.post(
+        f"/api/room-projects/{project['id']}/design-generations",
+        json={"product_ids": [best.id]},
+        headers=headers,
+    )
+
+    assert response.status_code == 409
+    assert "NO_COMPOSITIBLE_PRODUCT_IMAGES" in response.json()["detail"]
+
+    db_session.rollback()
+    generation = db_session.query(RoomDesignGeneration).one()
+    assert generation.status == "FAILED"
+    assert generation.error_code == "NO_COMPOSITIBLE_PRODUCT_IMAGES"
+    assert generation.generated_image_url is None
+
+
+def test_composite_fallback_under_cloud_ai_disabled(client, db_session, monkeypatch):
+    """Case 5: ENABLE_CLOUD_AI=false -> tự động fallback sang Composite 2D, chọn đúng ảnh ISOLATED."""
+    cloud_provider = FakeImageProvider()
+    cloud_provider.provider_name = "gemini"
+    override_image_provider(client.app, cloud_provider)
+    headers, project, _catalog, best, _lamp, _mismatch, _inactive = setup_recommendation_case(client, db_session)
+    make_valid_room_image(db_session, project)
+
+    # best: primary is scene, secondary is isolated
+    db_session.query(ProductImage).filter(ProductImage.product_id == best.id).delete()
+    scene_url = create_test_product_image_file("best_scene_5.png", kind="scene")
+    iso_url = create_test_product_image_file("best_iso_5.png", kind="isolated")
+    db_session.add_all([
+        ProductImage(product_id=best.id, image_url=scene_url, is_primary=True, sort_order=0),
+        ProductImage(product_id=best.id, image_url=iso_url, is_primary=False, sort_order=1),
+    ])
+    db_session.commit()
+
+    # Disable Cloud AI
+    monkeypatch.setattr("app.core.config.settings.enable_cloud_ai", False)
+
+    response = client.post(
+        f"/api/room-projects/{project['id']}/design-generations",
+        json={"product_ids": [best.id]},
+        headers=headers,
+    )
+
+    assert response.status_code == 201
+    body = response.json()
+    assert body["status"] == "COMPLETED"
+    assert body["provider"] == "composite"
+    # Verify Cloud AI provider was never called
+    assert len(cloud_provider.calls) == 0
+
+
+def test_composite_provider_error_handled_gracefully(client, db_session, monkeypatch):
+    """Case 6: Composite provider ném lỗi -> xử lý graceful HTTP 422, không HTTP 500, bảo mật đường dẫn."""
+    provider = CompositeImageProvider()
+    override_image_provider(client.app, provider)
+    headers, project, _catalog, best, _lamp, _mismatch, _inactive = setup_recommendation_case(client, db_session)
+    make_valid_room_image(db_session, project)
+
+    iso_url = create_test_product_image_file("best_iso_6.png", kind="isolated")
+    db_session.query(ProductImage).filter(ProductImage.product_id == best.id).delete()
+    db_session.add(ProductImage(product_id=best.id, image_url=iso_url, is_primary=True, sort_order=0))
+    db_session.commit()
+
+    def crashing_composite(*args, **kwargs):
+        raise ImageProviderError(
+            "COMPOSITE_CRASH",
+            "Pillow crashed processing D:\\secret\\path\\image.png with secret-key-9876",
+        )
+
+    monkeypatch.setattr(CompositeImageProvider, "generate_design", crashing_composite)
+
+    response = client.post(
+        f"/api/room-projects/{project['id']}/design-generations",
+        json={"product_ids": [best.id]},
+        headers=headers,
+    )
+
+    assert response.status_code == 422
+    detail = response.json()["detail"]
+    assert "COMPOSITE_CRASH" in detail
+    assert "secret-key-9876" not in detail
+    assert "[REDACTED]" in detail or "[PATH]" in detail
+    assert "D:\\secret" not in detail
+
+    db_session.rollback()
+    generation = db_session.query(RoomDesignGeneration).one()
+    assert generation.status == "FAILED"
+    assert "secret-key-9876" not in (generation.error_message or "")
+
+
+def test_cloud_provider_failure_auto_falls_back_to_composite(client, db_session):
+    """Case 7: Cloud AI lỗi -> tự động fallback sang Composite 2D thành công nếu có ảnh ISOLATED."""
+    failing_cloud = FailingImageProvider()
+    failing_cloud.provider_name = "cloudflare"
+    override_image_provider(client.app, failing_cloud)
+    headers, project, _catalog, best, _lamp, _mismatch, _inactive = setup_recommendation_case(client, db_session)
+    make_valid_room_image(db_session, project)
+
+    # best has isolated image
+    db_session.query(ProductImage).filter(ProductImage.product_id == best.id).delete()
+    iso_url = create_test_product_image_file("best_iso_7.png", kind="isolated")
+    db_session.add(ProductImage(product_id=best.id, image_url=iso_url, is_primary=True, sort_order=0))
+    db_session.commit()
+
+    response = client.post(
+        f"/api/room-projects/{project['id']}/design-generations",
+        json={"product_ids": [best.id]},
+        headers=headers,
+    )
+
+    assert response.status_code == 201
+    body = response.json()
+    assert body["status"] == "COMPLETED"
+    assert body["provider"] == "composite"
+    assert len(failing_cloud.calls) == 1  # Cloud was attempted first, then fallback completed
 

@@ -138,6 +138,28 @@ def setup_catalog_product(db_session, name="Modern Bed", slug="modern-bed"):
     )
     db_session.add(product)
     db_session.flush()
+
+    # Create an isolated catalog image on disk for composite fallback tests
+    from PIL import Image, ImageDraw
+    from app.models.entities import ProductImage
+    from app.services.storage_service import ProductImageStorageService
+    storage = ProductImageStorageService()
+    img_filename = f"{slug}.png"
+    img_path = storage.storage_root / img_filename
+    if not img_path.exists():
+        im = Image.new("RGB", (200, 200), (255, 255, 255))
+        d = ImageDraw.Draw(im)
+        d.rectangle([60, 60, 140, 140], fill=(50, 100, 150))
+        im.save(img_path, format="PNG")
+
+    img = ProductImage(
+        product_id=product.id,
+        image_url=f"/storage/products/{img_filename}",
+        is_primary=True,
+        sort_order=0,
+    )
+    db_session.add(img)
+    db_session.commit()
     return product
 
 

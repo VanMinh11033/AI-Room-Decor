@@ -55,12 +55,11 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 
 @pytest.fixture()
 def db_session():
-    with engine.connect() as connection:
-        connection.execution_options(isolation_level="AUTOCOMMIT").execute(text("SET FOREIGN_KEY_CHECKS=0"))
-    Base.metadata.drop_all(bind=engine)
-    with engine.connect() as connection:
-        connection.execution_options(isolation_level="AUTOCOMMIT").execute(text("SET FOREIGN_KEY_CHECKS=1"))
-    Base.metadata.create_all(bind=engine)
+    with engine.begin() as connection:
+        connection.execute(text("SET FOREIGN_KEY_CHECKS=0"))
+        Base.metadata.drop_all(bind=connection)
+        Base.metadata.create_all(bind=connection)
+        connection.execute(text("SET FOREIGN_KEY_CHECKS=1"))
     db = TestingSessionLocal()
     seed_initial_data(db)
     try:

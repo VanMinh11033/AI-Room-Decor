@@ -13,6 +13,7 @@ from app.ai.image.prompt_builder import PROMPT_VERSION, build_design_generation_
 from app.models.entities import AIUsageLog, Product, ProductImage, RoomDesignGeneration, RoomProject, User
 from app.schemas.design_generation import DesignGenerationCreate
 from app.services.ai_quota_service import AIQuotaService
+from app.services.design_compositor import ISOLATED, classify_product_image
 from app.services.recommendation_service import RecommendationService
 from app.services.storage_service import GeneratedDesignStorageService, ProductImageStorageService, RoomImageStorageService
 
@@ -22,12 +23,17 @@ _SECRET_PATTERNS = re.compile(
     r"(?:Bearer\s+[^\s,;]+|sk-[a-zA-Z0-9_\-]{8,}|AIza[0-9A-Za-z\-_]{20,}|(?:token|key|secret|password)=[^\s&,;]+|secret-[a-zA-Z0-9_\-]+)",
     re.IGNORECASE,
 )
+_PATH_PATTERNS = re.compile(
+    r"(?:[A-Za-z]:\\[^\s:\"\'<>]+\\|\/(?:tmp|home|var|app|storage|root)[^\s:\"\'<>]*)",
+    re.IGNORECASE,
+)
 
 
 def _sanitize_error_message(message: str | None) -> str:
     if not message:
         return ""
     safe = _SECRET_PATTERNS.sub("[REDACTED]", str(message))
+    safe = _PATH_PATTERNS.sub("[PATH]", safe)
     return safe[:500]
 
 
@@ -161,49 +167,190 @@ class DesignGenerationService:
                             continue
         return None
 
+    def _pick_compositible_product_image(
+        self, product: Product, storage: ProductImageStorageService
+    ) -> tuple[ProductImage, Path] | None:
+        """Find an ISOLATED image suitable for 2D deterministic compositing.
+
+        Checks the product's primary image first. If the primary image is a SCENE
+        (lifestyle interior photo), it scans the remaining product images to find
+        an ISOLATED candidate (plain/transparent background).
+        Does NOT alter database flags (is_primary or sort_order).
+        """
+        if not getattr(product, "images", None):
+            return None
+
+        primary = next((img for img in product.images if getattr(img, "is_primary", False)), None)
+        others = sorted(
+            [img for img in product.images if img != primary],
+            key=lambda img: getattr(img, "sort_order", 0),
+        )
+        candidates = ([primary] if primary is not None else []) + others
+
+        for img in candidates:
+            if not getattr(img, "image_url", None):
+                continue
+            try:
+                path = storage.resolve(img.image_url)
+            except Exception:
+                continue
+            if path is not None and path.is_file():
+                try:
+                    if classify_product_image(path) == ISOLATED:
+                        return img, path
+                except Exception:
+                    continue
+
+        return None
+
     def _generate_with_composite_fallback(
         self,
         current_user: User,
         project: RoomProject,
         selected_products: list[Product],
-        reference_image_paths: list[Path],
+        reference_image_paths: list[Path] | None = None,
         reason: str = "OFFLINE_FALLBACK",
         failed_generation: RoomDesignGeneration | None = None,
     ) -> RoomDesignGeneration:
         """
-        Tự động tạo ảnh phối cảnh 2D bằng Pillow Compositor cục bộ khi Cloudflare hết quota, lỗi 429/5xx,
+        Tự động tạo ảnh phối cảnh 2D bằng Pillow Compositor cục bộ khi Cloud AI hết quota, lỗi 429/5xx,
         hoặc khi công tắc khẩn cấp ENABLE_CLOUD_AI=false được kích hoạt.
+
+        Chỉ chọn các ảnh ISOLATED (nền trơn/trong suốt). Nếu ảnh chính là SCENE (phối cảnh phòng),
+        tự động tìm ảnh ISOLATED khác của cùng sản phẩm để ghép.
+        Nếu sản phẩm không có ảnh phù hợp, bỏ qua sản phẩm đó.
+        Nếu không có sản phẩm nào phù hợp, trả lỗi có kiểm soát 409 Conflict thay vì tạo ảnh giả.
         """
         started_at = perf_counter()
         composite_provider = CompositeImageProvider()
         source_image_path = RoomImageStorageService().resolve(project.room_image_path)
+        storage = ProductImageStorageService()
 
+        # Step 1: Detect and select ISOLATED images for each product
+        max_references = max(0, getattr(composite_provider, "MAX_INPUT_IMAGES", 5) - 1)
+        compositible_candidates: list[tuple[Product, Path]] = []
+        skipped_products: list[Product] = []
+
+        for idx, product in enumerate(selected_products):
+            picked = self._pick_compositible_product_image(product, storage)
+            if picked is not None:
+                compositible_candidates.append((product, picked[1]))
+            elif reference_image_paths and idx < len(reference_image_paths):
+                # Fallback to direct path if it exists and is already classified as ISOLATED
+                p = reference_image_paths[idx]
+                if p and p.is_file() and classify_product_image(p) == ISOLATED:
+                    compositible_candidates.append((product, p))
+                    continue
+                skipped_products.append(product)
+            else:
+                skipped_products.append(product)
+                logger.warning(
+                    "Product id=%s (%s) has no isolated image for 2D composite, excluding from composite canvas",
+                    product.id,
+                    getattr(product, "name", "unknown"),
+                )
+
+        # Step 2: Validate that at least ONE product can be composited (never fake success)
+        if not compositible_candidates:
+            latency_ms = int((perf_counter() - started_at) * 1000)
+            error_code = "NO_COMPOSITIBLE_PRODUCT_IMAGES"
+            error_message = (
+                "None of the selected products have an isolated cutout image for 2D composite generation. "
+                "Please select products with isolated catalog images or enable Cloud AI."
+            )
+            try:
+                self.db.rollback()
+            except Exception:
+                pass
+            if failed_generation is None:
+                gen_fail = RoomDesignGeneration(
+                    room_project_id=project.id,
+                    user_id=current_user.id,
+                    status="FAILED",
+                    provider=composite_provider.provider_name,
+                    model=composite_provider.model_name,
+                    prompt_version=PROMPT_VERSION,
+                    source_image_path=project.room_image_path,
+                    prompt=f"[Chế độ Offline 2D - {reason}] Ghép ảnh nội thất trực tiếp bằng Pillow Compositor.",
+                    products=selected_products,
+                )
+                self._persist_failure(
+                    generation=gen_fail,
+                    current_user=current_user,
+                    project=project,
+                    error_code=error_code,
+                    error_message=error_message,
+                    latency_ms=latency_ms,
+                )
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"{error_code}: {error_message}",
+            )
+
+        prioritized = sorted(
+            compositible_candidates,
+            key=lambda item: get_category_reference_priority(item[0]),
+        )[:max_references]
+
+        composited_products = [item[0] for item in prioritized]
+        comp_reference_paths = [item[1] for item in prioritized]
         categories = [
             p.category.slug if p.category and p.category.slug else "accessories"
-            for p in selected_products[:len(reference_image_paths)]
+            for p in composited_products
         ]
 
-        if reference_image_paths:
+        # Step 3: Run composite design with exception handling
+        generation: RoomDesignGeneration | None = None
+        skipped_note = f" (Đã bỏ qua {len(skipped_products)} sản phẩm không có ảnh nền trơn)" if skipped_products else ""
+        prompt = f"[Chế độ Offline 2D - {reason}] Ghép {len(composited_products)}/{len(selected_products)} sản phẩm nội thất trực tiếp bằng Pillow Compositor.{skipped_note}"
+
+        try:
             provider_result = composite_provider.generate_design(
                 source_image_path=source_image_path,
-                prompt=f"[Chế độ Offline 2D - {reason}] Ghép ảnh nội thất trực tiếp bằng Pillow Compositor.",
-                reference_image_paths=reference_image_paths,
+                prompt=prompt,
+                reference_image_paths=comp_reference_paths,
                 reference_categories=categories,
             )
-        else:
-            from PIL import Image
-            import io
-            with Image.open(source_image_path) as room_img:
-                buf = io.BytesIO()
-                room_img.convert("RGB").save(buf, format="PNG")
-                composite_bytes = buf.getvalue()
-            provider_result = GeneratedImage(data=composite_bytes, content_type="image/png")
+        except (ImageProviderError, Exception) as exc:
+            latency_ms = int((perf_counter() - started_at) * 1000)
+            safe_message = _sanitize_error_message(str(exc))
+            error_code = getattr(exc, "code", "COMPOSITE_GENERATION_FAILED") or "COMPOSITE_GENERATION_FAILED"
+            try:
+                self.db.rollback()
+            except Exception:
+                pass
+            if failed_generation is None:
+                generation = RoomDesignGeneration(
+                    room_project_id=project.id,
+                    user_id=current_user.id,
+                    status="FAILED",
+                    provider=composite_provider.provider_name,
+                    model=composite_provider.model_name,
+                    prompt_version=PROMPT_VERSION,
+                    source_image_path=project.room_image_path,
+                    prompt=prompt,
+                    products=composited_products,
+                )
+                self._persist_failure(
+                    generation=generation,
+                    current_user=current_user,
+                    project=project,
+                    error_code=error_code,
+                    error_message=safe_message,
+                    latency_ms=latency_ms,
+                )
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"{error_code}: {safe_message}",
+            ) from exc
 
+        # Step 4: Persist successful generation
         if failed_generation is not None:
             generation = failed_generation
             generation.provider = composite_provider.provider_name
             generation.model = composite_provider.model_name
-            generation.prompt = f"[Chế độ Offline 2D - {reason}] Ghép ảnh nội thất trực tiếp bằng Pillow Compositor. Không sử dụng AI Cloud."
+            generation.prompt = prompt
+            generation.products = composited_products
         else:
             generation = RoomDesignGeneration(
                 room_project_id=project.id,
@@ -213,8 +360,8 @@ class DesignGenerationService:
                 model=composite_provider.model_name,
                 prompt_version=PROMPT_VERSION,
                 source_image_path=project.room_image_path,
-                prompt=f"[Chế độ Offline 2D - {reason}] Ghép ảnh nội thất trực tiếp bằng Pillow Compositor. Không sử dụng AI Cloud.",
-                products=selected_products,
+                prompt=prompt,
+                products=composited_products,
             )
             self.db.add(generation)
             self.db.flush()
@@ -282,7 +429,6 @@ class DesignGenerationService:
                     f"this model supports at most {max_products} products per design. Affected product IDs: {unresolved_product_ids}"
                 ),
             )
-
         prompt = build_design_generation_prompt(project, analysis, preference, selected_products, reference_mapping)
         self._log_reference_diagnostics(selected_products, included_ids, missing_ids, len(reference_image_paths))
 
@@ -304,20 +450,22 @@ class DesignGenerationService:
         # 2. Concurrency Check & Reservation dưới Project Lock ngắn hạn
         quota_service = AIQuotaService(self.db)
         is_cloud = self.image_provider.provider_name in ("cloudflare", "gemini", "openai", "qwencloud")
+        is_composite = self.image_provider.provider_name == "composite"
         reservation = None
 
         with quota_service.project_lock(project.id):
             quota_service.check_in_flight_concurrency(project.id, "ROOM_DESIGN_GENERATION")
 
-            # 3. Emergency Kill Switch check (ENABLE_CLOUD_AI=false)
-            if is_cloud and not quota_service.is_cloud_ai_enabled():
-                logger.info("Cloud AI disabled via ENABLE_CLOUD_AI=false, auto-falling back to Composite 2D")
+            # 3. Emergency Kill Switch check (ENABLE_CLOUD_AI=false) hoặc Chế độ Composite 2D trực tiếp
+            if (is_cloud and not quota_service.is_cloud_ai_enabled()) or is_composite:
+                reason = "CLOUD_AI_DISABLED" if (is_cloud and not quota_service.is_cloud_ai_enabled()) else "LOCAL_COMPOSITE"
+                logger.info("Running Composite 2D (reason=%s)", reason)
                 return self._generate_with_composite_fallback(
                     current_user=current_user,
                     project=project,
                     selected_products=selected_products,
                     reference_image_paths=reference_image_paths,
-                    reason="CLOUD_AI_DISABLED",
+                    reason=reason,
                 )
 
             # 4. Daily Quota Check & Atomic Reservation
@@ -344,6 +492,7 @@ class DesignGenerationService:
                         reason="QUOTA_EXCEEDED",
                     )
 
+            is_composite = getattr(self.image_provider, "provider_name", "") == "composite"
             generation = RoomDesignGeneration(
                 room_project_id=project.id,
                 user_id=current_user.id,
@@ -353,7 +502,7 @@ class DesignGenerationService:
                 prompt_version=PROMPT_VERSION,
                 source_image_path=project.room_image_path,
                 prompt=prompt,
-                products=selected_products,
+                products=[p for p in selected_products if p.id in included_ids] if is_composite else selected_products,
             )
             self.db.add(generation)
             self.db.commit()
@@ -363,7 +512,12 @@ class DesignGenerationService:
         try:
             self.db.refresh(generation)
             source_image_path = RoomImageStorageService().resolve(project.room_image_path)
-            provider_result = self._generate(source_image_path, prompt, reference_image_paths)
+            provider_result = self._generate(
+                source_image_path,
+                prompt,
+                reference_image_paths,
+                reference_categories=[p.category.slug if p.category and p.category.slug else "accessories" for p in selected_products if p.id in included_ids] if getattr(self.image_provider, "supports_categories", False) else None,
+            )
             stored = GeneratedDesignStorageService().save(
                 provider_result.data,
                 provider_result.content_type,
@@ -562,7 +716,20 @@ class DesignGenerationService:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=detail)
         return [recommended_by_id[product_id] for product_id in product_ids]
 
-    def _generate(self, source_image_path: Path, prompt: str, reference_image_paths: list[Path]):
+    def _generate(
+        self,
+        source_image_path: Path,
+        prompt: str,
+        reference_image_paths: list[Path],
+        reference_categories: list[str | None] | None = None,
+    ):
+        if getattr(self.image_provider, "supports_categories", False):
+            return self.image_provider.generate_design(
+                source_image_path,
+                prompt,
+                reference_image_paths=reference_image_paths,
+                reference_categories=reference_categories,
+            )
         if getattr(self.image_provider, "MAX_INPUT_IMAGES", 1) > 1:
             return self.image_provider.generate_design(source_image_path, prompt, reference_image_paths=reference_image_paths)
         return self.image_provider.generate_design(source_image_path, prompt)
@@ -573,17 +740,28 @@ class DesignGenerationService:
     ) -> tuple[list[Path], list[tuple[int, Product]], list[int], list[int]]:
         max_references = max(0, getattr(self.image_provider, "MAX_INPUT_IMAGES", 1) - 1)
         storage = ProductImageStorageService()
+        is_composite = getattr(self.image_provider, "provider_name", "") == "composite"
 
         # Step 1: Detect available readable primary images on disk
         valid_candidates: list[tuple[Product, Path]] = []
         missing_ids: list[int] = []
         for product in selected_products:
-            image = self._primary_product_image(product)
-            path = storage.resolve(image.image_url) if image is not None else None
-            if image is None or path is None or not path.is_file():
-                missing_ids.append(product.id)
+            if is_composite:
+                picked = self._pick_compositible_product_image(product, storage)
+                if picked is not None:
+                    valid_candidates.append((product, picked[1]))
+                else:
+                    missing_ids.append(product.id)
             else:
-                valid_candidates.append((product, path))
+                image = self._primary_product_image(product)
+                try:
+                    path = storage.resolve(image.image_url) if image is not None else None
+                except Exception:
+                    path = None
+                if image is None or path is None or not path.is_file():
+                    missing_ids.append(product.id)
+                else:
+                    valid_candidates.append((product, path))
 
         # Step 2: Stable-sort candidates by anchor furniture priority
         # (sofa > bedding > storage > table > chair > rug > lighting > wall-decor > accessories).
