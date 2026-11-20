@@ -207,29 +207,35 @@ class AIQuotaService:
             pass
 
         # System query: đếm cả SUCCESS, RESERVED chưa stale và TIMEOUT_SUSPECTED để chặn thủng ngân sách
-        system_base = self.db.query(AIUsageLog).filter(
-            AIUsageLog.provider == prov,
-            AIUsageLog.created_at >= today_start,
-            (AIUsageLog.status == "SUCCESS")
-            | ((AIUsageLog.status == "RESERVED") & (AIUsageLog.created_at >= stale_threshold))
-            | (AIUsageLog.status == "TIMEOUT_SUSPECTED"),
-        )
-        if is_mysql:
-            system_base = system_base.with_for_update(read=True)
-        system_count = system_base.count()
-
-        user_count = 0
-        if user_id is not None:
-            user_base = self.db.query(AIUsageLog).filter(
-                AIUsageLog.user_id == user_id,
+        # Sử dụng ANSI SQL func.count(AIUsageLog.id) tương thích 100% với TiDB Cloud, MySQL và SQLite
+        # Tuyệt đối không dùng with_for_update(read=True) vì phát sinh LOCK IN SHARE MODE bị TiDB từ chối (Mã lỗi 1235)
+        system_count = (
+            self.db.query(func.count(AIUsageLog.id))
+            .filter(
                 AIUsageLog.provider == prov,
                 AIUsageLog.created_at >= today_start,
                 (AIUsageLog.status == "SUCCESS")
-                | ((AIUsageLog.status == "RESERVED") & (AIUsageLog.created_at >= stale_threshold)),
+                | ((AIUsageLog.status == "RESERVED") & (AIUsageLog.created_at >= stale_threshold))
+                | (AIUsageLog.status == "TIMEOUT_SUSPECTED"),
             )
-            if is_mysql:
-                user_base = user_base.with_for_update(read=True)
-            user_count = user_base.count()
+            .scalar()
+            or 0
+        )
+
+        user_count = 0
+        if user_id is not None:
+            user_count = (
+                self.db.query(func.count(AIUsageLog.id))
+                .filter(
+                    AIUsageLog.user_id == user_id,
+                    AIUsageLog.provider == prov,
+                    AIUsageLog.created_at >= today_start,
+                    (AIUsageLog.status == "SUCCESS")
+                    | ((AIUsageLog.status == "RESERVED") & (AIUsageLog.created_at >= stale_threshold)),
+                )
+                .scalar()
+                or 0
+            )
 
         return user_count, system_count
 
@@ -244,7 +250,8 @@ class AIQuotaService:
         """
         Kiểm tra và đặt chỗ quota nguyên tử trước khi gọi Cloud AI provider.
         - Sử dụng advisory lock trong thời gian ngắn (vài ms) để kiểm tra hạn mức.
-        - Commit ngay bản ghi RESERVED xuống DB để các transaction khác nhìn thấy.
+        - Refresh transaction snapshot sau khi lấy lock để nhìn thấy các đặt chỗ vừa commit từ worker khác.
+        - Commit ngay bản ghi RESERVED xuống DB để các transaction khác nhìn thấy trước khi release lock.
         - Giải phóng lock ngay lập tức TRƯỚC KHI gọi Cloud AI.
         - Trả về đối tượng AIUsageLog nếu thành công, None nếu hết quota hoặc tắt Kill switch.
         """
@@ -262,6 +269,12 @@ class AIQuotaService:
             if not acquired:
                 logger.warning("Could not acquire quota lock for provider=%s, rejecting reservation.", prov)
                 return None
+
+            # Expire session state để truy vấn dữ liệu quota mới nhất từ các transaction khác
+            try:
+                self.db.expire_all()
+            except Exception:
+                pass
 
             user_limit, system_limit = self.get_quota_limits(prov)
             user_used, system_used = self.get_daily_usage(user_id, prov)
@@ -285,19 +298,27 @@ class AIQuotaService:
                 )
                 return None
 
-            # Đặt chỗ nguyên tử và commit ngay lập tức
-            reservation = AIUsageLog(
-                user_id=user_id,
-                room_project_id=project_id,
-                provider=prov,
-                model=model,
-                task_type=task_type,
-                status="RESERVED",
-            )
-            self.db.add(reservation)
-            self.db.commit()
-            self.db.refresh(reservation)
-            return reservation
+            # Đặt chỗ nguyên tử và commit ngay lập tức TRƯỚC KHI giải phóng advisory lock
+            try:
+                reservation = AIUsageLog(
+                    user_id=user_id,
+                    room_project_id=project_id,
+                    provider=prov,
+                    model=model,
+                    task_type=task_type,
+                    status="RESERVED",
+                )
+                self.db.add(reservation)
+                self.db.commit()
+                self.db.refresh(reservation)
+                return reservation
+            except Exception as exc:
+                logger.error("Failed to commit AI reservation for provider=%s: %s", prov, exc, exc_info=True)
+                try:
+                    self.db.rollback()
+                except Exception:
+                    pass
+                return None
 
     def finalize_success(
         self,

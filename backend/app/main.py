@@ -60,3 +60,27 @@ def on_startup() -> None:
 @app.get("/health")
 def health():
     return {"status": "OK"}
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request, exc: Exception):
+    import logging
+    logging.getLogger(__name__).error(
+        "Unhandled server exception on %s %s: %s",
+        request.method,
+        request.url.path,
+        exc,
+        exc_info=True,
+    )
+    from fastapi.responses import JSONResponse
+    origin = request.headers.get("origin")
+    headers = {}
+    if origin and (origin in settings.cors_origins or "*" in settings.cors_origins):
+        headers["Access-Control-Allow-Origin"] = origin
+        headers["Access-Control-Allow-Credentials"] = "true"
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Đã xảy ra lỗi máy chủ nội bộ. Vui lòng thử lại sau."},
+        headers=headers,
+    )
+

@@ -125,6 +125,8 @@ DU_PHONG_KET_QUA_THIET_KE_DEP/
 # ===== Local Reports, Plans & Helper Scripts =====
 *_REPORT.md
 *_PLAN.md
+*_PREFLIGHT.md
+*_PREFLIGHT_*.md
 HUONG_DAN_*.md
 scripts/
 frontend/public/prototype_cutouts/
