@@ -156,7 +156,7 @@ export default function RecommendationsPage() {
       return;
     }
     if (selectedIds.length >= MAX_SELECTED_PRODUCTS) {
-      setGenerationError(`Hệ thống tự động phối cảnh tối đa ${MAX_SELECTED_PRODUCTS} sản phẩm để bảo đảm chất lượng bố cục phòng. Vui lòng bỏ chọn một món trước khi thêm món khác.`);
+      setGenerationError("Bạn đã chọn tối đa 3 sản phẩm tham chiếu cho AI. Vui lòng bỏ bớt 1 món để chọn món mới.");
       return;
     }
     setSelectedIds((current) => [...current, productId]);
