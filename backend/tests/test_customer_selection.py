@@ -599,3 +599,47 @@ def test_single_button_ai_design_flow_preserved(client, test_setup):
     data = res.json()
     assert data["generation_mode"] == "AI_PHOTOREALISTIC_PREVIEW"
     assert len(data["products"]) == 2
+
+
+# =============================================================================
+# SCENARIO 16: Customer selects products outside initial preference categories
+# =============================================================================
+def test_customer_selects_unrestricted_categories_in_manual_mode(client, test_setup):
+    headers = test_setup["headers"]
+    project = test_setup["project"]
+    lamp = test_setup["catalog"]["lamp"]
+    rug = test_setup["catalog"]["rug"]
+    art = test_setup["catalog"]["art"]
+    mock_cf = test_setup["mock_cf"]
+
+    # 1. Verify recommendations include products across all categories (not just preferred)
+    rec_res = client.get(f"/api/room-projects/{project.id}/recommendations?limit=50", headers=headers)
+    assert rec_res.status_code == 200
+    rec_items = rec_res.json()["items"]
+    rec_product_ids = {item["product"]["id"] for item in rec_items}
+
+    # Lamp, Rug, and Art must all be browsable in recommendations
+    assert lamp.id in rec_product_ids
+    assert rug.id in rec_product_ids
+    assert art.id in rec_product_ids
+
+    # 2. Customer selects a completely customized combo: [Lamp, Rug, Art]
+    res = client.post(
+        f"/api/room-projects/{project.id}/design-generations",
+        json={
+            "product_ids": [lamp.id, rug.id, art.id],
+            "selection_mode": "MANUAL",
+            "generation_mode": "AI_PHOTOREALISTIC_PREVIEW",
+            "force": True,
+        },
+        headers=headers,
+    )
+    assert res.status_code == 201, res.text
+    data = res.json()
+    assert [p["id"] for p in data["products"]] == [lamp.id, rug.id, art.id]
+
+    # 3. Dynamic Prompt and Reference Manifest contain all 3 products
+    assert f"Product #{lamp.id}" in mock_cf.last_prompt
+    assert f"Product #{rug.id}" in mock_cf.last_prompt
+    assert f"Product #{art.id}" in mock_cf.last_prompt
+

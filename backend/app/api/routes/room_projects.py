@@ -137,7 +137,7 @@ def get_room_project_recommendations(
     project_id: int,
     current_user: User = Depends(get_current_user),
     service: RecommendationService = Depends(get_recommendation_service),
-    limit: int = Query(12, ge=1, le=50),
+    limit: int = Query(50, ge=1, le=100),
 ):
     preference, analysis, recommendations = service.recommend_for_project(current_user, project_id, limit)
     bundle_data = service.last_bundle.to_dict() if getattr(service, "last_bundle", None) else None

@@ -854,7 +854,14 @@ class DesignGenerationService:
         rec_service = RecommendationService(self.db)
         preference, analysis, recommendations = rec_service.recommend_for_project(current_user, project_id, limit=50)
         effective_pref = getattr(rec_service, "last_effective_preference", None) or preference
-        recommended_by_id = {item.product.id: item.product for item in recommendations}
+        pref_cat_ids = set(getattr(effective_pref, "category_ids", None) or [])
+        if not pref_cat_ids and getattr(preference, "categories", None):
+            pref_cat_ids = {c.id for c in preference.categories}
+        recommended_by_id = {
+            item.product.id: item.product
+            for item in recommendations
+            if (not pref_cat_ids or item.product.category_id in pref_cat_ids)
+        }
         selection_mode = (getattr(payload, "selection_mode", None) or "AUTO").upper()
         selected_products = self._select_products(
             payload.product_ids,

@@ -126,7 +126,9 @@ export default function RecommendationsPage() {
 
   const selectedProducts = useMemo(() => {
     if (!recommendations) return [];
-    return recommendations.items.filter((item) => selectedIds.includes(item.product.id));
+    return selectedIds
+      .map((id) => recommendations.items.find((item) => item.product.id === id))
+      .filter((item): item is ProductRecommendation => Boolean(item));
   }, [recommendations, selectedIds]);
 
   // V1.5 PRO Budget Bundle Totals
@@ -155,15 +157,11 @@ export default function RecommendationsPage() {
       return;
     }
     if (selectedIds.includes(productId)) {
-      if (selectedIds.length === 1) {
-        setGenerationError("Cần giữ ít nhất 1 sản phẩm catalog để AI có đối tượng phối cảnh vào phòng.");
-        return;
-      }
       setSelectedIds((current) => current.filter((id) => id !== productId));
       return;
     }
     if (selectedIds.length >= MAX_SELECTED_PRODUCTS) {
-      setGenerationError(`Hệ thống tự động phối cảnh tối đa ${MAX_SELECTED_PRODUCTS} sản phẩm để bảo đảm chất lượng bố cục phòng.`);
+      setGenerationError(`Hệ thống tự động phối cảnh tối đa ${MAX_SELECTED_PRODUCTS} sản phẩm để bảo đảm chất lượng bố cục phòng. Vui lòng bỏ chọn một món trước khi thêm món khác.`);
       return;
     }
     setSelectedIds((current) => [...current, productId]);
@@ -175,7 +173,7 @@ export default function RecommendationsPage() {
   const handleCreateAIDesign = async () => {
     if (generationInFlight.current) return;
     if (selectedIds.length === 0) {
-      setGenerationError("Không có sản phẩm catalog phù hợp để tạo thiết kế.");
+      setGenerationError("Vui lòng chọn từ 1 đến 3 sản phẩm catalog để tạo thiết kế.");
       return;
     }
     generationInFlight.current = true;
@@ -312,7 +310,15 @@ export default function RecommendationsPage() {
             </div>
             <h2 className="text-2xl font-black text-ink md:text-3xl">Tạo phương án thiết kế phòng với AI</h2>
             <p className="max-w-xl text-sm leading-relaxed text-charcoal/70">
-              Hệ thống đã chọn <strong>{selectedProducts.length}</strong> sản phẩm tối ưu công năng (Anchor, Functional, Accent) theo ngân sách của bạn:
+              {selectedProducts.length > 0 ? (
+                <>
+                  Hệ thống đã chọn <strong>{selectedProducts.length}</strong> sản phẩm tối ưu công năng (Anchor, Functional, Accent) theo ngân sách của bạn:
+                </>
+              ) : (
+                <>
+                  Vui lòng chọn từ 1 đến 3 sản phẩm catalog bên dưới để tạo thiết kế:
+                </>
+              )}
             </p>
 
             {/* Showcase các sản phẩm được chọn */}

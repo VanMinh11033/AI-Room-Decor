@@ -113,9 +113,8 @@ class RecommendationEngine:
                 Product.stock_quantity > 0,
             )
         )
-        # Filter by requested category_ids when explicitly specified in preferences
-        if effective_pref.category_ids:
-            query = query.filter(Product.category_id.in_(effective_pref.category_ids))
+        # Note: Do not hard-filter by category_ids so customer can browse and select
+        # from all active catalog products. Category preference is factored into MCDA scoring.
         if effective_pref.budget_max is not None:
             query = query.filter(Product.price <= effective_pref.budget_max)
         return query.all()
