@@ -151,11 +151,6 @@ export default function RecommendationsPage() {
 
   const toggleProduct = (productId: number) => {
     setGenerationError("");
-    const recItem = recommendations?.items.find((item) => item.product.id === productId);
-    if (recItem && !isProductEligible(recItem.product)) {
-      setGenerationError("Sản phẩm này đang chờ ảnh catalog chuẩn để làm tham chiếu AI. Vui lòng chọn sản phẩm đã sẵn sàng.");
-      return;
-    }
     if (selectedIds.includes(productId)) {
       setSelectedIds((current) => current.filter((id) => id !== productId));
       return;
@@ -451,7 +446,6 @@ function RecommendationCard({
   selected: boolean;
   onToggle: (productId: number) => void;
 }) {
-  const isEligible = isProductEligible(item.product);
   const primaryImage = item.product.images.find((image) => image.is_primary)?.image_url || item.product.images[0]?.image_url;
   const tags = [...item.product.styles, ...item.product.colors, ...item.product.materials].slice(0, 4);
   const [adding, setAdding] = useState(false);
@@ -493,11 +487,7 @@ function RecommendationCard({
               </span>
             )}
           </div>
-          {isEligible ? (
-            <span className="rounded-full bg-emerald-600/90 text-white px-2 py-0.5 text-[10px] font-bold shadow-xs">✓ Sẵn sàng tạo ảnh AI</span>
-          ) : (
-            <span className="rounded-full bg-amber-600/90 text-white px-2 py-0.5 text-[10px] font-bold shadow-xs">Chờ kiểm định ảnh</span>
-          )}
+          <span className="rounded-full bg-emerald-600/90 text-white px-2 py-0.5 text-[10px] font-bold shadow-xs">✓ Sẵn sàng tạo ảnh AI</span>
         </div>
         <span className="absolute right-3 top-3" title={`Điểm phù hợp: ${item.score}/100`}><ScoreBadge score={item.score} /></span>
 
@@ -508,9 +498,7 @@ function RecommendationCard({
           className={`absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-black shadow-sm transition ${
             selected
               ? "bg-ink text-white"
-              : isEligible
-              ? "bg-white/90 text-charcoal/70 hover:bg-white hover:text-ink"
-              : "bg-white/80 text-charcoal/50 hover:bg-white"
+              : "bg-white/90 text-charcoal/70 hover:bg-white hover:text-ink"
           }`}
         >
           {selected ? (
@@ -518,10 +506,8 @@ function RecommendationCard({
               <Check size={14} className="text-emerald-400" />
               <span>Đang dùng trong AI</span>
             </>
-          ) : isEligible ? (
-            <span>Chọn món này</span>
           ) : (
-            <span>Chờ kiểm định</span>
+            <span>Chọn món này</span>
           )}
         </button>
       </div>

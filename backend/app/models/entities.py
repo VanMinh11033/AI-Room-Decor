@@ -247,15 +247,37 @@ class Product(Base, TimestampMixin):
 
     @property
     def is_reference_ready(self) -> bool:
-        project_root = Path(__file__).resolve().parents[3]
-        clean_dir = project_root / "storage" / "product_references_clean"
+        this_file = Path(__file__).resolve()
         p_slug = self.slug or ""
-        if (clean_dir / f"{self.id}_{p_slug}.jpg").is_file() or (clean_dir / f"{self.id}_{p_slug}.png").is_file():
-            return True
-        if self.id in {1, 6, 9, 16, 19, 21, 28}:
-            verified_dir = project_root / "storage" / "verified_catalog_cutouts"
-            if (verified_dir / f"{self.id}_{p_slug}.png").is_file():
-                return True
+        # 1. Skill Bridge packaged clean reference images (30 verified catalog references)
+        skill_clean = this_file.parents[1] / "ai" / "skill_bridge" / "product_references_clean"
+        if skill_clean.is_dir() and p_slug:
+            for ext in (".jpg", ".png", ".webp"):
+                if (skill_clean / f"{self.id}_{p_slug}{ext}").is_file():
+                    return True
+
+        # 2. Local storage clean references fallback
+        for parent_idx in (2, 3):
+            try:
+                storage_clean = this_file.parents[parent_idx] / "storage" / "product_references_clean"
+                if storage_clean.is_dir() and p_slug:
+                    for ext in (".jpg", ".png", ".webp"):
+                        if (storage_clean / f"{self.id}_{p_slug}{ext}").is_file():
+                            return True
+            except IndexError:
+                pass
+
+        # 3. Primary image fallback if available on disk
+        if self.images:
+            primary = next((img for img in self.images if img.is_primary), self.images[0])
+            if primary and primary.image_url:
+                for parent_idx in (2, 3):
+                    try:
+                        img_path = this_file.parents[parent_idx] / primary.image_url.lstrip("/")
+                        if img_path.is_file():
+                            return True
+                    except IndexError:
+                        pass
         return False
 
     @property
