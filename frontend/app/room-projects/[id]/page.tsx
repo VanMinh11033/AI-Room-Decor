@@ -393,6 +393,9 @@ function mapAnalysisError(message: string) {
   if (message === "GEMINI_PROVIDER_MODEL_ERROR" || message === "CLOUDFLARE_VISION_MODEL_ERROR") return "Model phân tích AI hiện không khả dụng. Vui lòng liên hệ quản trị viên.";
   if (message === "GEMINI_PROVIDER_UNAVAILABLE" || message === "CLOUDFLARE_VISION_UNAVAILABLE") return "Dịch vụ AI đang tạm thời bận. Vui lòng thử lại sau ít phút.";
   if (message === "GEMINI_PROVIDER_QUOTA_ERROR" || message === "CLOUDFLARE_VISION_QUOTA_ERROR" || message === "CLOUDFLARE_VISION_DAILY_QUOTA_EXCEEDED") return "Đã vượt hạn mức phân tích AI. Vui lòng thử lại sau.";
+  if (message === "CLOUDFLARE_VISION_INVALID_PAYLOAD") return "Cấu trúc dữ liệu ảnh không được AI chấp nhận. Vui lòng thử lại ảnh khác.";
+  if (message === "CLOUDFLARE_VISION_SOURCE_NOT_FOUND" || message === "ROOM_IMAGE_NOT_FOUND") return "Không tìm thấy file ảnh căn phòng. Vui lòng tải lại ảnh.";
+  if (message.includes("AI_ANALYSIS_IN_PROGRESS")) return "Yêu cầu phân tích phòng đang được xử lý, vui lòng chờ trong giây lát.";
   if (message === "VISION_PROVIDER_REQUEST_FAILED" || message === "VISION_PROVIDER_HTTP_ERROR" || message === "CLOUDFLARE_VISION_API_ERROR" || message === "CLOUDFLARE_VISION_REQUEST_FAILED") return "Không thể phân tích ảnh lúc này. Vui lòng thử lại.";
   if (message === "CLOUDFLARE_VISION_AGREEMENT_REQUIRED") return "Cần chấp nhận điều khoản Meta Llama trước khi sử dụng model Vision này.";
   if (message === "VISION_PROVIDER_MALFORMED_RESPONSE") return "Kết quả AI chưa đúng định dạng. Vui lòng thử lại.";

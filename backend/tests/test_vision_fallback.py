@@ -258,3 +258,25 @@ def test_fallback_real_room_image_full_analysis(tmp_path):
     assert analysis.raw_response["fallback"] is True
     assert analysis.raw_response["reason"] == "LOCAL_MODE"
 
+
+def test_cross_project_checksum_reuse(client, db_session):
+    headers = auth_headers(client, email="reuse-user@example.com")
+    # Project 1
+    p1 = create_project(client, headers)
+    upload_png(client, headers, p1["id"])
+    success = SuccessVisionProvider()
+    app.dependency_overrides[get_vision_provider] = lambda: success
+    res1 = client.post(f"/api/room-projects/{p1['id']}/analyze", headers=headers)
+    assert res1.status_code == 200
+    assert success.calls == 1
+
+    # Project 2 with same image
+    p2 = create_project(client, headers)
+    upload_png(client, headers, p2["id"])
+    res2 = client.post(f"/api/room-projects/{p2['id']}/analyze", headers=headers)
+    assert res2.status_code == 200
+    assert res2.json()["status"] == "COMPLETED"
+    # Should reuse without calling provider again
+    assert success.calls == 1
+
+

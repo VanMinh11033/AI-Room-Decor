@@ -234,3 +234,43 @@ def test_factory_missing_keys_falls_back_to_local(monkeypatch):
     provider = get_vision_provider()
     assert isinstance(provider, LocalFallbackProvider)
     assert provider.fallback_reason == "MISSING_API_KEY"
+
+
+def test_cloudflare_vision_agreement_required(tmp_path: Path):
+    test_img = create_test_image(tmp_path / "room.jpg")
+    fake_resp = mock_response(
+        status_code=403,
+        json_body={"errors": [{"code": 5016, "message": "You must agree to Meta's License and Acceptable Use Policy by passing {'prompt': 'agree'}."}]},
+    )
+    fake_client = FakeClient(response=fake_resp)
+    provider = CloudflareVisionProvider(account_id="acc", api_token="tok", client_factory=lambda: fake_client)
+    with pytest.raises(VisionProviderError) as exc_info:
+        provider.analyze_room(test_img, "image/jpeg")
+    assert exc_info.value.code == "CLOUDFLARE_VISION_AGREEMENT_REQUIRED"
+
+
+def test_cloudflare_vision_model_error_404(tmp_path: Path):
+    test_img = create_test_image(tmp_path / "room.jpg")
+    fake_resp = mock_response(
+        status_code=404,
+        json_body={"errors": [{"code": 7000, "message": "Model not found"}]},
+    )
+    fake_client = FakeClient(response=fake_resp)
+    provider = CloudflareVisionProvider(account_id="acc", api_token="tok", client_factory=lambda: fake_client)
+    with pytest.raises(VisionProviderError) as exc_info:
+        provider.analyze_room(test_img, "image/jpeg")
+    assert exc_info.value.code == "CLOUDFLARE_VISION_MODEL_ERROR"
+
+
+def test_cloudflare_vision_invalid_payload_400(tmp_path: Path):
+    test_img = create_test_image(tmp_path / "room.jpg")
+    fake_resp = mock_response(
+        status_code=400,
+        json_body={"errors": [{"code": 3030, "message": "Invalid request schema"}]},
+    )
+    fake_client = FakeClient(response=fake_resp)
+    provider = CloudflareVisionProvider(account_id="acc", api_token="tok", client_factory=lambda: fake_client)
+    with pytest.raises(VisionProviderError) as exc_info:
+        provider.analyze_room(test_img, "image/jpeg")
+    assert exc_info.value.code == "CLOUDFLARE_VISION_INVALID_PAYLOAD"
+

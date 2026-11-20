@@ -153,7 +153,31 @@ class CloudflareVisionProvider:
                 res = client.post(url, headers=headers, json=payload)
 
         if res.status_code in (401, 403):
+            codes: set[int] = set()
+            try:
+                cf_json = res.json()
+                if isinstance(cf_json, dict):
+                    for err in cf_json.get("errors", []):
+                        if isinstance(err, dict) and isinstance(err.get("code"), int):
+                            codes.add(err["code"])
+            except Exception:
+                pass
+            lowered = res.text.lower()
+            if 5016 in codes or "agree" in lowered or "license" in lowered or "terms" in lowered:
+                logger.warning("Cloudflare Vision requires Meta License Agreement (HTTP %s, codes=%s)", res.status_code, codes)
+                raise VisionProviderError(
+                    "CLOUDFLARE_VISION_AGREEMENT_REQUIRED",
+                    "Cần chấp nhận điều khoản Meta Llama trước khi sử dụng model này trên tài khoản Cloudflare.",
+                    status_code=res.status_code,
+                )
+            logger.warning("Cloudflare Vision authentication error (HTTP %s)", res.status_code)
             raise VisionProviderError("CLOUDFLARE_VISION_AUTH_ERROR", "Lỗi xác thực Cloudflare API Token.", status_code=res.status_code)
+        if res.status_code == 404:
+            logger.warning("Cloudflare Vision model not found or unavailable (HTTP 404): %s", self.model_name)
+            raise VisionProviderError("CLOUDFLARE_VISION_MODEL_ERROR", f"Model phân tích AI hiện không khả dụng ({self.model_name}).", status_code=404)
+        if res.status_code == 400:
+            logger.warning("Cloudflare Vision invalid payload (HTTP 400): %s", res.text[:200])
+            raise VisionProviderError("CLOUDFLARE_VISION_INVALID_PAYLOAD", f"Yêu cầu phân tích ảnh không hợp lệ: {res.text[:150]}", status_code=400)
         if res.status_code == 429:
             codes: set[int] = set()
             try:

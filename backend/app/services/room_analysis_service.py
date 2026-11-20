@@ -1,3 +1,4 @@
+import logging
 from datetime import UTC, datetime
 from time import perf_counter
 
@@ -10,6 +11,8 @@ from app.models.entities import AIUsageLog, RoomAnalysis, RoomProject, User
 from app.schemas.room_project import RoomAnalysisResult, RoomProjectCreate
 from app.services.ai_quota_service import AIQuotaService
 from app.services.storage_service import RoomImageStorageService
+
+logger = logging.getLogger(__name__)
 
 
 class RoomAnalysisService:
@@ -196,7 +199,8 @@ class RoomAnalysisService:
 
         started_at = perf_counter()
         try:
-            image_path = RoomImageStorageService().resolve(project.room_image_path)
+            image_source = project.room_image_url if (project.room_image_url and project.room_image_url.startswith("http")) else project.room_image_path
+            image_path = RoomImageStorageService().resolve(image_source)
             provider_result = provider.analyze_room(image_path, project.image_content_type)
             result = RoomAnalysisResult.model_validate(provider_result.result)
             latency_ms = int((perf_counter() - started_at) * 1000)
@@ -349,7 +353,8 @@ class RoomAnalysisService:
         reason: str = "LOCAL_MODE",
     ) -> RoomAnalysis | None:
         try:
-            image_path = RoomImageStorageService().resolve(project.room_image_path)
+            image_source = project.room_image_url if (project.room_image_url and project.room_image_url.startswith("http")) else project.room_image_path
+            image_path = RoomImageStorageService().resolve(image_source)
             fallback_provider = LocalFallbackProvider(room_type=project.room_type, fallback_reason=reason)
             provider_result = fallback_provider.analyze_room(image_path, project.image_content_type)
             result = RoomAnalysisResult.model_validate(provider_result.result)
