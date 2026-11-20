@@ -91,7 +91,12 @@ class CloudflareVisionProvider:
                 "parsed_vision": parsed,
                 "local_cv": local_analysis.raw_response,
             }
-            return VisionAnalysis(result=merged_result, raw_response=raw_response, usage=VisionUsage(total_tokens=250))
+            usage_neurons = 0.0
+            try:
+                usage_neurons = float(response_json.get("result", {}).get("usage", {}).get("neurons", 15.0))
+            except Exception:
+                pass
+            return VisionAnalysis(result=merged_result, raw_response=raw_response, usage=VisionUsage(total_tokens=250, estimated_cost=usage_neurons))
         except VisionProviderError:
             raise
         except Exception as exc:
@@ -135,9 +140,7 @@ class CloudflareVisionProvider:
             "Content-Type": "application/json",
         }
         payload = {
-            "messages": [
-                {"role": "user", "content": prompt},
-            ],
+            "prompt": prompt,
             "image": image_data_url,
             "max_tokens": 1024,
         }
@@ -186,7 +189,11 @@ class CloudflareVisionProvider:
 
     def _extract_json_response(self, data: dict[str, Any]) -> dict[str, Any]:
         result = data.get("result") or {}
-        text = result.get("response") or ""
+        resp = result.get("response")
+        if isinstance(resp, dict):
+            return resp
+
+        text = str(resp or "")
 
         # Check for Meta License Agreement requirement
         text_lower = text.lower()

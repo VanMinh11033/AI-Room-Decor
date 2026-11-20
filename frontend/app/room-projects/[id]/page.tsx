@@ -389,11 +389,12 @@ function projectStatusLabel(project: RoomProject | null, analysis: RoomAnalysis 
 
 function mapAnalysisError(message: string) {
   if (message === "AI_PROVIDER_NOT_CONFIGURED") return "AI phân tích phòng chưa được cấu hình.";
-  if (message === "GEMINI_PROVIDER_AUTH_ERROR") return "Dịch vụ phân tích AI đang gặp lỗi xác thực. Vui lòng liên hệ quản trị viên.";
-  if (message === "GEMINI_PROVIDER_MODEL_ERROR") return "Model phân tích AI hiện không khả dụng. Vui lòng liên hệ quản trị viên.";
-  if (message === "GEMINI_PROVIDER_UNAVAILABLE") return "Gemini đang tạm thời quá tải. Hệ thống đã thử lại nhưng chưa thành công. Vui lòng thử lại sau ít phút.";
-  if (message === "GEMINI_PROVIDER_QUOTA_ERROR") return "Đã vượt hạn mức phân tích AI. Vui lòng thử lại sau.";
-  if (message === "VISION_PROVIDER_REQUEST_FAILED" || message === "VISION_PROVIDER_HTTP_ERROR") return "Không thể phân tích ảnh lúc này. Vui lòng thử lại.";
+  if (message === "GEMINI_PROVIDER_AUTH_ERROR" || message === "CLOUDFLARE_VISION_AUTH_ERROR") return "Dịch vụ phân tích AI đang gặp lỗi xác thực. Vui lòng liên hệ quản trị viên.";
+  if (message === "GEMINI_PROVIDER_MODEL_ERROR" || message === "CLOUDFLARE_VISION_MODEL_ERROR") return "Model phân tích AI hiện không khả dụng. Vui lòng liên hệ quản trị viên.";
+  if (message === "GEMINI_PROVIDER_UNAVAILABLE" || message === "CLOUDFLARE_VISION_UNAVAILABLE") return "Dịch vụ AI đang tạm thời bận. Vui lòng thử lại sau ít phút.";
+  if (message === "GEMINI_PROVIDER_QUOTA_ERROR" || message === "CLOUDFLARE_VISION_QUOTA_ERROR" || message === "CLOUDFLARE_VISION_DAILY_QUOTA_EXCEEDED") return "Đã vượt hạn mức phân tích AI. Vui lòng thử lại sau.";
+  if (message === "VISION_PROVIDER_REQUEST_FAILED" || message === "VISION_PROVIDER_HTTP_ERROR" || message === "CLOUDFLARE_VISION_API_ERROR" || message === "CLOUDFLARE_VISION_REQUEST_FAILED") return "Không thể phân tích ảnh lúc này. Vui lòng thử lại.";
+  if (message === "CLOUDFLARE_VISION_AGREEMENT_REQUIRED") return "Cần chấp nhận điều khoản Meta Llama trước khi sử dụng model Vision này.";
   if (message === "VISION_PROVIDER_MALFORMED_RESPONSE") return "Kết quả AI chưa đúng định dạng. Vui lòng thử lại.";
   if (message === "AI_ANALYSIS_FAILED") return "Phân tích ảnh thất bại. Vui lòng thử lại.";
   return "Không thể phân tích ảnh lúc này. Vui lòng thử lại.";

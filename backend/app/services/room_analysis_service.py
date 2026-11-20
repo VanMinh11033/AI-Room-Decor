@@ -104,6 +104,48 @@ class RoomAnalysisService:
         if cached is not None and not force:
             return cached
 
+        # Check cross-project cache for identical image uploaded by same user
+        if not force:
+            cross_cached = (
+                self.db.query(RoomAnalysis)
+                .filter(
+                    RoomAnalysis.user_id == current_user.id,
+                    RoomAnalysis.image_checksum == project.image_checksum,
+                    RoomAnalysis.status == "COMPLETED",
+                )
+                .order_by(RoomAnalysis.created_at.desc())
+                .first()
+            )
+            if cross_cached is not None:
+                logger.info(
+                    "Reusing existing completed analysis id=%s for project_id=%s (identical image checksum)",
+                    cross_cached.id,
+                    project.id,
+                )
+                cloned = RoomAnalysis(
+                    room_project_id=project.id,
+                    user_id=current_user.id,
+                    image_checksum=project.image_checksum,
+                    status="COMPLETED",
+                    provider=cross_cached.provider,
+                    model=cross_cached.model,
+                    room_type=cross_cached.room_type,
+                    dominant_colors=cross_cached.dominant_colors,
+                    existing_objects=cross_cached.existing_objects,
+                    empty_areas=cross_cached.empty_areas,
+                    lighting=cross_cached.lighting,
+                    design_characteristics=cross_cached.design_characteristics,
+                    layout_summary=cross_cached.layout_summary,
+                    confidence=cross_cached.confidence,
+                    raw_response=cross_cached.raw_response,
+                    completed_at=datetime.now(UTC),
+                )
+                project.status = "ANALYZED"
+                self.db.add(cloned)
+                self.db.commit()
+                self.db.refresh(cloned)
+                return cloned
+
         provider = self.vision_provider
         if provider is None:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Vision provider dependency is missing")
@@ -257,6 +299,8 @@ class RoomAnalysisService:
                 "GEMINI_PROVIDER_QUOTA_ERROR",
                 "CLOUDFLARE_VISION_UNAVAILABLE",
                 "CLOUDFLARE_VISION_QUOTA_ERROR",
+                "CLOUDFLARE_VISION_DAILY_QUOTA_EXCEEDED",
+                "CLOUDFLARE_VISION_RATE_LIMIT",
                 "CLOUDFLARE_VISION_AGREEMENT_REQUIRED",
                 "CLOUDFLARE_VISION_API_ERROR",
                 "CLOUDFLARE_VISION_REQUEST_FAILED",

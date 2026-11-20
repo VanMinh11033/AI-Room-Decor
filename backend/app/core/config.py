@@ -17,13 +17,13 @@ class Settings(BaseSettings):
     product_storage_dir: str = "storage/products"
     room_storage_dir: str = "storage/rooms"
     max_room_image_mb: int = 10
-    vision_provider: str | None = None
-    vision_model: str | None = None
+    vision_provider: str = "cloudflare"
+    vision_model: str = "@cf/meta/llama-3.2-11b-vision-instruct"
     vision_api_key: str | None = None
     gemini_api_key: str | None = None
     vision_api_base_url: str = "https://api.openai.com/v1"
-    image_provider: str | None = None
-    image_model: str | None = None
+    image_provider: str = "cloudflare"
+    image_model: str = "@cf/black-forest-labs/flux-2-dev"
     image_api_key: str | None = None
     image_api_base_url: str = "https://api.openai.com/v1"
     cloudflare_account_id: str | None = None
