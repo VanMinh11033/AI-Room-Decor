@@ -149,6 +149,14 @@ export default function RecommendationsPage() {
     return userBudgetMax - totalSelectedPrice;
   }, [userBudgetMax, totalSelectedPrice]);
 
+  const isAIBundle = useMemo(() => {
+    const bundleIds = recommendations?.bundle?.product_ids || [];
+    if (!bundleIds.length || selectedIds.length !== bundleIds.length) return false;
+    const sortedSelected = [...selectedIds].sort((a, b) => a - b);
+    const sortedBundle = [...bundleIds].sort((a, b) => a - b);
+    return sortedSelected.every((id, idx) => id === sortedBundle[idx]);
+  }, [recommendations, selectedIds]);
+
   const toggleProduct = (productId: number) => {
     setGenerationError("");
     if (selectedIds.includes(productId)) {
@@ -301,14 +309,20 @@ export default function RecommendationsPage() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="space-y-3 flex-1">
             <div className="inline-flex items-center gap-2 rounded-full bg-clay px-3 py-1 text-xs font-black uppercase tracking-wider text-white">
-              <Sparkles size={14} /> Tự động 100% · Một chạm tạo thiết kế
+              <Sparkles size={14} /> {isAIBundle ? "Tự động 100% · Một chạm tạo thiết kế" : "Tùy chọn của bạn · Tạo thiết kế AI"}
             </div>
             <h2 className="text-2xl font-black text-ink md:text-3xl">Tạo phương án thiết kế phòng với AI</h2>
             <p className="max-w-xl text-sm leading-relaxed text-charcoal/70">
               {selectedProducts.length > 0 ? (
-                <>
-                  Hệ thống đã chọn <strong>{selectedProducts.length}</strong> sản phẩm tối ưu công năng (Anchor, Functional, Accent) theo ngân sách của bạn:
-                </>
+                isAIBundle ? (
+                  <>
+                    Hệ thống đã chọn <strong>{selectedProducts.length}</strong> sản phẩm tối ưu công năng (Anchor, Functional, Accent) theo ngân sách của bạn:
+                  </>
+                ) : (
+                  <>
+                    Bạn đã chọn <strong>{selectedProducts.length}</strong> sản phẩm cho phương án thiết kế phòng này:
+                  </>
+                )
               ) : (
                 <>
                   Vui lòng chọn từ 1 đến 3 sản phẩm catalog bên dưới để tạo thiết kế:
@@ -364,11 +378,21 @@ export default function RecommendationsPage() {
               )}
             </div>
 
-            {recommendations?.bundle?.bundle_explanation && (
+            {isAIBundle && recommendations?.bundle?.bundle_explanation ? (
               <p className="text-xs font-medium italic text-charcoal/60">
                 💡 {recommendations.bundle.bundle_explanation}
               </p>
-            )}
+            ) : selectedProducts.length > 0 ? (
+              <p className="text-xs font-medium italic text-charcoal/60">
+                💡 Bộ sản phẩm bạn chọn gồm {selectedProducts.length} món với tổng giá {totalSelectedPrice.toLocaleString("vi-VN")} đ{
+                  remainingBudget !== null
+                    ? remainingBudget >= 0
+                      ? ` (tiết kiệm ${remainingBudget.toLocaleString("vi-VN")} đ so với ngân sách)`
+                      : ` (vượt ${Math.abs(remainingBudget).toLocaleString("vi-VN")} đ so với ngân sách)`
+                    : ""
+                }. AI sẽ phối cảnh chuẩn xác các sản phẩm này vào phòng.
+              </p>
+            ) : null}
           </div>
 
           {/* Nút bấm DUY NHẤT */}
