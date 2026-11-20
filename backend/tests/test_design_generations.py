@@ -1,5 +1,7 @@
 import logging
 from pathlib import Path
+import pytest
+from app.core.config import settings
 
 from app.ai.image.base import GeneratedImage, ImageProviderError, ImageGenerationUsage
 from app.ai.image.composite_provider import CompositeImageProvider
@@ -673,6 +675,7 @@ def test_composite_provider_error_handled_gracefully(client, db_session, monkeyp
     assert "secret-key-9876" not in (generation.error_message or "")
 
 
+@pytest.mark.skipif(not settings.enable_cloud_ai, reason="Yêu cầu ENABLE_CLOUD_AI=true để kiểm tra cloud provider attempt trước khi fallback")
 def test_cloud_provider_failure_auto_falls_back_to_composite(client, db_session):
     """Case 7: Cloud AI lỗi -> tự động fallback sang Composite 2D thành công nếu có ảnh ISOLATED."""
     failing_cloud = FailingImageProvider()

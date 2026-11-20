@@ -88,6 +88,8 @@ class ProductRead(ProductBase):
     room_types: list[CatalogRead] = Field(default_factory=list)
     colors: list[ColorRead] = Field(default_factory=list)
     searchable_text: str | None = None
+    is_reference_ready: bool = True
+    is_composite_ready: bool = False
     created_at: datetime
     updated_at: datetime
 

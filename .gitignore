@@ -110,3 +110,22 @@ desktop.ini
 
 # ===== Test & Audit Image Artifacts =====
 phase_9_1_product_audit.jpg
+
+# ===== Scratch & Local Presentation Folders =====
+scratch/
+backend/scratch/
+scratch_last_transcript.txt
+backup_*/
+ANH_GUI_CHATGPT/
+BO_ANH_MAU_BAO_VE_DO_AN/
+DEMO_BAO_VE_DO_AN/
+DEMO_BAO_VE_DO_AN_MULTI_PRODUCT/
+DU_PHONG_KET_QUA_THIET_KE_DEP/
+
+# ===== Local Reports, Plans & Helper Scripts =====
+*_REPORT.md
+*_PLAN.md
+HUONG_DAN_*.md
+scripts/
+frontend/public/prototype_cutouts/
+backend/scripts/

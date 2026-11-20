@@ -86,6 +86,7 @@ class RoomAnalysisRead(BaseModel):
     confidence: Decimal | None = None
     error_code: str | None = None
     error_message: str | None = None
+    raw_response: dict | list | None = None
     completed_at: datetime | None = None
     created_at: datetime
     updated_at: datetime

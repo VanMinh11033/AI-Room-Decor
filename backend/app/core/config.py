@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     cloudflare_account_id: str | None = None
     cloudflare_api_token: str | None = None
     cloudflare_image_timeout_seconds: int = 300
-    cloudflare_image_max_retries: int = 3
+    cloudflare_image_max_retries: int = 0
     qwencloud_api_key: str | None = None
     qwencloud_api_base_url: str = "https://maas.qwencloudapi.com/api/v1"
     qwencloud_image_timeout_seconds: int = 600
@@ -62,9 +62,25 @@ class Settings(BaseSettings):
     enable_cloud_ai: bool = True
     gemini_daily_user_limit: int = 3
     gemini_daily_system_limit: int = 50
-    cloudflare_daily_user_limit: int = 1
-    cloudflare_daily_system_limit: int = 10
+    cloudflare_daily_user_limit: int = 5
+    cloudflare_daily_system_limit: int = 5
     ai_in_flight_timeout_seconds: int = 300
+
+    # AI Room Decor Skill V1.0 Feature Flags
+    room_decor_skill_enabled: bool = False
+    room_decor_min_score: float = 85.0
+    room_decor_max_attempts: int = 1
+
+    # AI Room Decor Skill V2.0 PRO Feature Flags (Disabled by default)
+    room_decor_v2_enabled: bool = False
+    room_decor_v2_mode: str = "offline_preview"  # "offline_preview" | "hybrid"
+    room_decor_external_enabled: bool = False
+    room_decor_max_external_calls: int = 0
+    room_decor_max_cost_usd: float = 0.0
+    # V1.5 PRO Personalization Engine & Dynamic Prompting
+    room_decor_v1_5_personalization_enabled: bool = True
+    room_decor_recommendation_version: str = "v1.5"
+    room_decor_prompt_version: str = "v1.5"
 
     model_config = SettingsConfigDict(
         env_file=(PROJECT_ROOT / ".env", BACKEND_ROOT / ".env"),

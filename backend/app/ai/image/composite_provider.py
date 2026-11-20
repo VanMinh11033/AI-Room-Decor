@@ -25,12 +25,20 @@ class CompositeImageProvider:
         prompt: str,
         reference_image_paths: list[Path] | None = None,
         reference_categories: list[str | None] | None = None,
+        placements: list[dict] | None = None,
+        light_direction: str | None = None,
+        shadow_intensity: float | None = None,
+        floor_horizon_ratio: float | None = None,
     ) -> GeneratedImage:
         try:
             data = composite_design(
                 source_image_path,
                 list(reference_image_paths or []),
                 list(reference_categories or []),
+                placements=placements,
+                light_direction=light_direction,
+                shadow_intensity=shadow_intensity,
+                floor_horizon_ratio=floor_horizon_ratio,
             )
         except ProductNotCompositibleError as exc:
             raise ImageProviderError("PRODUCT_IMAGE_NOT_COMPOSITIBLE", str(exc)) from exc

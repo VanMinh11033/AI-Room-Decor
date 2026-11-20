@@ -132,9 +132,9 @@ export default function RoomProjectDetailPage() {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(360px,0.9fr)]">
         <div className="space-y-5">
           <div className="overflow-hidden rounded-3xl border border-ink/10 bg-white shadow-soft">
-            <div className="aspect-[16/10] bg-ivory">
+            <div className="aspect-[16/10] bg-stone/20 flex items-center justify-center">
               {project.room_image_url ? (
-                <img src={apiAssetUrl(project.room_image_url)} alt={project.title} className="h-full w-full object-cover" />
+                <img src={apiAssetUrl(project.room_image_url)} alt={project.title} className="h-full w-full object-contain" />
               ) : (
                 <EmptyImagePlaceholder label="Chưa có ảnh phòng" />
               )}
@@ -271,16 +271,70 @@ function FailedState({ error, loading, onRetry }: { error: RoomAnalysis; loading
   );
 }
 
+function renderFallbackBanner(analysis: RoomAnalysis) {
+  if (analysis.provider !== "local_fallback") return null;
+
+  const reason = String(analysis.raw_response?.reason || "LOCAL_MODE");
+
+  if (reason === "CLOUDFLARE_VISION_AGREEMENT_REQUIRED") {
+    return (
+      <div className="rounded-2xl border border-blue-200 bg-blue-50 p-3 text-sm font-bold text-blue-800">
+        Cần kích hoạt điều khoản Meta Llama trên tài khoản Cloudflare Workers AI. Hệ thống đang sử dụng Chế độ Phân tích Thị giác Cục bộ (Local CV) để bạn tiếp tục decor không bị gián đoạn.
+      </div>
+    );
+  }
+
+  if (reason === "CLOUDFLARE_VISION_QUOTA_ERROR" || reason === "QUOTA_EXCEEDED" || reason === "GEMINI_PROVIDER_QUOTA_ERROR") {
+    return (
+      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm font-bold text-amber-800">
+        Hạn mức gọi Cloud AI hôm nay đã đạt giới hạn. Hệ thống đang sử dụng Chế độ Phân tích Thị giác Cục bộ (Local CV Engine - 0đ chi phí).
+      </div>
+    );
+  }
+
+  if (reason === "CLOUDFLARE_VISION_UNAVAILABLE" || reason === "GEMINI_PROVIDER_UNAVAILABLE" || reason === "TEMPORARILY_OVERLOADED") {
+    return (
+      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm font-bold text-amber-800">
+        Dịch vụ Cloud AI đang tạm thời bận. Hệ thống đã tự động chuyển sang Chế độ Phân tích Thị giác Cục bộ (Local CV Engine) để bạn tiếp tục decor không bị gián đoạn.
+      </div>
+    );
+  }
+
+  if (reason === "CLOUD_AI_DISABLED") {
+    return (
+      <div className="rounded-2xl border border-blue-200 bg-blue-50 p-3 text-sm font-bold text-blue-800">
+        Chế độ Cloud AI đang tắt. Hệ thống đang sử dụng Chế độ Phân tích Thị giác Cục bộ (Local CV Engine - An toàn & Miễn phí).
+      </div>
+    );
+  }
+
+  if (reason === "MISSING_API_KEY" || reason === "AI_PROVIDER_NOT_CONFIGURED" || reason === "INVALID_API_KEY") {
+    return (
+      <div className="rounded-2xl border border-sky-200 bg-sky-50 p-3 text-sm font-bold text-sky-800">
+        Hệ thống đang hoạt động ở Chế độ Phân tích Thị giác Cục bộ (Local Computer Vision Engine - Miễn phí & An toàn).
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm font-bold text-emerald-800">
+      Đang sử dụng Chế độ Phân tích Thị giác Cục bộ (Local Computer Vision Engine - 0đ chi phí).
+    </div>
+  );
+}
+
 function AnalysisResult({ analysis }: { analysis: RoomAnalysis }) {
   return (
     <div className="space-y-4">
-      {analysis.provider === "local_fallback" && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm font-bold text-amber-800">
-          Gemini đang tạm thời quá tải. Hệ thống đang sử dụng phân tích cơ bản tạm thời để bạn có thể tiếp tục.
+      {analysis.provider === "cloudflare" && (
+        <div className="rounded-2xl border border-clay/20 bg-gradient-to-r from-clay/10 via-amber-50 to-ivory p-3 text-sm font-bold text-ink flex items-center justify-between">
+          <span>✨ Phân tích Không gian AI: Cloudflare Llama 3.2 Vision kết hợp Local CV</span>
+          <span className="text-xs font-semibold text-charcoal/60">Độ tin cậy: {Math.round(Number(analysis.confidence || 0.9) * 100)}%</span>
         </div>
       )}
+      {renderFallbackBanner(analysis)}
       <div className="grid gap-3 sm:grid-cols-2">
-        <StatusTile label="Loại phòng" value={displayRoomType(analysis.room_type) || "-"} />
+        <StatusTile label="Loại phòng" value={displayRoomType(analysis.room_type) || analysis.room_type || "-"} />
         <StatusTile label="Ánh sáng" value={analysis.lighting ? `${analysis.lighting.type} · ${analysis.lighting.level}` : "-"} />
       </div>
       <div className="rounded-2xl bg-ivory p-4">
@@ -289,7 +343,7 @@ function AnalysisResult({ analysis }: { analysis: RoomAnalysis }) {
           {analysis.dominant_colors.length > 0 ? analysis.dominant_colors.map((color, index) => (
             <span key={`${index}-${color.name}-${color.hex || ""}`} className="inline-flex items-center gap-2 rounded-full border border-ink/10 bg-white px-3 py-1 text-sm font-bold">
               <span className="h-5 w-5 rounded-full border border-ink/10" style={{ backgroundColor: color.hex || "#ffffff" }} />
-              {displayColor(color.name)} {color.percentage ? `${color.percentage}%` : ""}
+              {displayColor(color.name) || color.name} {color.percentage ? `${color.percentage}%` : ""}
             </span>
           )) : <span className="text-sm text-charcoal/50">-</span>}
         </div>

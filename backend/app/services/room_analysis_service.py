@@ -107,9 +107,11 @@ class RoomAnalysisService:
         provider = self.vision_provider
         if provider is None:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Vision provider dependency is missing")
+        if isinstance(provider, LocalFallbackProvider) and not provider.room_type and project.room_type:
+            provider.room_type = project.room_type
 
         quota_service = AIQuotaService(self.db)
-        is_cloud = provider.provider_name in ("gemini", "openai")
+        is_cloud = provider.provider_name in ("gemini", "openai", "cloudflare")
         reservation = None
 
         with quota_service.project_lock(project.id):
@@ -250,7 +252,15 @@ class RoomAnalysisService:
                 )
 
             # Auto-fallback to local Pillow Vision for unavailable or quota errors (KHÔNG retry tự động khi timeout không rõ kết quả)
-            if not is_timeout and exc.code in ("GEMINI_PROVIDER_UNAVAILABLE", "GEMINI_PROVIDER_QUOTA_ERROR"):
+            if not is_timeout and exc.code in (
+                "GEMINI_PROVIDER_UNAVAILABLE",
+                "GEMINI_PROVIDER_QUOTA_ERROR",
+                "CLOUDFLARE_VISION_UNAVAILABLE",
+                "CLOUDFLARE_VISION_QUOTA_ERROR",
+                "CLOUDFLARE_VISION_AGREEMENT_REQUIRED",
+                "CLOUDFLARE_VISION_API_ERROR",
+                "CLOUDFLARE_VISION_REQUEST_FAILED",
+            ):
                 fallback = self._try_local_fallback(current_user, project, analysis, latency_ms, reason=exc.code)
                 if fallback is not None:
                     self.db.commit()
@@ -292,18 +302,18 @@ class RoomAnalysisService:
         project: RoomProject,
         analysis: RoomAnalysis,
         latency_ms: int,
-        reason: str = "GEMINI_PROVIDER_UNAVAILABLE",
+        reason: str = "LOCAL_MODE",
     ) -> RoomAnalysis | None:
         try:
             image_path = RoomImageStorageService().resolve(project.room_image_path)
-            fallback_provider = LocalFallbackProvider(room_type=project.room_type)
+            fallback_provider = LocalFallbackProvider(room_type=project.room_type, fallback_reason=reason)
             provider_result = fallback_provider.analyze_room(image_path, project.image_content_type)
             result = RoomAnalysisResult.model_validate(provider_result.result)
 
-            # Hiển thị rõ ràng cho người dùng biết kết quả offline
-            result.layout_summary = (
-                f"[Chế độ Offline - {reason}] Phân tích phòng cục bộ bằng Pillow Engine. Không sử dụng AI Cloud."
-            )
+            if reason and reason != "LOCAL_MODE":
+                prefix = f"[Chế độ Offline - {reason}] "
+                if not result.layout_summary.startswith(prefix):
+                    result.layout_summary = f"{prefix}{result.layout_summary}"
 
             raw_response = dict(provider_result.raw_response or {})
             raw_response["reason"] = reason

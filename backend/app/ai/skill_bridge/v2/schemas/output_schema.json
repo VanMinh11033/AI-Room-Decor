@@ -1,0 +1,124 @@
+{
+  "type": "object",
+  "properties": {
+    "generated_design_image": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "selected_product_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 2000
+      },
+      "uniqueItems": true
+    },
+    "layout_description": {
+      "type": "string"
+    },
+    "architecture_validation": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "pass",
+            "fail",
+            "unknown"
+          ]
+        },
+        "evidence": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "status",
+        "evidence"
+      ],
+      "additionalProperties": false
+    },
+    "catalog_fidelity_validation": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "status": {
+            "enum": [
+              "pass",
+              "fail",
+              "unknown"
+            ]
+          },
+          "evidence": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "product_id",
+          "status",
+          "evidence"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "quality_score": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 100
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "generation_status": {
+      "enum": [
+        "succeeded",
+        "needs_review",
+        "failed"
+      ]
+    },
+    "provider": {
+      "type": "string"
+    },
+    "model": {
+      "type": "string"
+    },
+    "attempts": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "provenance": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "generated_design_image",
+    "selected_product_ids",
+    "layout_description",
+    "architecture_validation",
+    "catalog_fidelity_validation",
+    "quality_score",
+    "warnings",
+    "generation_status",
+    "provider",
+    "model",
+    "attempts",
+    "provenance"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

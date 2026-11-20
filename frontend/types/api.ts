@@ -73,6 +73,8 @@ export type Product = {
   styles: CatalogItem[];
   room_types: CatalogItem[];
   colors: Color[];
+  is_reference_ready?: boolean;
+  is_composite_ready?: boolean;
 };
 
 export type Paginated<T> = {
@@ -183,6 +185,7 @@ export type RoomAnalysis = {
   confidence?: string | null;
   error_code?: string | null;
   error_message?: string | null;
+  raw_response?: Record<string, any> | null;
   completed_at?: string | null;
   created_at: string;
   updated_at: string;
@@ -199,6 +202,8 @@ export type RoomPreference = {
   notes?: string | null;
   styles: CatalogItem[];
   colors: Color[];
+  is_reference_ready?: boolean;
+  is_composite_ready?: boolean;
   materials: CatalogItem[];
   categories: Category[];
   created_at: string;
@@ -210,6 +215,10 @@ export type ProductRecommendation = {
   score: number;
   reasons: string[];
   breakdown: Record<string, number>;
+  role?: "ANCHOR" | "FUNCTIONAL" | "ACCENT" | string | null;
+  boost?: number;
+  penalty?: number;
+  provenance?: Record<string, string>;
 };
 
 export type RecommendationResponse = {
@@ -218,6 +227,30 @@ export type RecommendationResponse = {
   preference: RoomPreference;
   total: number;
   items: ProductRecommendation[];
+  bundle?: {
+    product_ids: number[];
+    product_names: string[];
+    total_price: number;
+    total_score: number;
+    remaining_budget?: number | null;
+    is_budget_compliant: boolean;
+    bundle_explanation: string;
+    roles?: string[];
+  } | null;
+  effective_preference?: {
+    styles: string[];
+    colors: string[];
+    materials: string[];
+    categories: string[];
+    budget_min?: number | null;
+    budget_max?: number | null;
+    currency: string;
+    purpose?: string | null;
+    notes?: string | null;
+    room_type: string;
+    provenance: Record<string, string>;
+  } | null;
+  recommendation_version?: string;
 };
 
 export type DesignGeneration = {
@@ -235,6 +268,14 @@ export type DesignGeneration = {
   error_message?: string | null;
   latency_ms?: number | null;
   completed_at?: string | null;
+  generation_mode?: "CATALOG_ACCURATE" | "AI_PHOTOREALISTIC_PREVIEW" | string;
+  is_ai_preview?: boolean;
+  verification_status?: "VERIFIED" | "NEEDS_REVIEW" | "REJECTED" | "COMPOSITE_FALLBACK" | string;
+  verification_details?: Record<string, any>;
+  quality_score?: number | null;
+  warnings?: string[];
+  selection_mode?: "AUTO" | "MANUAL" | string | null;
+  total_price?: number | null;
   products: Product[];
   created_at: string;
   updated_at: string;

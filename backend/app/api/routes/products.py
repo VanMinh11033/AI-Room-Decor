@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, Upload
 from sqlalchemy import or_
 from sqlalchemy.orm import Session, joinedload
 
-from app.api.deps import require_admin
+from app.api.deps import get_current_user, require_admin
 from app.core.database import get_db
-from app.models.entities import Category, Color, Material, Product, ProductImage, ProductStatus, RoomType, Style, User
+from app.models.entities import Category, Color, Favorite, Material, Product, ProductImage, ProductStatus, RoomType, Style, User
 from app.schemas.common import MessageResponse
 from app.schemas.product import ProductCreate, ProductListResponse, ProductRead, ProductUpdate
 from app.services.storage_service import ProductImageStorageService
@@ -269,3 +269,42 @@ def upload_product_image(
     )
     db.commit()
     return get_product_or_404(db, product.id)
+
+
+@router.get("/favorites", response_model=list[int])
+def get_user_favorites(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    favs = db.query(Favorite.product_id).filter(Favorite.user_id == current_user.id).all()
+    return [f[0] for f in favs]
+
+
+@router.post("/favorites/{product_id}")
+def add_user_favorite(
+    product_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    prod = db.query(Product).filter(Product.id == product_id, Product.is_active == True).first()
+    if not prod:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Product not found")
+    existing = db.query(Favorite).filter(Favorite.user_id == current_user.id, Favorite.product_id == product_id).first()
+    if not existing:
+        db.add(Favorite(user_id=current_user.id, product_id=product_id))
+        db.commit()
+    return {"status": "added", "product_id": product_id}
+
+
+@router.delete("/favorites/{product_id}")
+def remove_user_favorite(
+    product_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    existing = db.query(Favorite).filter(Favorite.user_id == current_user.id, Favorite.product_id == product_id).first()
+    if existing:
+        db.delete(existing)
+        db.commit()
+    return {"status": "removed", "product_id": product_id}
+

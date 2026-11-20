@@ -1,5 +1,6 @@
 import enum
 from datetime import datetime
+from pathlib import Path
 
 from sqlalchemy import Boolean, Column, DateTime, Enum, ForeignKey, Index, Integer, JSON, Numeric, String, Table, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -244,6 +245,26 @@ class Product(Base, TimestampMixin):
     room_types: Mapped[list[RoomType]] = relationship(secondary=product_room_types, back_populates="products")
     colors: Mapped[list[Color]] = relationship(secondary=product_colors, back_populates="products")
 
+    @property
+    def is_reference_ready(self) -> bool:
+        project_root = Path(__file__).resolve().parents[3]
+        clean_dir = project_root / "storage" / "product_references_clean"
+        p_slug = self.slug or ""
+        if (clean_dir / f"{self.id}_{p_slug}.jpg").is_file() or (clean_dir / f"{self.id}_{p_slug}.png").is_file():
+            return True
+        if self.id in {1, 6, 9, 16, 19, 21, 28}:
+            verified_dir = project_root / "storage" / "verified_catalog_cutouts"
+            if (verified_dir / f"{self.id}_{p_slug}.png").is_file():
+                return True
+        return False
+
+    @property
+    def is_composite_ready(self) -> bool:
+        project_root = Path(__file__).resolve().parents[3]
+        verified_dir = project_root / "storage" / "verified_catalog_cutouts"
+        p_slug = self.slug or ""
+        return self.id in {1, 6, 9, 16, 19, 21, 28} and (verified_dir / f"{self.id}_{p_slug}.png").is_file()
+
 
 class ProductImage(Base, TimestampMixin):
     __tablename__ = "product_images"
@@ -381,6 +402,87 @@ class RoomDesignGeneration(Base, TimestampMixin):
     room_project: Mapped[RoomProject] = relationship(back_populates="design_generations")
     user: Mapped[User] = relationship()
     products: Mapped[list[Product]] = relationship(secondary=room_design_generation_products)
+
+    @property
+    def generation_mode(self) -> str:
+        prompt_text = self.prompt or ""
+        if "[MODE: AI_PHOTOREALISTIC_PREVIEW]" in prompt_text:
+            return "AI_PHOTOREALISTIC_PREVIEW"
+        if "[MODE: CATALOG_ACCURATE]" in prompt_text:
+            return "CATALOG_ACCURATE"
+        if self.provider in ("gemini", "cloudflare", "openai", "qwencloud", "gemini_manual_import"):
+            return "AI_PHOTOREALISTIC_PREVIEW"
+        return "CATALOG_ACCURATE"
+
+    @property
+    def is_ai_preview(self) -> bool:
+        return self.generation_mode == "AI_PHOTOREALISTIC_PREVIEW"
+
+    @property
+    def verification_status(self) -> str:
+        prompt_text = self.prompt or ""
+        # 1. Fallback & Rejected always take precedence
+        if "[STATUS: COMPOSITE_FALLBACK]" in prompt_text:
+            return "COMPOSITE_FALLBACK"
+        if "[STATUS: REJECTED]" in prompt_text:
+            return "REJECTED"
+        if "[STATUS: FAILED]" in prompt_text:
+            return "FAILED"
+        # 2. Strict Constraint: AI Preview can NEVER be marked VERIFIED
+        if self.is_ai_preview:
+            return "NEEDS_REVIEW"
+        # 3. Composite engine catalog accurate mode
+        if "[STATUS: VERIFIED]" in prompt_text or self.provider == "composite":
+            return "VERIFIED"
+        return "VERIFIED"
+
+    @property
+    def verification_details(self) -> dict:
+        is_manual = self.provider == "gemini_manual_import" or "GEMINI_WEB_APP_MANUAL" in (self.prompt or "")
+        is_exact = not self.is_ai_preview and self.verification_status == "VERIFIED"
+        source_label = "Ảnh phối cảnh tạo bằng ứng dụng Gemini — nhập thủ công" if is_manual else (
+            "Bản xem trước AI · Trạng thái: NEEDS_REVIEW" if self.is_ai_preview else (
+                "Thiết kế Chuẩn Catalog 100% · Trạng thái: VERIFIED" if is_exact else "Bản ghép xem trước Offline – Không phải ảnh AI Photorealistic"
+            )
+        )
+        details = {
+            "mode": self.generation_mode,
+            "status": self.verification_status,
+            "provider": self.provider,
+            "is_catalog_exact": is_exact,
+            "is_photorealistic": bool(self.is_ai_preview),
+            "source_type": "GEMINI_WEB_APP_MANUAL" if is_manual else ("API" if self.is_ai_preview else "COMPOSITE"),
+            "source_label": source_label,
+            "api_used": False if (is_manual or self.provider == "composite") else True,
+            "referenced_product_ids": [p.id for p in self.products] if getattr(self, "products", None) else [],
+            "verified_product_ids": [p.id for p in self.products] if (getattr(self, "products", None) and is_exact) else [],
+        }
+        try:
+            from app.ai.skill_bridge import parse_skill_metadata
+            _, meta = parse_skill_metadata(self.prompt)
+            if meta is not None:
+                details.update({
+                    "skill_version": meta.version,
+                    "quality_score": meta.quality_score,
+                    "component_scores": meta.component_scores,
+                    "referenced_product_ids": meta.referenced_product_ids or details["referenced_product_ids"],
+                    "verified_product_ids": meta.verified_product_ids,
+                    "hard_gates_passed": meta.hard_gates_passed,
+                    "neuron_estimate": meta.neuron_estimate,
+                    "warnings": meta.warnings,
+                    "provenance": meta.provenance,
+                })
+        except Exception:
+            pass
+        return details
+
+    @property
+    def quality_score(self) -> float | None:
+        return self.verification_details.get("quality_score")
+
+    @property
+    def warnings(self) -> list[str]:
+        return self.verification_details.get("warnings") or []
 
 
 class Cart(Base, TimestampMixin):

@@ -1,0 +1,488 @@
+{
+  "generated_at": "2026-11-16T22:45:00Z",
+  "total_references": 30,
+  "cloudflare_ready_count": 30,
+  "composite_ready_count": 7,
+  "products": [
+    {
+      "product_id": 1,
+      "product_name": "Japandi Low Sofa",
+      "product_slug": "japandi-low-sofa",
+      "category": "Sofa",
+      "reference_path": "storage/product_references_clean/1_japandi-low-sofa.jpg",
+      "dimensions": [
+        512,
+        201
+      ],
+      "format": "JPEG",
+      "source_used": "storage/verified_catalog_cutouts/1_japandi-low-sofa.png",
+      "processing_method": "authentic_cutout_composited_on_white",
+      "cloudflare_suitability": "VALID_FOR_CLOUDFLARE_REFERENCE",
+      "composite_suitability": "VALID_FOR_2D_COMPOSITE"
+    },
+    {
+      "product_id": 2,
+      "product_name": "Modern Modular Sofa",
+      "product_slug": "modern-modular-sofa",
+      "category": "Sofa",
+      "reference_path": "storage/product_references_clean/2_modern-modular-sofa.jpg",
+      "dimensions": [
+        447,
+        447
+      ],
+      "format": "JPEG",
+      "source_used": "storage/products/90759221812d48fa9205c96270b7105e.jpg",
+      "processing_method": "authentic_catalog_photo_resampled_512",
+      "cloudflare_suitability": "VALID_FOR_CLOUDFLARE_REFERENCE",
+      "composite_suitability": "NEEDS_IMAGE_PREPARATION"
+    },
+    {
+      "product_id": 3,
+      "product_name": "Scandinavian Lounge Chair",
+      "product_slug": "scandinavian-lounge-chair",
+      "category": "Chair",
+      "reference_path": "storage/product_references_clean/3_scandinavian-lounge-chair.jpg",
+      "dimensions": [
+        332,
+        321
+      ],
+      "format": "JPEG",
+      "source_used": "storage/products/3fd1d991eafb4b438c908cac65150d41.jpg",
+      "processing_method": "scandinavian_chair_cropped_from_lifestyle_scene",
+      "cloudflare_suitability": "VALID_FOR_CLOUDFLARE_REFERENCE",
+      "composite_suitability": "NEEDS_IMAGE_PREPARATION"
+    },
+    {
+      "product_id": 4,
+      "product_name": "Industrial Bar Chair",
+      "product_slug": "industrial-bar-chair",
+      "category": "Chair",
+      "reference_path": "storage/product_references_clean/4_industrial-bar-chair.jpg",
+      "dimensions": [
+        504,
+        512
+      ],
+      "format": "JPEG",
+      "source_used": "storage/products/833b1a13631446138a1a6882f4d96a7c.jpg",
+      "processing_method": "authentic_catalog_photo_resampled_512",
+      "cloudflare_suitability": "VALID_FOR_CLOUDFLARE_REFERENCE",
+      "composite_suitability": "NEEDS_IMAGE_PREPARATION"
+    },
+    {
+      "product_id": 5,
+      "product_name": "Oak Coffee Table",
+      "product_slug": "oak-coffee-table",
+      "category": "Table",
+      "reference_path": "storage/product_references_clean/5_oak-coffee-table.jpg",
+      "dimensions": [
+        512,
+        512
+      ],
+      "format": "JPEG",
+      "source_used": "storage/products/4b91d2b4dd524c5eb62a5f0ec5aa2296.jpg",
+      "processing_method": "authentic_catalog_photo_resampled_512",
+      "cloudflare_suitability": "VALID_FOR_CLOUDFLARE_REFERENCE",
+      "composite_suitability": "NEEDS_HUMAN_REVIEW"
+    },
+    {
+      "product_id": 6,
+      "product_name": "Glass Side Table",
+      "product_slug": "glass-side-table",
+      "category": "Table",
+      "reference_path": "storage/product_references_clean/6_glass-side-table.jpg",
+      "dimensions": [
+        444,
+        512
+      ],
+      "format": "JPEG",
+      "source_used": "storage/verified_catalog_cutouts/6_glass-side-table.png",
+      "processing_method": "authentic_cutout_composited_on_white",
+      "cloudflare_suitability": "VALID_FOR_CLOUDFLARE_REFERENCE",
+      "composite_suitability": "VALID_FOR_2D_COMPOSITE"
+    },
+    {
+      "product_id": 7,
+      "product_name": "Rattan Bedside Table",
+      "product_slug": "rattan-bedside-table",
+      "category": "Table",
+      "reference_path": "storage/product_references_clean/7_rattan-bedside-table.jpg",
+      "dimensions": [
+        447,
+        447
+      ],
+      "format": "JPEG",
+      "source_used": "storage/products/020b6e6042184578b905fdcee201ec72.jpg",
+      "processing_method": "authentic_catalog_photo_resampled_512",
+      "cloudflare_suitability": "VALID_FOR_CLOUDFLARE_REFERENCE",
+      "composite_suitability": "NEEDS_HUMAN_REVIEW"
+    },
+    {
+      "product_id": 8,
+      "product_name": "Minimal Desk",
+      "product_slug": "minimal-desk",
+      "category": "Table",
+      "reference_path": "storage/product_references_clean/8_minimal-desk.jpg",
+      "dimensions": [
+        512,
+        512
+      ],
+      "format": "JPEG",
+      "source_used": "storage/products/bdec983877d34e38bd7fccbb86d8a54a.jpg",
+      "processing_method": "authentic_catalog_photo_resampled_512",
+      "cloudflare_suitability": "VALID_FOR_CLOUDFLARE_REFERENCE",
+      "composite_suitability": "NEEDS_IMAGE_PREPARATION"
+    },
+    {
+      "product_id": 9,
+      "product_name": "Brass Floor Lamp",
+      "product_slug": "brass-floor-lamp",
+      "category": "Lighting",
+      "reference_path": "storage/product_references_clean/9_brass-floor-lamp.jpg",
+      "dimensions": [
+        133,
+        401
+      ],
+      "format": "JPEG",
+      "source_used": "storage/verified_catalog_cutouts/9_brass-floor-lamp.png",
+      "processing_method": "authentic_cutout_composited_on_white",
+      "cloudflare_suitability": "VALID_FOR_CLOUDFLARE_REFERENCE",
+      "composite_suitability": "VALID_FOR_2D_COMPOSITE"
+    },
+    {
+      "product_id": 10,
+      "product_name": "Bamboo Pendant Light",
+      "product_slug": "bamboo-pendant-light",
+      "category": "Lighting",
+      "reference_path": "storage/product_references_clean/10_bamboo-pendant-light.jpg",
+      "dimensions": [
+        426,
+        512
+      ],
+      "format": "JPEG",
+      "source_used": "storage/products/f69db6ebc6a04d3f89405015e5fa6ef9.jpg",
+      "processing_method": "authentic_catalog_photo_resampled_512",
+      "cloudflare_suitability": "VALID_FOR_CLOUDFLARE_REFERENCE",
+      "composite_suitability": "NEEDS_IMAGE_PREPARATION"
+    },
+    {
+      "product_id": 11,
+      "product_name": "Black Desk Lamp",
+      "product_slug": "black-desk-lamp",
+      "category": "Lighting",
+      "reference_path": "storage/product_references_clean/11_black-desk-lamp.jpg",
+      "dimensions": [
+        512,
+        512
+      ],
+      "format": "JPEG",
+      "source_used": "storage/products/0e874d16293a4686a03a17f7ee81db86.jpg",
+      "processing_method": "authentic_catalog_photo_resampled_512",
+      "cloudflare_suitability": "VALID_FOR_CLOUDFLARE_REFERENCE",
+      "composite_suitability": "NEEDS_IMAGE_PREPARATION"
+    },
+    {
+      "product_id": 12,
+      "product_name": "Woven Jute Rug",
+      "product_slug": "woven-jute-rug",
+      "category": "Rug",
+      "reference_path": "storage/product_references_clean/12_woven-jute-rug.jpg",
+      "dimensions": [
+        483,
+        512
+      ],
+      "format": "JPEG",
+      "source_used": "storage/products/34a3482898df467a8ded1bcd191d6355.jpg",
+      "processing_method": "authentic_catalog_photo_resampled_512",
+      "cloudflare_suitability": "VALID_FOR_CLOUDFLARE_REFERENCE",
+      "composite_suitability": "NEEDS_HUMAN_REVIEW"
+    },
+    {
+      "product_id": 13,
+      "product_name": "Geometric Gray Rug",
+      "product_slug": "geometric-gray-rug",
+      "category": "Rug",
+      "reference_path": "storage/product_references_clean/13_geometric-gray-rug.jpg",
+      "dimensions": [
+        512,
+        512
+      ],
+      "format": "JPEG",
+      "source_used": "storage/products/ec533509c09542ac8769109bf765a1df.jpg",
+      "processing_method": "authentic_catalog_photo_resampled_512",
+      "cloudflare_suitability": "VALID_FOR_CLOUDFLARE_REFERENCE",
+      "composite_suitability": "NEEDS_IMAGE_PREPARATION"
+    },
+    {
+      "product_id": 14,
+      "product_name": "Vintage Persian Rug",
+      "product_slug": "vintage-persian-rug",
+      "category": "Rug",
+      "reference_path": "storage/product_references_clean/14_vintage-persian-rug.jpg",
+      "dimensions": [
+        384,
+        512
+      ],
+      "format": "JPEG",
+      "source_used": "storage/products/f11eed4aefa647c6bf55bf1823adcbd3.webp",
+      "processing_method": "authentic_catalog_photo_resampled_512",
+      "cloudflare_suitability": "VALID_FOR_CLOUDFLARE_REFERENCE",
+      "composite_suitability": "NEEDS_IMAGE_PREPARATION"
+    },
+    {
+      "product_id": 15,
+      "product_name": "Abstract Wall Art",
+      "product_slug": "abstract-wall-art",
+      "category": "Wall Decor",
+      "reference_path": "storage/product_references_clean/15_abstract-wall-art.jpg",
+      "dimensions": [
+        214,
+        282
+      ],
+      "format": "JPEG",
+      "source_used": "storage/products/15c5da8330b24ebeaae95cfb3a748973.jpg",
+      "processing_method": "canvas_artwork_cropped_from_lifestyle_scene",
+      "cloudflare_suitability": "VALID_FOR_CLOUDFLARE_REFERENCE",
+      "composite_suitability": "NEEDS_HUMAN_REVIEW"
+    },
+    {
+      "product_id": 16,
+      "product_name": "Rattan Wall Mirror",
+      "product_slug": "rattan-wall-mirror",
+      "category": "Wall Decor",
+      "reference_path": "storage/product_references_clean/16_rattan-wall-mirror.jpg",
+      "dimensions": [
+        313,
+        512
+      ],
+      "format": "JPEG",
+      "source_used": "storage/verified_catalog_cutouts/16_rattan-wall-mirror.png",
+      "processing_method": "authentic_cutout_composited_on_white",
+      "cloudflare_suitability": "VALID_FOR_CLOUDFLARE_REFERENCE",
+      "composite_suitability": "VALID_FOR_2D_COMPOSITE"
+    },
+    {
+      "product_id": 17,
+      "product_name": "Walnut Bookshelf",
+      "product_slug": "walnut-bookshelf",
+      "category": "Storage",
+      "reference_path": "storage/product_references_clean/17_walnut-bookshelf.jpg",
+      "dimensions": [
+        512,
+        512
+      ],
+      "format": "JPEG",
+      "source_used": "storage/products/98c70a9b5b854a08b4bc30a4b76ab463.jpg",
+      "processing_method": "authentic_catalog_photo_resampled_512",
+      "cloudflare_suitability": "VALID_FOR_CLOUDFLARE_REFERENCE",
+      "composite_suitability": "NEEDS_IMAGE_PREPARATION"
+    },
+    {
+      "product_id": 18,
+      "product_name": "White Storage Cabinet",
+      "product_slug": "white-storage-cabinet",
+      "category": "Storage",
+      "reference_path": "storage/product_references_clean/18_white-storage-cabinet.jpg",
+      "dimensions": [
+        446,
+        512
+      ],
+      "format": "JPEG",
+      "source_used": "storage/products/edf1efbb906943f4a29df6d8cfc6ee56.jpg",
+      "processing_method": "authentic_catalog_photo_resampled_512",
+      "cloudflare_suitability": "VALID_FOR_CLOUDFLARE_REFERENCE",
+      "composite_suitability": "NEEDS_IMAGE_PREPARATION"
+    },
+    {
+      "product_id": 19,
+      "product_name": "Stone Decor Tray",
+      "product_slug": "stone-decor-tray",
+      "category": "Accessories",
+      "reference_path": "storage/product_references_clean/19_stone-decor-tray.jpg",
+      "dimensions": [
+        512,
+        300
+      ],
+      "format": "JPEG",
+      "source_used": "storage/verified_catalog_cutouts/19_stone-decor-tray.png",
+      "processing_method": "authentic_cutout_composited_on_white",
+      "cloudflare_suitability": "VALID_FOR_CLOUDFLARE_REFERENCE",
+      "composite_suitability": "VALID_FOR_2D_COMPOSITE"
+    },
+    {
+      "product_id": 20,
+      "product_name": "Ceramic Plant Pot",
+      "product_slug": "ceramic-plant-pot",
+      "category": "Plant Decor",
+      "reference_path": "storage/product_references_clean/20_ceramic-plant-pot.jpg",
+      "dimensions": [
+        350,
+        350
+      ],
+      "format": "JPEG",
+      "source_used": "storage/products/0ffd1c3214bf4fb49baef602845579b7.jpg",
+      "processing_method": "authentic_catalog_photo_resampled_512",
+      "cloudflare_suitability": "VALID_FOR_CLOUDFLARE_REFERENCE",
+      "composite_suitability": "NEEDS_IMAGE_PREPARATION"
+    },
+    {
+      "product_id": 21,
+      "product_name": "Tall Faux Plant",
+      "product_slug": "tall-faux-plant",
+      "category": "Plant Decor",
+      "reference_path": "storage/product_references_clean/21_tall-faux-plant.jpg",
+      "dimensions": [
+        427,
+        512
+      ],
+      "format": "JPEG",
+      "source_used": "storage/verified_catalog_cutouts/21_tall-faux-plant.png",
+      "processing_method": "authentic_cutout_composited_on_white",
+      "cloudflare_suitability": "VALID_FOR_CLOUDFLARE_REFERENCE",
+      "composite_suitability": "VALID_FOR_2D_COMPOSITE"
+    },
+    {
+      "product_id": 22,
+      "product_name": "Linen Bedding Set",
+      "product_slug": "linen-bedding-set",
+      "category": "Bedding",
+      "reference_path": "storage/product_references_clean/22_linen-bedding-set.jpg",
+      "dimensions": [
+        425,
+        470
+      ],
+      "format": "JPEG",
+      "source_used": "storage/products/ea114719401f4e4ea4758afb2205ccb4.jpg",
+      "processing_method": "authentic_catalog_photo_resampled_512",
+      "cloudflare_suitability": "VALID_FOR_CLOUDFLARE_REFERENCE",
+      "composite_suitability": "NEEDS_IMAGE_PREPARATION"
+    },
+    {
+      "product_id": 23,
+      "product_name": "Luxury Velvet Cushion",
+      "product_slug": "luxury-velvet-cushion",
+      "category": "Accessories",
+      "reference_path": "storage/product_references_clean/23_luxury-velvet-cushion.jpg",
+      "dimensions": [
+        384,
+        512
+      ],
+      "format": "JPEG",
+      "source_used": "storage/products/16ff1741bf504a73a12b5d2601e4aab1.jpg",
+      "processing_method": "authentic_catalog_photo_resampled_512",
+      "cloudflare_suitability": "VALID_FOR_CLOUDFLARE_REFERENCE",
+      "composite_suitability": "NEEDS_IMAGE_PREPARATION"
+    },
+    {
+      "product_id": 24,
+      "product_name": "Industrial Wall Shelf",
+      "product_slug": "industrial-wall-shelf",
+      "category": "Storage",
+      "reference_path": "storage/product_references_clean/24_industrial-wall-shelf.jpg",
+      "dimensions": [
+        386,
+        512
+      ],
+      "format": "JPEG",
+      "source_used": "storage/products/600ba4e97b8342fc9ae76cb1928d6d9f.jpg",
+      "processing_method": "authentic_catalog_photo_resampled_512",
+      "cloudflare_suitability": "VALID_FOR_CLOUDFLARE_REFERENCE",
+      "composite_suitability": "NEEDS_IMAGE_PREPARATION"
+    },
+    {
+      "product_id": 25,
+      "product_name": "Round Dining Table",
+      "product_slug": "round-dining-table",
+      "category": "Table",
+      "reference_path": "storage/product_references_clean/25_round-dining-table.jpg",
+      "dimensions": [
+        512,
+        512
+      ],
+      "format": "JPEG",
+      "source_used": "storage/products/78d6e5de82c34506a8f94faed25fa326.webp",
+      "processing_method": "authentic_catalog_photo_resampled_512",
+      "cloudflare_suitability": "VALID_FOR_CLOUDFLARE_REFERENCE",
+      "composite_suitability": "NEEDS_IMAGE_PREPARATION"
+    },
+    {
+      "product_id": 26,
+      "product_name": "Modern Dining Chair",
+      "product_slug": "modern-dining-chair",
+      "category": "Chair",
+      "reference_path": "storage/product_references_clean/26_modern-dining-chair.jpg",
+      "dimensions": [
+        384,
+        512
+      ],
+      "format": "JPEG",
+      "source_used": "storage/products/82136cb1cd554d57bcd51b281b3034c4.jpg",
+      "processing_method": "authentic_catalog_photo_resampled_512",
+      "cloudflare_suitability": "VALID_FOR_CLOUDFLARE_REFERENCE",
+      "composite_suitability": "NEEDS_IMAGE_PREPARATION"
+    },
+    {
+      "product_id": 27,
+      "product_name": "Japandi Floor Cushion",
+      "product_slug": "japandi-floor-cushion",
+      "category": "Accessories",
+      "reference_path": "storage/product_references_clean/27_japandi-floor-cushion.jpg",
+      "dimensions": [
+        512,
+        512
+      ],
+      "format": "JPEG",
+      "source_used": "storage/products/29ae222b2ac24e90892a84f2290ef635.jpg",
+      "processing_method": "authentic_catalog_photo_resampled_512",
+      "cloudflare_suitability": "VALID_FOR_CLOUDFLARE_REFERENCE",
+      "composite_suitability": "NEEDS_IMAGE_PREPARATION"
+    },
+    {
+      "product_id": 28,
+      "product_name": "Bamboo Room Divider",
+      "product_slug": "bamboo-room-divider",
+      "category": "Accessories",
+      "reference_path": "storage/product_references_clean/28_bamboo-room-divider.jpg",
+      "dimensions": [
+        512,
+        512
+      ],
+      "format": "JPEG",
+      "source_used": "storage/verified_catalog_cutouts/28_bamboo-room-divider.png",
+      "processing_method": "authentic_cutout_composited_on_white",
+      "cloudflare_suitability": "VALID_FOR_CLOUDFLARE_REFERENCE",
+      "composite_suitability": "VALID_FOR_2D_COMPOSITE"
+    },
+    {
+      "product_id": 29,
+      "product_name": "Minimal White Wardrobe",
+      "product_slug": "minimal-white-wardrobe",
+      "category": "Storage",
+      "reference_path": "storage/product_references_clean/29_minimal-white-wardrobe.jpg",
+      "dimensions": [
+        351,
+        351
+      ],
+      "format": "JPEG",
+      "source_used": "storage/products/8339cf8ea5394e43b3a58ee4c6146b54.webp",
+      "processing_method": "authentic_catalog_photo_resampled_512",
+      "cloudflare_suitability": "VALID_FOR_CLOUDFLARE_REFERENCE",
+      "composite_suitability": "NEEDS_IMAGE_PREPARATION"
+    },
+    {
+      "product_id": 30,
+      "product_name": "Glass Console Table",
+      "product_slug": "glass-console-table",
+      "category": "Table",
+      "reference_path": "storage/product_references_clean/30_glass-console-table.jpg",
+      "dimensions": [
+        512,
+        512
+      ],
+      "format": "JPEG",
+      "source_used": "storage/products/b81d5410ffd3404598bf780b961df137.jpg",
+      "processing_method": "authentic_catalog_photo_resampled_512",
+      "cloudflare_suitability": "VALID_FOR_CLOUDFLARE_REFERENCE",
+      "composite_suitability": "NEEDS_IMAGE_PREPARATION"
+    }
+  ]
+}

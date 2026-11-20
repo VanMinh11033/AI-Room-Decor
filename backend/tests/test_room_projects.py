@@ -137,6 +137,8 @@ def test_analyze_saves_structured_result_and_uses_cache(client, db_session):
 
 
 def test_ai_provider_not_configured_is_not_faked(client, db_session):
+    from app.ai.vision.factory import NotConfiguredVisionProvider
+    app.dependency_overrides[get_vision_provider] = lambda: NotConfiguredVisionProvider()
     headers = auth_headers(client)
     project = create_project(client, headers)
     assert upload_image(client, headers, project["id"]).status_code == 200

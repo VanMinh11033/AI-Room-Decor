@@ -2,11 +2,19 @@ from pathlib import Path
 from uuid import uuid4
 
 from PIL import Image
+import pytest
 
+from app.core.config import settings
 from app.models.entities import Product, ProductImage, RoomDesignGeneration
 from app.services.storage_service import ProductImageStorageService
 from test_design_generations import FakeImageProvider, add_room_image, override_image_provider
 from test_recommendations import create_product, setup_recommendation_case
+
+
+@pytest.fixture(autouse=True)
+def legacy_mode(monkeypatch):
+    monkeypatch.setattr(settings, "room_decor_skill_enabled", False)
+    monkeypatch.setattr(settings, "room_decor_v1_5_personalization_enabled", False)
 
 
 def write_product_image(storage: ProductImageStorageService, filename: str) -> Path:

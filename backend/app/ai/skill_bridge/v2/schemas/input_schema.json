@@ -1,0 +1,133 @@
+{
+  "type": "object",
+  "properties": {
+    "room_image": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]*$"
+    },
+    "room_type": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "selected_products": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "product_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "product_images": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:/-]*$"
+            },
+            "minItems": 1,
+            "maxItems": 8,
+            "uniqueItems": true
+          },
+          "product_dimensions": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "width_cm": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "depth_cm": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  },
+                  "height_cm": {
+                    "type": "number",
+                    "exclusiveMinimum": 0
+                  }
+                },
+                "required": [
+                  "width_cm",
+                  "depth_cm",
+                  "height_cm"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "product_id",
+          "product_name",
+          "product_images",
+          "product_dimensions"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "maxItems": 10
+    },
+    "design_style": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2000
+    },
+    "user_requirements": {
+      "type": "string",
+      "maxLength": 4000
+    },
+    "room_dimensions": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "width_cm": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "depth_cm": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "height_cm": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            }
+          },
+          "required": [
+            "width_cm",
+            "depth_cm",
+            "height_cm"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "room_image",
+    "room_type",
+    "selected_products",
+    "design_style",
+    "user_requirements"
+  ],
+  "additionalProperties": false,
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

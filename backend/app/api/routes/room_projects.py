@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, File, Query, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.ai.image.base import ImageProvider
@@ -6,6 +6,7 @@ from app.ai.image.factory import get_image_provider
 from app.ai.vision.base import VisionProvider
 from app.ai.vision.factory import get_vision_provider
 from app.api.deps import get_current_user
+from app.core.config import settings
 from app.core.database import get_db
 from app.core.rate_limit import design_generation_rate_limiter, room_analyze_rate_limiter, room_upload_rate_limiter
 from app.models.entities import User
@@ -139,6 +140,8 @@ def get_room_project_recommendations(
     limit: int = Query(12, ge=1, le=50),
 ):
     preference, analysis, recommendations = service.recommend_for_project(current_user, project_id, limit)
+    bundle_data = service.last_bundle.to_dict() if getattr(service, "last_bundle", None) else None
+    eff_pref_data = service.last_effective_preference.to_dict() if getattr(service, "last_effective_preference", None) else None
     return {
         "room_project_id": project_id,
         "analysis_id": analysis.id,
@@ -148,11 +151,18 @@ def get_room_project_recommendations(
             {
                 "product": item.product,
                 "score": item.score,
+                "role": getattr(item, "role", None).value if getattr(item, "role", None) else None,
+                "boost": getattr(item, "boost", 0.0),
+                "penalty": getattr(item, "penalty", 0.0),
                 "reasons": item.reasons,
                 "breakdown": item.breakdown,
+                "provenance": getattr(item, "provenance", {}),
             }
             for item in recommendations
         ],
+        "bundle": bundle_data,
+        "effective_preference": eff_pref_data,
+        "recommendation_version": getattr(settings, "room_decor_recommendation_version", "v1.5"),
     }
 
 
@@ -193,3 +203,46 @@ def get_room_project_design_generation(
     service: DesignGenerationService = Depends(get_design_generation_service),
 ):
     return service.get_generation(current_user, project_id, generation_id)
+
+
+@router.post(
+    "/{project_id}/design-generations/import-gemini",
+    response_model=DesignGenerationRead,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(design_generation_rate_limiter)],
+)
+def import_gemini_manual_design_generation(
+    project_id: int,
+    file: UploadFile = File(..., description="File ảnh thiết kế PNG hoặc JPG tải từ Gemini"),
+    product_ids: str = Form(..., description="Danh sách Product IDs tham chiếu (VD: '1,6' hoặc '[1, 6]')"),
+    notes: str | None = Form(None, description="Ghi chú tùy chọn"),
+    current_user: User = Depends(get_current_user),
+    service: DesignGenerationService = Depends(get_design_generation_service),
+):
+    import json
+    parsed_ids: list[int] = []
+    raw = (product_ids or "").strip()
+    try:
+        if raw.startswith("["):
+            parsed_ids = [int(x) for x in json.loads(raw)]
+        else:
+            parsed_ids = [int(x.strip()) for x in raw.split(",") if x.strip()]
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Định dạng product_ids không hợp lệ. Vui lòng cung cấp danh sách ID phân tách bằng dấu phẩy hoặc JSON array.",
+        )
+
+    if not parsed_ids:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cần ít nhất một mã sản phẩm (product_id) tham chiếu.",
+        )
+
+    return service.import_gemini_manual_design(
+        current_user=current_user,
+        project_id=project_id,
+        file=file,
+        product_ids=parsed_ids,
+        notes=notes,
+    )

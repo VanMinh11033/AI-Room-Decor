@@ -122,22 +122,26 @@ def setup_sample_project(client, headers, title="Quota Test Room"):
 
 
 def setup_catalog_product(db_session, name="Modern Bed", slug="modern-bed"):
-    category = db_session.query(Category).filter(Category.slug == "bedding").first()
-    if not category:
-        category = Category(name="Bedding", slug="bedding", is_active=True)
-        db_session.add(category)
-        db_session.flush()
+    existing = db_session.query(Product).filter(Product.slug == slug).first()
+    if existing:
+        product = existing
+    else:
+        category = db_session.query(Category).filter(Category.slug == "bedding").first()
+        if not category:
+            category = Category(name="Bedding", slug="bedding", is_active=True)
+            db_session.add(category)
+            db_session.flush()
 
-    product = Product(
-        name=name,
-        slug=slug,
-        category_id=category.id,
-        price=Decimal("500.00"),
-        stock_quantity=10,
-        status=ProductStatus.ACTIVE,
-    )
-    db_session.add(product)
-    db_session.flush()
+        product = Product(
+            name=name,
+            slug=slug,
+            category_id=category.id,
+            price=Decimal("500.00"),
+            stock_quantity=10,
+            status=ProductStatus.ACTIVE,
+        )
+        db_session.add(product)
+        db_session.flush()
 
     # Create an isolated catalog image on disk for composite fallback tests
     from PIL import Image, ImageDraw
@@ -152,14 +156,19 @@ def setup_catalog_product(db_session, name="Modern Bed", slug="modern-bed"):
         d.rectangle([60, 60, 140, 140], fill=(50, 100, 150))
         im.save(img_path, format="PNG")
 
-    img = ProductImage(
-        product_id=product.id,
-        image_url=f"/storage/products/{img_filename}",
-        is_primary=True,
-        sort_order=0,
-    )
-    db_session.add(img)
+    img = db_session.query(ProductImage).filter(ProductImage.product_id == product.id).first()
+    if not img:
+        img = ProductImage(
+            product_id=product.id,
+            image_url=f"/storage/products/{img_filename}",
+            is_primary=True,
+            sort_order=0,
+        )
+        db_session.add(img)
+    else:
+        img.image_url = f"/storage/products/{img_filename}"
     db_session.commit()
+    db_session.refresh(product)
     return product
 
 
@@ -168,6 +177,7 @@ def setup_catalog_product(db_session, name="Modern Bed", slug="modern-bed"):
 # -----------------------------------------------------------------------------
 
 
+@pytest.mark.skipif(not settings.enable_cloud_ai, reason="Yêu cầu ENABLE_CLOUD_AI=true để kiểm tra reservation Cloud AI")
 def test_ai_quota_service_direct_reservation_and_limits(db_session):
     """Kiểm tra trực tiếp các hàm nghiệp vụ của AIQuotaService."""
     quota_svc = AIQuotaService(db_session)
@@ -553,6 +563,7 @@ def test_design_cache_isolated_between_users(client, db_session, monkeypatch):
     assert mock_cf.calls == 2
 
 
+@pytest.mark.skipif(not settings.enable_cloud_ai, reason="Yêu cầu ENABLE_CLOUD_AI=true để kiểm tra metrics Cloud AI")
 def test_admin_ai_usage_endpoint_with_quota_metrics(client, db_session):
     """Kiểm tra API Admin /api/admin/ai-usage trả về đầy đủ các trường quota, status, fallback, và cost_disclaimer."""
     admin_headers = create_admin_token(client, db_session)
@@ -834,6 +845,7 @@ def test_timeout_suspected_quota_accounting(client, db_session, monkeypatch):
     class TimeoutCloudflareProvider(ImageProvider):
         provider_name = "cloudflare"
         model_name = "flux-1-schnell"
+        MAX_INPUT_IMAGES = 4
 
         def generate_design(self, source_image_path, prompt, reference_image_paths=None):
             from app.ai.image.base import ImageProviderError

@@ -5,6 +5,15 @@ const API_URL = rawApiUrl;
 
 export function getAccessToken() {
   if (typeof window === "undefined") return null;
+  try {
+    const urlToken = new URLSearchParams(window.location.search).get("token");
+    if (urlToken) {
+      window.localStorage.setItem("access_token", urlToken);
+      return urlToken;
+    }
+  } catch {
+    // ignore
+  }
   return window.localStorage.getItem("access_token");
 }
 

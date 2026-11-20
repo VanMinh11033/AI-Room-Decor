@@ -33,8 +33,8 @@ class AIQuotaService:
     def _advisory_lock(self, lock_name: str, timeout_seconds: int = 5):
         """
         Khóa đồng bộ đa tầng: Threading Lock cho các request trong cùng process,
-        kết hợp MySQL GET_LOCK cho multi-process / đa kết nối database.
-        Đảm bảo tính nguyên tử tuyệt đối khi kiểm tra và đặt chỗ quota.
+        kết hợp MySQL GET_LOCK trên dedicated connection để đảm bảo tính nguyên tử tuyệt đối
+        và không bao giờ bị rò rỉ khóa khi session commit/close.
         """
         is_mysql = False
         try:
@@ -52,10 +52,13 @@ class AIQuotaService:
             yield False
             return
 
+        conn = None
         mysql_acquired = False
         if is_mysql:
             try:
-                res = self.db.execute(
+                engine = self.db.get_bind()
+                conn = engine.connect()
+                res = conn.execute(
                     text("SELECT GET_LOCK(:lock_name, :timeout)"),
                     {"lock_name": safe_name, "timeout": timeout_seconds},
                 ).scalar()
@@ -70,14 +73,21 @@ class AIQuotaService:
         try:
             yield acquired
         finally:
-            if is_mysql and mysql_acquired:
+            if conn is not None:
                 try:
-                    self.db.execute(
-                        text("SELECT RELEASE_LOCK(:lock_name)"),
-                        {"lock_name": safe_name},
-                    )
+                    if mysql_acquired:
+                        conn.execute(
+                            text("SELECT RELEASE_LOCK(:lock_name)"),
+                            {"lock_name": safe_name},
+                        )
                 except Exception as exc:
                     logger.error("Error releasing MySQL lock %s: %s", safe_name, exc)
+                finally:
+                    try:
+                        conn.execute(text("SELECT RELEASE_ALL_LOCKS()"))
+                    except Exception:
+                        pass
+                    conn.close()
             if thread_acquired:
                 thread_lock.release()
 

@@ -251,6 +251,8 @@ def test_cloudflare_provider_classifies_invalid_base64_response(tmp_path):
         (400, "invalid image input", "CLOUDFLARE_IMAGE_INPUT_ERROR"),
         (401, "unauthorized token", "CLOUDFLARE_IMAGE_AUTH_ERROR"),
         (429, "rate limit exceeded", "CLOUDFLARE_IMAGE_QUOTA_ERROR"),
+        (429, '{"errors":[{"code":4006,"message":"AiError: you have used up your daily free allocation of 10,000 neurons"}],"success":false}', "CLOUDFLARE_IMAGE_DAILY_QUOTA_EXCEEDED"),
+        (429, '{"errors":[{"code":3040,"message":"AiError: Rate limit exceeded or queue full"}],"success":false}', "CLOUDFLARE_IMAGE_RATE_LIMIT_OR_BUSY"),
         (404, "model not found", "CLOUDFLARE_IMAGE_MODEL_ERROR"),
         (500, "upstream error", "CLOUDFLARE_IMAGE_SERVER_ERROR"),
     ],
@@ -563,3 +565,53 @@ def test_cloudflare_provider_does_not_retry_auth_error(tmp_path):
     assert exc_info.value.code == "CLOUDFLARE_IMAGE_AUTH_ERROR"
     assert len(client.calls) == 1
     assert slept == []
+
+
+def test_cloudflare_provider_sends_dynamic_aspect_ratio_dimensions(tmp_path):
+    encoded = base64.b64encode(JPEG_BYTES).decode("ascii")
+
+    # 1. 16:9 room image (960x538) -> should produce 1024x576
+    image_16_9 = tmp_path / "room_16_9.jpg"
+    write_image(image_16_9, size=(960, 538))
+    fake_client = FakeClient(response=response(json_body={"success": True, "result": {"image": encoded}}))
+    provider = CloudflareImageProvider(
+        account_id="account-id",
+        api_token="token",
+        model_name="@cf/black-forest-labs/flux-2-dev",
+        client_factory=lambda: fake_client,
+    )
+    provider.generate_design(image_16_9, "Decorate 16:9 room.")
+    data_16_9 = fake_client.calls[0]["data"]
+    assert data_16_9["width"] == "1024"
+    assert data_16_9["height"] == "576"
+
+    # 2. 4:3 room image (800x600) -> should produce 1024x768
+    image_4_3 = tmp_path / "room_4_3.jpg"
+    write_image(image_4_3, size=(800, 600))
+    fake_client_4_3 = FakeClient(response=response(json_body={"success": True, "result": {"image": encoded}}))
+    provider_4_3 = CloudflareImageProvider(
+        account_id="account-id",
+        api_token="token",
+        model_name="@cf/black-forest-labs/flux-2-dev",
+        client_factory=lambda: fake_client_4_3,
+    )
+    provider_4_3.generate_design(image_4_3, "Decorate 4:3 room.")
+    data_4_3 = fake_client_4_3.calls[0]["data"]
+    assert data_4_3["width"] == "1024"
+    assert data_4_3["height"] == "768"
+
+    # 3. Portrait 3:4 room image (600x800) -> should produce 768x1024
+    image_3_4 = tmp_path / "room_3_4.jpg"
+    write_image(image_3_4, size=(600, 800))
+    fake_client_3_4 = FakeClient(response=response(json_body={"success": True, "result": {"image": encoded}}))
+    provider_3_4 = CloudflareImageProvider(
+        account_id="account-id",
+        api_token="token",
+        model_name="@cf/black-forest-labs/flux-2-dev",
+        client_factory=lambda: fake_client_3_4,
+    )
+    provider_3_4.generate_design(image_3_4, "Decorate 3:4 room.")
+    data_3_4 = fake_client_3_4.calls[0]["data"]
+    assert data_3_4["width"] == "768"
+    assert data_3_4["height"] == "1024"
+

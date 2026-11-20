@@ -1,6 +1,7 @@
 from io import BytesIO
-
+import pytest
 from PIL import Image
+from app.core.config import settings
 
 from app.ai.vision.base import VisionAnalysis, VisionProviderError, VisionUsage
 from app.ai.vision.fallback_provider import LocalFallbackProvider
@@ -78,6 +79,7 @@ def upload_png(client, headers, project_id):
     return response
 
 
+@pytest.mark.skipif(not settings.enable_cloud_ai, reason="Yêu cầu ENABLE_CLOUD_AI=true (chế độ Cloud AI Gemini)")
 def test_gemini_success_does_not_fallback(client, db_session):
     headers = auth_headers(client)
     project = create_project(client, headers)
@@ -94,6 +96,7 @@ def test_gemini_success_does_not_fallback(client, db_session):
     assert fallback_logs == 0
 
 
+@pytest.mark.skipif(not settings.enable_cloud_ai, reason="Yêu cầu ENABLE_CLOUD_AI=true (chế độ Cloud AI Gemini)")
 def test_unavailable_falls_back_and_completes(client, db_session):
     headers = auth_headers(client)
     project = create_project(client, headers)
@@ -121,6 +124,7 @@ def test_unavailable_falls_back_and_completes(client, db_session):
     assert fallback_log.total_tokens == 0
 
 
+@pytest.mark.skipif(not settings.enable_cloud_ai, reason="Yêu cầu ENABLE_CLOUD_AI=true (chế độ Cloud AI Gemini)")
 def test_quota_error_falls_back(client, db_session):
     headers = auth_headers(client)
     project = create_project(client, headers)
@@ -146,6 +150,7 @@ def test_quota_error_falls_back(client, db_session):
     assert fallback_log.total_tokens == 0
 
 
+@pytest.mark.skipif(not settings.enable_cloud_ai, reason="Yêu cầu ENABLE_CLOUD_AI=true (chế độ Cloud AI Gemini)")
 def test_auth_error_does_not_fallback(client, db_session):
     headers = auth_headers(client)
     project = create_project(client, headers)
@@ -161,6 +166,7 @@ def test_auth_error_does_not_fallback(client, db_session):
     assert db_session.query(RoomAnalysis).filter(RoomAnalysis.provider == "local_fallback").count() == 0
 
 
+@pytest.mark.skipif(not settings.enable_cloud_ai, reason="Yêu cầu ENABLE_CLOUD_AI=true (chế độ Cloud AI Gemini)")
 def test_model_error_does_not_fallback(client, db_session):
     headers = auth_headers(client)
     project = create_project(client, headers)
@@ -193,6 +199,7 @@ def test_fallback_makes_no_external_call_and_invents_no_objects(tmp_path):
     assert analysis.raw_response["fallback"] is True
 
 
+@pytest.mark.skipif(not settings.enable_cloud_ai, reason="Yêu cầu ENABLE_CLOUD_AI=true (chế độ Cloud AI Gemini)")
 def test_force_reattempts_gemini_after_fallback(client, db_session):
     headers = auth_headers(client)
     project = create_project(client, headers)
@@ -222,3 +229,32 @@ def test_force_reattempts_gemini_after_fallback(client, db_session):
     )
     assert newest.provider == "gemini"
     assert newest.status == "COMPLETED"
+
+
+def test_fallback_real_room_image_full_analysis(tmp_path):
+    # Test on a realistic sized image (128x128)
+    image_path = tmp_path / "real_room.png"
+    buf = BytesIO()
+    # Create an image with top bright (light) and bottom floor (tan/wood)
+    im = Image.new("RGB", (128, 128), color=(240, 238, 230))
+    # Draw floor at the bottom
+    for y in range(80, 128):
+        for x in range(128):
+            im.putpixel((x, y), (180, 140, 100))
+    im.save(buf, format="PNG")
+    image_path.write_bytes(buf.getvalue())
+
+    provider = LocalFallbackProvider(room_type="living-room", fallback_reason="LOCAL_MODE")
+    analysis = provider.analyze_room(image_path, "image/png")
+
+    assert provider.provider_name == "local_fallback"
+    assert analysis.result.room_type == "Phòng khách"
+    assert len(analysis.result.dominant_colors) > 0
+    assert analysis.result.lighting is not None
+    assert analysis.result.lighting.type.startswith("Tự nhiên")
+    assert len(analysis.result.empty_areas) >= 2
+    assert len(analysis.result.existing_objects) >= 3
+    assert "khung nhìn" in analysis.result.layout_summary
+    assert analysis.raw_response["fallback"] is True
+    assert analysis.raw_response["reason"] == "LOCAL_MODE"
+

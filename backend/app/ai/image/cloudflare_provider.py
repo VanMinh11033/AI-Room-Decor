@@ -57,7 +57,13 @@ class CloudflareImageProvider:
         reference_image_paths = reference_image_paths or []
         try:
             image_bytes, content_type, filename = self._prepare_input_image(source_image_path)
-            data = {"prompt": self._fit_prompt(self._editing_prompt(prompt, len(reference_image_paths))), "steps": "8"}
+            target_w, target_h = self._calculate_target_dimensions(source_image_path)
+            data = {
+                "prompt": self._fit_prompt(self._editing_prompt(prompt, len(reference_image_paths))),
+                "steps": "8",
+                "width": str(target_w),
+                "height": str(target_h),
+            }
             files = {"input_image_0": (filename, image_bytes, content_type)}
             for index, reference_path in enumerate(reference_image_paths[:MAX_REFERENCE_IMAGES], start=1):
                 reference_bytes, reference_content_type, reference_filename = self._prepare_reference_image(reference_path, index)
@@ -191,19 +197,27 @@ class CloudflareImageProvider:
         message = self._response_diagnostic(self._safe_error_message(response.text[:500]), response)
         status_code = response.status_code
         lowered = message.lower()
+        try:
+            error_codes = self._extract_cloudflare_error_codes(response.json())
+        except (ValueError, UnicodeDecodeError):
+            error_codes = set()
+
         if status_code in {401, 403}:
             return ImageProviderError("CLOUDFLARE_IMAGE_AUTH_ERROR", message)
         if status_code == 400:
             return ImageProviderError("CLOUDFLARE_IMAGE_INPUT_ERROR", message)
+
+        # Disambiguate Cloudflare error codes: 4006/3036 (Daily 10k quota) vs 3040 (Rate limit / concurrency / busy)
+        if 4006 in error_codes or 3036 in error_codes or "10,000 neurons" in lowered or "daily free allocation" in lowered:
+            return ImageProviderError("CLOUDFLARE_IMAGE_DAILY_QUOTA_EXCEEDED", message)
+        if 3040 in error_codes:
+            return ImageProviderError("CLOUDFLARE_IMAGE_RATE_LIMIT_OR_BUSY", message, transient=True)
+
         if status_code == 429 or "quota" in lowered or "rate" in lowered:
             return ImageProviderError("CLOUDFLARE_IMAGE_QUOTA_ERROR", message)
         if status_code == 404 or "not found" in lowered or "unsupported" in lowered:
             return ImageProviderError("CLOUDFLARE_IMAGE_MODEL_ERROR", message)
         if status_code >= 500:
-            try:
-                error_codes = self._extract_cloudflare_error_codes(response.json())
-            except (ValueError, UnicodeDecodeError):
-                error_codes = set()
             if 3043 in error_codes:
                 return ImageProviderError("CLOUDFLARE_IMAGE_SERVER_ERROR", message)
             return ImageProviderError("CLOUDFLARE_IMAGE_SERVER_ERROR", message, transient=True)
@@ -229,11 +243,55 @@ class CloudflareImageProvider:
             diagnostic += f" (Cloudflare request ID: {request_id})"
         return diagnostic[:500]
 
+    def _calculate_target_dimensions(self, source_image_path: Path) -> tuple[int, int]:
+        """Calculate output width and height matching source image aspect ratio for FLUX."""
+        try:
+            with Image.open(source_image_path) as image:
+                orig_w, orig_h = image.size
+        except Exception:
+            return 1024, 1024
+
+        if orig_w <= 0 or orig_h <= 0:
+            return 1024, 1024
+
+        aspect = orig_w / orig_h
+        # FLUX models work best with dimensions in multiples of 16, bounded by 1024 on the long edge
+        if aspect >= 1.0:
+            target_w = 1024
+            raw_h = 1024.0 / aspect
+            target_h = max(256, min(1024, int(round(raw_h / 16.0) * 16)))
+        else:
+            target_h = 1024
+            raw_w = 1024.0 * aspect
+            target_w = max(256, min(1024, int(round(raw_w / 16.0) * 16)))
+
+        return target_w, target_h
+
     def _prepare_input_image(self, source_image_path: Path) -> tuple[bytes, str, str]:
         return self._prepare_image(source_image_path, "input_image_0.jpg")
 
     def _prepare_reference_image(self, source_image_path: Path, index: int) -> tuple[bytes, str, str]:
-        return self._prepare_image(source_image_path, f"input_image_{index}.jpg")
+        """Prepare reference image on clean white background, strictly below 512px for FLUX."""
+        with Image.open(source_image_path) as image:
+            image.load()
+            has_alpha = image.mode in ("RGBA", "LA", "PA") or (
+                image.mode == "P" and "transparency" in image.info
+            )
+            if has_alpha:
+                rgba = image.convert("RGBA")
+                # Composite transparent cutout onto solid white studio background
+                white_bg = Image.new("RGBA", rgba.size, (255, 255, 255, 255))
+                composite = Image.alpha_composite(white_bg, rgba).convert("RGB")
+                composite.thumbnail((MAX_INPUT_IMAGE_SIDE, MAX_INPUT_IMAGE_SIDE), Image.Resampling.LANCZOS)
+                buffer = BytesIO()
+                composite.save(buffer, format="JPEG", quality=95, optimize=True)
+                return buffer.getvalue(), "image/jpeg", f"input_image_{index}.jpg"
+            else:
+                rgb = image.convert("RGB")
+                rgb.thumbnail((MAX_INPUT_IMAGE_SIDE, MAX_INPUT_IMAGE_SIDE), Image.Resampling.LANCZOS)
+                buffer = BytesIO()
+                rgb.save(buffer, format="JPEG", quality=95, optimize=True)
+                return buffer.getvalue(), "image/jpeg", f"input_image_{index}.jpg"
 
     def _prepare_image(self, source_image_path: Path, filename: str) -> tuple[bytes, str, str]:
         with Image.open(source_image_path) as image:
@@ -246,14 +304,12 @@ class CloudflareImageProvider:
 
     def _editing_prompt(self, prompt: str, reference_count: int = 0) -> str:
         lines = [
-            "Use image 0 as the original room.",
-            "Preserve the original room geometry, camera viewpoint, walls, floor, ceiling, windows, doors, and permanent architectural elements as much as possible.",
-            "Only add or modify furniture and decor requested by the system prompt. Do not invent database product IDs.",
+            "Use image 0 as the original room. Preserve the original room geometry, camera viewpoint, walls, floor texture, ceiling, windows, doors, and plants exactly as shown.",
+            "Only place the specified catalog furniture items into the room. Do not add unrequested furniture, trees, or structural changes.",
         ]
         if reference_count > 0:
             lines.append(
-                f"Use images 1 through {reference_count} as visual references for the selected catalog products, "
-                "preserving their recognizable shape, main color, material appearance, and distinctive design features as closely as possible."
+                f"Use images 1 through {reference_count} as visual references for the selected catalog products, preserving recognizable form, silhouette, contour, and finish."
             )
         lines.append(prompt)
         return "\n".join(lines)

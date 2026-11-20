@@ -10,8 +10,9 @@ from app.core.config import settings
 class NotConfiguredImageProvider:
     provider_name = "not_configured"
     model_name = "not_configured"
+    MAX_INPUT_IMAGES = 4
 
-    def generate_design(self, source_image_path, prompt):
+    def generate_design(self, source_image_path, prompt, *args, **kwargs):
         raise ImageProviderNotConfiguredError()
 
 
