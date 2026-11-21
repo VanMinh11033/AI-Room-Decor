@@ -349,12 +349,33 @@ export type Order = {
   id: number;
   user_id: number;
   status: string;
-  total_amount: string;
+  recipient_name: string;
+  recipient_phone: string;
+  province: string;
+  ward: string;
+  street_address: string;
+  delivery_notes?: string | null;
   shipping_address?: string | null;
+  subtotal_amount: string;
+  shipping_fee?: string | null;
+  shipping_fee_status: string;
+  total_amount?: string | null;
+  payment_method: string;
+  payment_status: string;
   customer?: User | null;
   items: OrderItem[];
   created_at: string;
   updated_at: string;
+};
+
+export type ShippingPreviewResponse = {
+  is_bulky: boolean;
+  shipping_fee?: string | null;
+  shipping_fee_status: string;
+  subtotal: string;
+  total_amount?: string | null;
+  bulky_items: string[];
+  message: string;
 };
 
 export type OrderListResponse = {

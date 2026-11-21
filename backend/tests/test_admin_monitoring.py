@@ -29,6 +29,16 @@ def register_customer(client, email="admin-monitor-customer@example.com"):
     return {"Authorization": f"Bearer {response.json()['access_token']}"}
 
 
+ORDER_PAYLOAD = {
+    "recipient_name": "Customer Monitor",
+    "recipient_phone": "0912345678",
+    "province": "Hà Nội",
+    "ward": "Phường Cống Vị",
+    "street_address": "Demo Address",
+    "payment_method": "COD",
+}
+
+
 def create_admin_headers(client, db_session, email="monitor-admin@example.com"):
     role = db_session.query(Role).filter(Role.name == RoleName.ADMIN).one()
     admin = User(
@@ -154,7 +164,7 @@ def test_admin_dashboard_stats_and_customer_blocked(client, db_session):
     project_one = create_project_fixture(db_session, "dashboard-project-one@example.com")
     project_two = create_project_fixture(db_session, "dashboard-project-two@example.com")
     client.post("/api/cart/items", json={"product_id": product.id, "quantity": 1}, headers=customer_headers)
-    order = client.post("/api/orders", json={"shipping_address": "Demo"}, headers=customer_headers).json()
+    order = client.post("/api/orders", json=ORDER_PAYLOAD, headers=customer_headers).json()
     client.patch(f"/api/admin/orders/{order['id']}/status", json={"status": "COMPLETED"}, headers=admin_headers)
 
     assert client.get("/api/admin/dashboard", headers=customer_headers).status_code == 403
@@ -236,7 +246,7 @@ def test_admin_order_customer_display_preserved(client, db_session):
     admin_headers = create_admin_headers(client, db_session, "order-display-admin@example.com")
     product = create_product(db_session, "Order Display Lamp", "order-display-lamp")
     client.post("/api/cart/items", json={"product_id": product.id, "quantity": 1}, headers=customer_headers)
-    order = client.post("/api/orders", json={}, headers=customer_headers).json()
+    order = client.post("/api/orders", json=ORDER_PAYLOAD, headers=customer_headers).json()
 
     response = client.get(f"/api/admin/orders/{order['id']}", headers=admin_headers)
     assert response.status_code == 200

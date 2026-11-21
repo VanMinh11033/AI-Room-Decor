@@ -23,6 +23,26 @@ class OrderStatus(str, enum.Enum):
     CANCELLED = "CANCELLED"
 
 
+class PaymentMethod(str, enum.Enum):
+    COD = "COD"
+    VNPAY = "VNPAY"
+
+
+class PaymentStatus(str, enum.Enum):
+    UNPAID = "UNPAID"
+    PENDING = "PENDING"
+    PAID = "PAID"
+    FAILED = "FAILED"
+    REFUNDED = "REFUNDED"
+
+
+class ShippingFeeStatus(str, enum.Enum):
+    CALCULATED = "CALCULATED"
+    PENDING_CALCULATION = "PENDING_CALCULATION"
+    AWAITING_CUSTOMER_CONFIRMATION = "AWAITING_CUSTOMER_CONFIRMATION"
+    CUSTOMER_CONFIRMED = "CUSTOMER_CONFIRMED"
+
+
 class ProductStatus(str, enum.Enum):
     DRAFT = "DRAFT"
     ACTIVE = "ACTIVE"
@@ -536,8 +556,25 @@ class Order(Base, TimestampMixin):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
     status: Mapped[OrderStatus] = mapped_column(Enum(OrderStatus), default=OrderStatus.PENDING, nullable=False, index=True)
-    total_amount: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False, default=0)
+    recipient_name: Mapped[str] = mapped_column(String(100), nullable=False, default="N/A", server_default="N/A")
+    recipient_phone: Mapped[str] = mapped_column(String(20), nullable=False, default="", server_default="")
+    province: Mapped[str] = mapped_column(String(100), nullable=False, default="", server_default="")
+    ward: Mapped[str] = mapped_column(String(100), nullable=False, default="", server_default="")
+    street_address: Mapped[str] = mapped_column(String(255), nullable=False, default="", server_default="")
+    delivery_notes: Mapped[str | None] = mapped_column(String(500), nullable=True)
     shipping_address: Mapped[str | None] = mapped_column(String(500))
+    subtotal_amount: Mapped[float] = mapped_column(Numeric(12, 2), nullable=False, default=0, server_default="0")
+    shipping_fee: Mapped[float | None] = mapped_column(Numeric(12, 2), nullable=True)
+    shipping_fee_status: Mapped[str] = mapped_column(
+        String(50), nullable=False, default=ShippingFeeStatus.CALCULATED.value, server_default=ShippingFeeStatus.CALCULATED.value
+    )
+    total_amount: Mapped[float | None] = mapped_column(Numeric(12, 2), nullable=True)
+    payment_method: Mapped[str] = mapped_column(
+        String(20), nullable=False, default=PaymentMethod.COD.value, server_default=PaymentMethod.COD.value, index=True
+    )
+    payment_status: Mapped[str] = mapped_column(
+        String(20), nullable=False, default=PaymentStatus.UNPAID.value, server_default=PaymentStatus.UNPAID.value, index=True
+    )
 
     user: Mapped[User] = relationship()
     items: Mapped[list["OrderItem"]] = relationship(back_populates="order", cascade="all, delete-orphan")

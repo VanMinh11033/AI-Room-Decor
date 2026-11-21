@@ -104,6 +104,10 @@ const statusLabels: Record<string, string> = {
   processing: "Đang xử lý",
   shipped: "Đang giao",
   success: "Thành công",
+  unpaid: "Chưa thanh toán (COD)",
+  paid: "Đã thanh toán",
+  pending_calculation: "Chờ xác nhận phí",
+  calculated: "Đã tính phí",
 };
 
 export function displayCategory(value: NullableText) {
@@ -134,6 +138,23 @@ export function displayRole(value: NullableText) {
   if (value === "ADMIN") return "Quản trị viên";
   if (value === "CUSTOMER") return "Khách hàng";
   return String(value || "");
+}
+
+export function displayPaymentStatus(value: NullableText) {
+  const norm = String(value || "").toUpperCase();
+  if (norm === "PAID") return "Đã thanh toán";
+  if (norm === "UNPAID") return "Chưa thanh toán (COD)";
+  if (norm === "PENDING") return "Đang xử lý";
+  if (norm === "FAILED") return "Thanh toán thất bại";
+  if (norm === "REFUNDED") return "Đã hoàn tiền";
+  return String(value || "Chưa thanh toán");
+}
+
+export function displayPaymentMethod(value: NullableText) {
+  const norm = String(value || "").toUpperCase();
+  if (norm === "COD") return "Thanh toán khi nhận hàng (COD)";
+  if (norm === "VNPAY") return "VNPAY (Sắp ra mắt)";
+  return String(value || "COD");
 }
 
 export function joinDisplay<T>(items: T[] | undefined, selector: (item: T) => string, fallback = "-") {

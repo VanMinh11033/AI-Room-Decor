@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowUpRight,
-  CheckCircle2,
+  Banknote,
   Clock,
   DollarSign,
   Package,
@@ -32,6 +32,7 @@ export default function AdminOrdersPage() {
   const { loading: authLoading } = useAuth("ADMIN");
   const [orders, setOrders] = useState<Order[]>([]);
   const [statusFilter, setStatusFilter] = useState("");
+  const [paymentFilter, setPaymentFilter] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -47,15 +48,18 @@ export default function AdminOrdersPage() {
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {
       const matchStatus = !statusFilter || order.status === statusFilter;
+      const matchPayment = !paymentFilter || order.payment_status === paymentFilter;
       const q = searchQuery.toLowerCase().trim();
       const matchSearch =
         !q ||
         String(order.id).includes(q) ||
+        (order.recipient_name || "").toLowerCase().includes(q) ||
+        (order.recipient_phone || "").toLowerCase().includes(q) ||
         (order.customer?.full_name || "").toLowerCase().includes(q) ||
         (order.customer?.email || "").toLowerCase().includes(q);
-      return matchStatus && matchSearch;
+      return matchStatus && matchPayment && matchSearch;
     });
-  }, [orders, statusFilter, searchQuery]);
+  }, [orders, statusFilter, paymentFilter, searchQuery]);
 
   if (authLoading) {
     return (
@@ -67,16 +71,18 @@ export default function AdminOrdersPage() {
 
   const pendingCount = orders.filter((o) => o.status === "PENDING").length;
   const completedCount = orders.filter((o) => o.status === "COMPLETED").length;
+  const unpaidCount = orders.filter((o) => o.payment_status === "UNPAID").length;
   const completedRevenue = orders
-    .filter((o) => o.status === "COMPLETED")
-    .reduce((sum, o) => sum + Number(o.total_amount || 0), 0);
+    .filter((o) => o.payment_status === "PAID" || o.status === "COMPLETED")
+    .reduce((sum, o) => sum + Number(o.total_amount || o.subtotal_amount || 0), 0);
 
   const tableColumns = [
     { key: "id", label: "Mã đơn" },
-    { key: "customer", label: "Khách hàng" },
+    { key: "customer", label: "Người nhận / SĐT" },
     { key: "items", label: "Sản phẩm", align: "center" as const },
+    { key: "payment", label: "Thanh toán (COD)", align: "center" as const },
     { key: "amount", label: "Tổng tiền", align: "right" as const },
-    { key: "status", label: "Trạng thái", align: "center" as const },
+    { key: "status", label: "Trạng thái đơn", align: "center" as const },
     { key: "time", label: "Thời gian đặt" },
     { key: "action", label: "Chi tiết", align: "right" as const },
   ];
@@ -86,8 +92,8 @@ export default function AdminOrdersPage() {
       {/* 1. Page Header */}
       <AdminPageHeader
         eyebrow="Giao dịch & Thương mại"
-        title="Quản lý đơn hàng"
-        subtitle="Theo dõi chi tiết các giao dịch mua sắm nội thất, địa chỉ giao nhận và cập nhật tiến độ vận chuyển."
+        title="Quản lý đơn hàng COD"
+        subtitle="Theo dõi chi tiết các giao dịch mua sắm nội thất, địa chỉ giao nhận và tiến độ thu tiền mặt COD."
       />
 
       {/* 2. Top Summary KPI Cards */}
@@ -112,15 +118,15 @@ export default function AdminOrdersPage() {
           }
         />
         <AdminStatMiniCard
-          label="Đã hoàn thành"
-          value={completedCount}
-          sub="Giao hàng thành công"
-          icon={CheckCircle2}
+          label="Chưa thu tiền COD"
+          value={unpaidCount}
+          sub="Đang giao hoặc chờ thu tiền"
+          icon={Banknote}
         />
         <AdminStatMiniCard
-          label="Doanh thu hoàn tất"
+          label="Doanh thu đã thu"
           value={`${completedRevenue.toLocaleString("vi-VN")} đ`}
-          sub="Từ các đơn COMPLETED"
+          sub={`Từ ${completedCount} đơn hoàn thành`}
           icon={DollarSign}
         />
       </div>
@@ -136,35 +142,53 @@ export default function AdminOrdersPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full rounded-xl border border-[#2D332C]/15 bg-[#FAF8F5] py-2.5 pl-10 pr-4 text-sm text-[#242424] placeholder:text-[#777777] focus:border-[#A68B6D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C9A77A]/25"
-            placeholder="Tìm theo mã đơn #, tên khách hàng, email..."
+            placeholder="Tìm theo mã đơn #, người nhận, SĐT, email..."
           />
         </div>
 
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="rounded-xl border border-[#2D332C]/15 bg-[#FAF8F5] px-4 py-2.5 text-sm text-[#242424] focus:border-[#A68B6D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C9A77A]/25"
-        >
-          <option value="">Tất cả trạng thái đơn</option>
-          <option value="PENDING">Chờ xử lý (Pending)</option>
-          <option value="CONFIRMED">Đã xác nhận (Confirmed)</option>
-          <option value="PROCESSING">Đang chuẩn bị (Processing)</option>
-          <option value="SHIPPED">Đang vận chuyển (Shipped)</option>
-          <option value="COMPLETED">Hoàn tất (Completed)</option>
-          <option value="CANCELLED">Đã hủy (Cancelled)</option>
-        </select>
-
-        {(statusFilter || searchQuery) && (
-          <button
-            type="button"
-            onClick={() => {
-              setStatusFilter("");
-              setSearchQuery("");
-            }}
-            title="Đặt lại"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#2D332C]/15 bg-[#FAF8F5] text-[#777777] transition hover:border-[#A68B6D] hover:bg-white hover:text-[#242424]"
+        {/* Status Filter */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold text-[#777777]">Đơn hàng:</span>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="rounded-xl border border-[#2D332C]/15 bg-[#FAF8F5] px-3.5 py-2.5 text-xs font-bold text-[#242424] focus:border-[#A68B6D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C9A77A]/25"
           >
-            <RotateCcw size={15} />
+            <option value="">Tất cả trạng thái</option>
+            <option value="PENDING">Đang chờ (PENDING)</option>
+            <option value="CONFIRMED">Đã xác nhận (CONFIRMED)</option>
+            <option value="PROCESSING">Đang chuẩn bị (PROCESSING)</option>
+            <option value="SHIPPED">Đang giao hàng (SHIPPED)</option>
+            <option value="COMPLETED">Đã hoàn thành (COMPLETED)</option>
+            <option value="CANCELLED">Đã hủy (CANCELLED)</option>
+          </select>
+        </div>
+
+        {/* Payment Filter */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-semibold text-[#777777]">Thu tiền:</span>
+          <select
+            value={paymentFilter}
+            onChange={(e) => setPaymentFilter(e.target.value)}
+            className="rounded-xl border border-[#2D332C]/15 bg-[#FAF8F5] px-3.5 py-2.5 text-xs font-bold text-[#242424] focus:border-[#A68B6D] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C9A77A]/25"
+          >
+            <option value="">Tất cả thanh toán</option>
+            <option value="UNPAID">Chưa thu tiền (UNPAID)</option>
+            <option value="PAID">Đã thu tiền (PAID)</option>
+          </select>
+        </div>
+
+        {(searchQuery || statusFilter || paymentFilter) && (
+          <button
+            onClick={() => {
+              setSearchQuery("");
+              setStatusFilter("");
+              setPaymentFilter("");
+            }}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-[#2D332C]/15 bg-white px-3.5 py-2 text-xs font-semibold text-[#777777] transition hover:bg-[#FAF8F5] hover:text-[#242424]"
+          >
+            <RotateCcw size={13} />
+            Đặt lại
           </button>
         )}
       </AdminSearchFilterBar>
@@ -183,18 +207,18 @@ export default function AdminOrdersPage() {
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={7} className="p-12 text-center text-sm font-medium text-[#777777]">
+                <td colSpan={8} className="p-12 text-center text-sm font-medium text-[#777777]">
                   Đang tải danh sách đơn hàng...
                 </td>
               </tr>
             ) : filteredOrders.length === 0 ? (
               <tr>
-                <td colSpan={7} className="p-8">
+                <td colSpan={8} className="p-8">
                   <AdminEmptyState
                     icon={Package}
                     title="Không có đơn hàng nào"
                     description={
-                      searchQuery || statusFilter
+                      searchQuery || statusFilter || paymentFilter
                         ? "Không có đơn hàng nào phù hợp với bộ lọc tìm kiếm hiện tại."
                         : "Hệ thống chưa ghi nhận đơn đặt hàng nào."
                     }
@@ -214,14 +238,14 @@ export default function AdminOrdersPage() {
                     </Link>
                   </AdminTableCell>
 
-                  {/* Khách hàng */}
+                  {/* Người nhận / SĐT */}
                   <AdminTableCell>
                     <div>
                       <p className="font-bold text-[#242424]">
-                        {order.customer?.full_name || "Khách hàng"}
+                        {order.recipient_name || order.customer?.full_name || "Khách hàng"}
                       </p>
-                      <p className="text-xs text-[#777777]">
-                        {order.customer?.email || `ID: #${order.user_id}`}
+                      <p className="text-xs font-semibold text-[#A68B6D]">
+                        {order.recipient_phone || "Chưa có SĐT"}
                       </p>
                     </div>
                   </AdminTableCell>
@@ -233,14 +257,33 @@ export default function AdminOrdersPage() {
                     </span>
                   </AdminTableCell>
 
-                  {/* Tổng tiền */}
-                  <AdminTableCell align="right">
-                    <span className="font-bold text-[#242424]">
-                      {Number(order.total_amount).toLocaleString("vi-VN")} đ
+                  {/* Trạng thái thanh toán COD */}
+                  <AdminTableCell align="center">
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold border ${
+                        order.payment_status === "PAID"
+                          ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                          : "bg-amber-50 text-amber-900 border-amber-200"
+                      }`}
+                    >
+                      {order.payment_status === "PAID" ? "Đã thu tiền" : "Chưa thu (COD)"}
                     </span>
                   </AdminTableCell>
 
-                  {/* Trạng thái */}
+                  {/* Tổng tiền */}
+                  <AdminTableCell align="right">
+                    {order.total_amount ? (
+                      <span className="font-bold text-[#242424]">
+                        {Number(order.total_amount).toLocaleString("vi-VN")} đ
+                      </span>
+                    ) : (
+                      <span className="rounded bg-amber-50 px-2 py-0.5 text-xs font-bold text-amber-900">
+                        Chờ xác nhận phí
+                      </span>
+                    )}
+                  </AdminTableCell>
+
+                  {/* Trạng thái đơn */}
                   <AdminTableCell align="center">
                     <AdminStatusBadge status={order.status} size="sm" />
                   </AdminTableCell>

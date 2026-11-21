@@ -82,6 +82,11 @@ class Settings(BaseSettings):
     room_decor_recommendation_version: str = "v1.5"
     room_decor_prompt_version: str = "v1.5"
 
+    # Shipping policy configuration (configurable, no hardcoding)
+    shipping_small_item_fee: float = 30000.0
+    shipping_bulky_categories: str = "sofa,table,storage,bed"
+    shipping_bulky_weight_threshold: float = 20.0
+
     model_config = SettingsConfigDict(
         env_file=(PROJECT_ROOT / ".env", BACKEND_ROOT / ".env"),
         env_file_encoding="utf-8",
@@ -91,6 +96,10 @@ class Settings(BaseSettings):
     @property
     def cors_origins(self) -> list[str]:
         return [origin.strip() for origin in self.backend_cors_origins.split(",") if origin.strip()]
+
+    @property
+    def bulky_category_slugs(self) -> list[str]:
+        return [cat.strip().lower() for cat in self.shipping_bulky_categories.split(",") if cat.strip()]
 
     @property
     def is_testing(self) -> bool:

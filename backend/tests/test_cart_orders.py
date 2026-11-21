@@ -44,6 +44,16 @@ def admin_headers(client, db_session, email="orders-admin@example.com"):
     return {"Authorization": f"Bearer {login.json()['access_token']}"}
 
 
+ORDER_PAYLOAD = {
+    "recipient_name": "Test Customer",
+    "recipient_phone": "0912345678",
+    "province": "Hà Nội",
+    "ward": "Phường Cống Vị",
+    "street_address": "123 Main St",
+    "payment_method": "COD",
+}
+
+
 def make_product(db_session, name="Oak Lamp", slug="oak-lamp", price="129.99", stock=10, active=True):
     category = db_session.query(Category).first()
     if category is None:
@@ -140,11 +150,13 @@ def test_checkout_uses_db_price_decrements_stock_clears_cart(client, db_session)
     db_session.query(Product).filter(Product.id == product.id).update({"price": Decimal("250.00")})
     db_session.commit()
 
-    response = client.post("/api/orders", json={"shipping_address": "123 Main St"}, headers=headers)
+    response = client.post("/api/orders", json=ORDER_PAYLOAD, headers=headers)
     assert response.status_code == 201
     order = response.json()
     assert order["status"] == "PENDING"
-    assert order["total_amount"] == "500.00"
+    assert order["subtotal_amount"] == "500.00"
+    assert order["shipping_fee"] == "30000.00"
+    assert order["total_amount"] == "30500.00"
     assert order["items"][0]["unit_price"] == "250.00"
     assert order["items"][0]["quantity"] == 2
 
@@ -163,7 +175,7 @@ def test_checkout_insufficient_stock_rolls_back(client, db_session):
     db_session.query(Product).filter(Product.id == product.id).update({"stock_quantity": 1})
     db_session.commit()
 
-    response = client.post("/api/orders", json={}, headers=headers)
+    response = client.post("/api/orders", json=ORDER_PAYLOAD, headers=headers)
     assert response.status_code == 400
 
     db_session.rollback()
@@ -177,7 +189,7 @@ def test_checkout_insufficient_stock_rolls_back(client, db_session):
 
 def test_checkout_empty_cart_rejected(client, db_session):
     headers = register(client, "empty-cart@example.com")
-    response = client.post("/api/orders", json={}, headers=headers)
+    response = client.post("/api/orders", json=ORDER_PAYLOAD, headers=headers)
     assert response.status_code == 400
 
 
@@ -187,7 +199,7 @@ def test_own_order_history_detail_and_cross_user_protection(client, db_session):
     product = make_product(db_session, "Oak Lamp", "history-lamp", "100.00", stock=10)
 
     client.post("/api/cart/items", json={"product_id": product.id, "quantity": 1}, headers=owner)
-    created = client.post("/api/orders", json={}, headers=owner)
+    created = client.post("/api/orders", json=ORDER_PAYLOAD, headers=owner)
     assert created.status_code == 201
     order_id = created.json()["id"]
 
@@ -207,7 +219,7 @@ def test_cancel_order_restores_stock(client, db_session):
     headers = register(client, "cancel-user@example.com")
     product = make_product(db_session, "Oak Lamp", "cancel-lamp", "100.00", stock=5)
     client.post("/api/cart/items", json={"product_id": product.id, "quantity": 2}, headers=headers)
-    order = client.post("/api/orders", json={}, headers=headers).json()
+    order = client.post("/api/orders", json=ORDER_PAYLOAD, headers=headers).json()
 
     db_session.rollback()
     assert db_session.get(Product, product.id).stock_quantity == 3
@@ -229,7 +241,7 @@ def test_admin_orders_and_customer_blocked(client, db_session):
     product = make_product(db_session, "Oak Lamp", "admin-lamp", "100.00", stock=10)
 
     client.post("/api/cart/items", json={"product_id": product.id, "quantity": 1}, headers=customer)
-    order = client.post("/api/orders", json={}, headers=customer).json()
+    order = client.post("/api/orders", json=ORDER_PAYLOAD, headers=customer).json()
 
     assert client.get("/api/admin/orders", headers=customer).status_code == 403
     assert client.get(f"/api/admin/orders/{order['id']}", headers=customer).status_code == 403

@@ -231,7 +231,7 @@ def list_ai_usage(
 
 def _build_dashboard_stats(db: Session) -> DashboardStats:
     completed_revenue = (
-        db.query(func.coalesce(func.sum(Order.total_amount), 0))
+        db.query(func.coalesce(func.sum(Order.subtotal_amount), 0))
         .filter(Order.status == OrderStatus.COMPLETED)
         .scalar()
         or Decimal("0")
