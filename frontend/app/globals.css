@@ -95,6 +95,8 @@ select {
 
 /* Scoped Full-Width override strictly for Homepage (<main> containing .homepage-fullwidth) */
 main:has(> .homepage-fullwidth) {
+  width: 100%;
+  min-width: 0;
   max-width: 100%;
   padding-left: 1rem;
   padding-right: 1rem;
@@ -123,6 +125,8 @@ main:has(> .homepage-fullwidth) {
 
 .homepage-fullwidth {
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
   overflow-x: clip;
 }
 

@@ -66,7 +66,7 @@ export default function CheckoutPage() {
           <Link href="/products" className="primary-cta mt-6">Xem sản phẩm</Link>
         </SectionCard>
       ) : (
-        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.1fr_0.9fr] w-full min-w-0">
           <SectionCard title="Địa chỉ giao hàng">
             <form onSubmit={onSubmit} className="space-y-5">
               <label className="block text-sm font-bold text-ink">

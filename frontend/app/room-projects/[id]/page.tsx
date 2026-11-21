@@ -129,8 +129,8 @@ export default function RoomProjectDetailPage() {
         { label: "Thiết kế AI", state: "pending" },
       ]} />
 
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(360px,0.9fr)]">
-        <div className="space-y-5">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(360px,0.9fr)] w-full min-w-0">
+        <div className="space-y-5 w-full min-w-0">
           <div className="overflow-hidden rounded-3xl border border-ink/10 bg-white shadow-soft">
             <div className="aspect-[16/10] bg-stone/20 flex items-center justify-center">
               {project.room_image_url ? (
@@ -152,7 +152,7 @@ export default function RoomProjectDetailPage() {
           />
         </div>
 
-        <aside className="space-y-5">
+        <aside className="space-y-5 w-full min-w-0">
           <SectionCard
             title="Phân tích không gian"
             subtitle="AI đọc ảnh phòng để xác định bố cục, ánh sáng, màu chủ đạo và các khu vực có thể decor."

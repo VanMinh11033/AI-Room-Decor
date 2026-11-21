@@ -14,7 +14,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="vi">
       <body className="flex min-h-screen flex-col">
         <Navigation />
-        <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 md:px-6 md:py-12">{children}</main>
+        <main className="mx-auto w-full min-w-0 max-w-7xl flex-1 px-4 py-6 sm:py-8 md:px-6 md:py-12">{children}</main>
         <footer className="mt-16 border-t border-[#2D332C]/10 bg-white/80 backdrop-blur-sm">
           <div className="mx-auto max-w-7xl px-4 py-12 md:px-6">
             <div className="grid gap-10 md:grid-cols-[1.4fr_0.8fr_0.8fr]">

@@ -129,7 +129,7 @@ export default function DesignGenerationPage() {
       )}
 
       {/* 2. Before / After Comparison Grid */}
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 w-full min-w-0">
         <ImagePanel
           label="Trước khi decor (Ảnh phòng gốc)"
           imageUrl={project.room_image_url}

@@ -30,9 +30,9 @@ export default function HomePage() {
         <div className="pointer-events-none absolute -bottom-28 left-1/3 h-80 w-80 rounded-full bg-[#A68B6D]/12 blur-3xl" />
 
         {/* Split Hero Grid: Left ~46%, Right Image ~54% on Desktop */}
-        <div className="relative grid items-center gap-10 lg:grid-cols-[0.88fr_1.12fr] lg:gap-10 xl:grid-cols-[0.85fr_1.15fr] xl:gap-14">
+        <div className="relative grid grid-cols-1 items-center gap-8 sm:gap-10 lg:grid-cols-[0.88fr_1.12fr] lg:gap-10 xl:grid-cols-[0.85fr_1.15fr] xl:gap-14 w-full min-w-0">
           {/* Left Column: Editorial Content */}
-          <div className="space-y-7">
+          <div className="w-full min-w-0 space-y-6 sm:space-y-7">
             <div className="motion-fade-up">
               <span className="studio-pill">
                 <Sparkles size={14} className="text-[#C9A77A]" />
@@ -40,7 +40,7 @@ export default function HomePage() {
               </span>
             </div>
 
-            <h1 className="motion-fade-up motion-delay-100 max-w-2xl text-2xl sm:text-4xl md:text-5xl xl:text-[3.4rem] 2xl:text-[3.75rem] font-bold leading-[1.15] tracking-tight text-[#242424] break-words">
+            <h1 className="motion-fade-up motion-delay-100 w-full max-w-2xl text-2xl sm:text-4xl md:text-5xl xl:text-[3.4rem] 2xl:text-[3.75rem] font-bold leading-[1.15] tracking-tight text-[#242424] break-words">
               Kiến tạo không gian sống chuẩn mực cùng{" "}
               <span className="relative inline-block text-[#2D332C]">
                 <span className="relative z-10 text-[#A68B6D]">Trí tuệ Nhân tạo</span>
@@ -48,13 +48,13 @@ export default function HomePage() {
               </span>
             </h1>
 
-            <p className="motion-fade-up motion-delay-150 max-w-2xl text-base leading-8 text-[#777777] md:text-lg">
+            <p className="motion-fade-up motion-delay-150 w-full max-w-2xl text-sm sm:text-base leading-7 sm:leading-8 text-[#777777] md:text-lg">
               Tải lên bức ảnh căn phòng hiện tại, chọn ngân sách và phong cách yêu thích.{" "}
               <strong className="font-semibold text-[#242424]">AI Room Decor</strong> phân tích bố cục không gian, gợi ý sản phẩm nội thất thật từ catalog và dựng phương án thiết kế trực quan ngay trước mắt bạn.
             </p>
 
             {/* Primary & Secondary CTAs */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 pt-1">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 pt-1 w-full">
               <Link
                 href="/room-projects/new"
                 className="motion-fade-up motion-delay-200 primary-cta group w-full sm:w-auto border border-[#C9A77A]/40 bg-[#2D332C] px-5 py-3.5 sm:px-7 sm:py-4 text-sm font-semibold text-[#FAF8F5] hover:bg-[#A68B6D] hover:text-white"
@@ -75,7 +75,7 @@ export default function HomePage() {
             </div>
 
             {/* Real Architecture Capabilities Strip */}
-            <div className="motion-fade-up motion-delay-350 grid gap-4 border-t border-[#2D332C]/10 pt-7 sm:grid-cols-3">
+            <div className="motion-fade-up motion-delay-350 grid grid-cols-1 gap-4 border-t border-[#2D332C]/10 pt-7 sm:grid-cols-3 w-full min-w-0">
               <div>
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#A68B6D]">AI Vision</p>
                 <p className="mt-1 text-sm font-semibold text-[#242424]">Nhận diện bố cục & ánh sáng</p>
@@ -92,7 +92,7 @@ export default function HomePage() {
           </div>
 
           {/* Right Column (~53-55% width): Large Interior Visual + Non-Overlapping Floating Cards */}
-          <div className="relative w-full xl:px-4 xl:py-3">
+          <div className="relative w-full min-w-0 xl:px-4 xl:py-3">
             {/* Decorative Architectural Backplate */}
             <div className="pointer-events-none absolute inset-1 hidden rounded-[2.25rem] border border-[#C9A77A]/35 bg-[#FAF8F5]/70 sm:block xl:inset-x-6 xl:inset-y-1 xl:rotate-1" />
 
@@ -119,7 +119,7 @@ export default function HomePage() {
             {/* Floating Cards Container:
                 - Mobile/Tablet (<1280px): 2-column grid cleanly below the image (never covers image/text)
                 - Desktop (xl 1280px+): Anchored at top-left and top-right/bottom-right corners without covering left text or bottom caption */}
-            <div className="mt-4 grid gap-3.5 sm:grid-cols-2 xl:mt-0">
+            <div className="mt-4 grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:mt-0 w-full min-w-0">
               {/* Floating Card 1: AI Vision */}
               <div className="motion-fade-up motion-delay-250 xl:motion-float-slow z-10 rounded-2xl border border-[#C9A77A]/50 bg-white/95 p-4 shadow-soft backdrop-blur-md xl:absolute xl:left-0 xl:top-6 xl:w-64">
                 <div className="flex items-center gap-2.5">
@@ -181,10 +181,10 @@ export default function HomePage() {
           </p>
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-12">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 w-full min-w-0">
           {/* Bento Card 1 (Span 7): AI Room Analysis */}
           <article className="studio-bento-card motion-fade-up motion-delay-100 group lg:col-span-7">
-            <div className="grid h-full gap-6 md:grid-cols-[1.02fr_0.98fr] md:items-center">
+            <div className="grid grid-cols-1 h-full gap-6 md:grid-cols-[1.02fr_0.98fr] md:items-center">
               <div className="flex flex-col justify-between space-y-5">
                 <div>
                   <div className="inline-flex items-center gap-2 rounded-full bg-[#FAF8F5] px-3.5 py-1 text-xs font-bold uppercase tracking-[0.16em] text-[#A68B6D] ring-1 ring-[#C9A77A]/35">
@@ -365,7 +365,7 @@ export default function HomePage() {
           {/* Subtle Horizontal Connector Line on Desktop */}
           <div className="pointer-events-none absolute left-10 right-10 top-11 hidden h-px bg-gradient-to-r from-[#C9A77A]/20 via-[#C9A77A]/60 to-[#C9A77A]/20 lg:block" />
 
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
+          <div className="grid grid-cols-1 gap-4 sm:gap-5 sm:grid-cols-2 lg:grid-cols-5 w-full min-w-0">
             <ProcessStep
               number="01"
               icon={Camera}
@@ -409,9 +409,9 @@ export default function HomePage() {
           4. FULL-WIDTH BEFORE / AFTER SHOWCASE — ẢNH LỚN & RÕ NÉT
       ========================================================= */}
       <section className="overflow-hidden rounded-[2rem] border border-[#2D332C]/10 bg-gradient-to-br from-[#FAF8F5] via-white to-[#F3EFEA] p-6 shadow-soft sm:p-8 md:p-12 xl:p-14">
-        <div className="grid items-center gap-10 xl:grid-cols-[1.22fr_0.78fr] xl:gap-14">
+        <div className="grid grid-cols-1 items-center gap-8 sm:gap-10 xl:grid-cols-[1.22fr_0.78fr] xl:gap-14 w-full min-w-0">
           {/* Left (~61% on Desktop): Large Before / After Visual Comparison */}
-          <div className="space-y-5">
+          <div className="space-y-5 w-full min-w-0">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="inline-flex items-center gap-2 rounded-full border border-[#C9A77A]/40 bg-white px-3.5 py-1.5 text-xs font-semibold text-[#2D332C]">
                 <Eye size={14} className="text-[#A68B6D]" /> Minh họa trực quan chế độ đối chiếu Before / After
@@ -421,7 +421,7 @@ export default function HomePage() {
               </span>
             </div>
 
-            <div className="grid gap-5 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 w-full min-w-0">
               {/* Before Panel */}
               <div className="group relative overflow-hidden rounded-3xl border border-[#2D332C]/10 bg-white p-3 shadow-card">
                 <div className="relative aspect-[16/11] min-h-[240px] overflow-hidden rounded-2xl bg-[#FAF8F5] sm:min-h-[280px]">
@@ -472,7 +472,7 @@ export default function HomePage() {
           </div>
 
           {/* Right (~39% on Desktop): Explanation & Direct Action */}
-          <div className="space-y-6">
+          <div className="space-y-6 w-full min-w-0">
             <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-[#A68B6D]">
               <Wand2 size={15} /> Trực quan hóa trước khi mua
             </span>

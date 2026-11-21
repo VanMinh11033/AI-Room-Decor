@@ -83,8 +83,8 @@ export default function CartPage() {
           <Link href="/products" className="primary-cta mt-6">Xem sản phẩm</Link>
         </SectionCard>
       ) : (
-        <div className="grid gap-6 lg:grid-cols-[1.4fr_0.6fr]">
-          <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.4fr_0.6fr] w-full min-w-0">
+          <div className="space-y-4 w-full min-w-0">
             {items.map((item) => {
               const product = item.product;
               const image = product?.images.find((img) => img.is_primary)?.image_url || product?.images[0]?.image_url;

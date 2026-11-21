@@ -67,7 +67,7 @@ export default function ProductsPage() {
       />
 
       <SectionCard>
-        <form ref={formRef} onSubmit={onSubmit} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <form ref={formRef} onSubmit={onSubmit} className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 w-full min-w-0">
           <label className="relative sm:col-span-2">
             <Search size={17} className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/40" />
             <input name="search" className="premium-input w-full pl-10" placeholder="Tìm sản phẩm, tag, mô tả..." />
@@ -89,7 +89,7 @@ export default function ProductsPage() {
       {loading && <p className="font-semibold text-charcoal/60">Đang tải sản phẩm...</p>}
       {error && <p className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">{error}</p>}
 
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 w-full min-w-0">
         {products.map((product) => <ProductCard key={product.id} product={product} />)}
       </div>
 
