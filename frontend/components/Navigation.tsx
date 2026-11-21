@@ -61,15 +61,7 @@ export function Navigation() {
   }
 
   if (checked && role === "ADMIN") {
-    items.push(
-      { href: "/admin", label: "Tổng quan" },
-      { href: "/admin/users", label: "Người dùng" },
-      { href: "/admin/products", label: "Sản phẩm" },
-      { href: "/admin/product-images", label: "Ảnh chờ duyệt" },
-      { href: "/admin/orders", label: "Đơn hàng" },
-      { href: "/admin/room-projects", label: "Dự án phòng" },
-      { href: "/admin/ai-usage", label: "Theo dõi AI" }
-    );
+    items.push({ href: "/admin", label: "Quản trị" });
   }
 
   return (

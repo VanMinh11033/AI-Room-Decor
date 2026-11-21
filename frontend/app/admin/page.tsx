@@ -20,6 +20,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { apiFetch } from "@/lib/api";
 import { displayRoomType, displayStatus } from "@/lib/display";
 import type { AdminDashboard } from "@/types/api";
+import { AdminStatusBadge } from "@/components/admin/AdminPrimitives";
 
 export default function AdminPage() {
   const { loading } = useAuth("ADMIN");
@@ -227,22 +228,24 @@ export default function AdminPage() {
         {cards.map((card) => {
           const Icon = card.icon;
           return (
-            <Link key={card.label} href={card.href} className="admin-kpi-card group block">
-              <div className="flex items-start justify-between gap-3">
-                <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#C9A77A]/35 bg-[#FAF8F5] text-[#2D332C] transition-colors duration-200 group-hover:border-[#C9A77A] group-hover:bg-[#2D332C] group-hover:text-[#C9A77A]">
-                  <Icon size={20} />
-                </span>
-                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#FAF8F5] text-[#A68B6D] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-[#2D332C]">
-                  <ArrowUpRight size={14} />
-                </span>
+            <Link key={card.label} href={card.href} className="admin-kpi-card group flex h-full flex-col justify-between">
+              <div>
+                <div className="flex items-start justify-between gap-3">
+                  <span className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#C9A77A]/35 bg-[#FAF8F5] text-[#2D332C] transition-colors duration-200 group-hover:border-[#C9A77A] group-hover:bg-[#2D332C] group-hover:text-[#C9A77A]">
+                    <Icon size={20} />
+                  </span>
+                  <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#FAF8F5] text-[#A68B6D] transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-[#2D332C]">
+                    <ArrowUpRight size={14} />
+                  </span>
+                </div>
+                <p className="mt-4 text-xs font-semibold uppercase tracking-[0.12em] text-[#777777]">
+                  {card.label}
+                </p>
+                <p className="mt-1.5 text-3xl font-bold tracking-tight text-[#242424]">
+                  {card.value ?? "-"}
+                </p>
               </div>
-              <p className="mt-4 text-xs font-semibold uppercase tracking-[0.12em] text-[#777777]">
-                {card.label}
-              </p>
-              <p className="mt-1.5 text-3xl font-bold tracking-tight text-[#242424]">
-                {card.value ?? "-"}
-              </p>
-              <p className="mt-1 text-xs text-[#777777]">{card.sub}</p>
+              <p className="mt-2 border-t border-[#2D332C]/5 pt-2 text-xs text-[#777777]">{card.sub}</p>
             </Link>
           );
         })}
@@ -282,9 +285,7 @@ export default function AdminPage() {
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-[#242424]">#{order.id}</span>
-                      <span className={statusBadgeClass(order.status)}>
-                        {displayStatus(order.status)}
-                      </span>
+                      <AdminStatusBadge status={order.status} size="sm" />
                     </div>
                     <span className="text-sm font-bold text-[#A68B6D]">
                       {money(order.total_amount)}
@@ -341,9 +342,7 @@ export default function AdminPage() {
                     <p className="font-bold text-[#242424]">
                       #{project.id} · {project.title}
                     </p>
-                    <span className={statusBadgeClass(project.status)}>
-                      {displayStatus(project.status)}
-                    </span>
+                    <AdminStatusBadge status={project.status} size="sm" />
                   </div>
                   <p className="mt-1.5 text-sm text-[#242424]/80">
                     {project.customer?.full_name || "Khách hàng"} · {displayStatus(project.status)}
@@ -400,9 +399,7 @@ export default function AdminPage() {
                     <p className="font-bold text-[#242424]">
                       {log.provider} · {log.task_type}
                     </p>
-                    <span className={statusBadgeClass(log.status)}>
-                      {displayStatus(log.status)}
-                    </span>
+                    <AdminStatusBadge status={log.status} size="sm" />
                   </div>
                   <p className="mt-1 text-sm font-medium text-[#A68B6D]">{log.model}</p>
                   <p className="mt-1.5 text-xs text-[#777777]">
@@ -489,19 +486,6 @@ function calcPercent(part?: number, total?: number): number | null {
   return Math.round((part / total) * 100);
 }
 
-function statusBadgeClass(status?: string | null) {
-  const normalized = String(status || "").toUpperCase();
-  if (normalized === "COMPLETED" || normalized === "SUCCESS" || normalized === "ACTIVE" || normalized === "APPROVED") {
-    return "inline-flex shrink-0 items-center rounded-full border border-emerald-700/20 bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-800";
-  }
-  if (normalized === "PENDING" || normalized === "PROCESSING" || normalized === "CONFIRMED" || normalized === "SHIPPED" || normalized === "ANALYZING" || normalized === "GENERATING") {
-    return "inline-flex shrink-0 items-center rounded-full border border-[#C9A77A]/45 bg-[#C9A77A]/15 px-2.5 py-0.5 text-[11px] font-bold text-[#2D332C]";
-  }
-  if (normalized === "CANCELLED" || normalized === "FAILED" || normalized === "REJECTED") {
-    return "inline-flex shrink-0 items-center rounded-full border border-red-300 bg-red-50 px-2.5 py-0.5 text-[11px] font-bold text-red-700";
-  }
-  return "inline-flex shrink-0 items-center rounded-full border border-[#2D332C]/15 bg-[#FAF8F5] px-2.5 py-0.5 text-[11px] font-bold text-[#2D332C]";
-}
 
 function money(value: string | number) {
   return `${Number(value || 0).toLocaleString("vi-VN")} đ`;

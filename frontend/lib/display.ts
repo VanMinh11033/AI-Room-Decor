@@ -130,6 +130,12 @@ export function displayStatus(value: NullableText) {
   return lookup(value, statusLabels);
 }
 
+export function displayRole(value: NullableText) {
+  if (value === "ADMIN") return "Quản trị viên";
+  if (value === "CUSTOMER") return "Khách hàng";
+  return String(value || "");
+}
+
 export function joinDisplay<T>(items: T[] | undefined, selector: (item: T) => string, fallback = "-") {
   const text = (items || []).map(selector).filter(Boolean).join(", ");
   return text || fallback;
