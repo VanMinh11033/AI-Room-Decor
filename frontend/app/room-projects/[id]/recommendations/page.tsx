@@ -274,7 +274,7 @@ export default function RecommendationsPage() {
                 </span>
               )}
             </div>
-            <h1 className="mt-4 text-3xl font-black tracking-tight text-ink md:text-5xl">Gợi ý sản phẩm dành cho căn phòng này</h1>
+            <h1 className="mt-4 text-2xl sm:text-3xl md:text-5xl font-black tracking-tight text-ink break-words">Gợi ý sản phẩm dành cho căn phòng này</h1>
             <p className="mt-4 max-w-2xl text-lg leading-8 text-charcoal/65">
               Hệ thống đã phân tích không gian, kết hợp sở thích cá nhân và ngân sách để tính toán tổ hợp nội thất hài hòa nhất. Bạn có thể xem giải thích lý do bên dưới hoặc bấm nút để tạo ảnh phối cảnh ngay.
             </p>
@@ -305,13 +305,13 @@ export default function RecommendationsPage() {
       </div>
 
       {/* 2. Hero Action Card & Budget Bundle Optimizer */}
-      <div className="overflow-hidden rounded-3xl border-2 border-clay bg-gradient-to-r from-clay/5 via-white to-ivory p-6 shadow-md md:p-8">
+      <div className="overflow-hidden rounded-3xl border-2 border-clay bg-gradient-to-r from-clay/5 via-white to-ivory p-4 sm:p-6 md:p-8 shadow-md">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-3 flex-1">
+          <div className="space-y-3 flex-1 min-w-0">
             <div className="inline-flex items-center gap-2 rounded-full bg-clay px-3 py-1 text-xs font-black uppercase tracking-wider text-white">
               <Sparkles size={14} /> {isAIBundle ? "Tự động 100% · Một chạm tạo thiết kế" : "Tùy chọn của bạn · Tạo thiết kế AI"}
             </div>
-            <h2 className="text-2xl font-black text-ink md:text-3xl">Tạo phương án thiết kế phòng với AI</h2>
+            <h2 className="text-xl sm:text-2xl font-black text-ink md:text-3xl break-words">Tạo phương án thiết kế phòng với AI</h2>
             <p className="max-w-xl text-sm leading-relaxed text-charcoal/70">
               {selectedProducts.length > 0 ? (
                 isAIBundle ? (
@@ -332,11 +332,11 @@ export default function RecommendationsPage() {
 
             {/* Showcase các sản phẩm được chọn */}
             {selectedProducts.length > 0 && (
-              <div className="flex flex-wrap gap-3 pt-1">
+              <div className="flex flex-wrap gap-2.5 sm:gap-3 pt-1">
                 {selectedProducts.map((item) => {
                   const img = item.product.images.find((i) => i.is_primary)?.image_url || item.product.images[0]?.image_url;
                   return (
-                    <div key={item.product.id} className="flex items-center gap-3 rounded-2xl border border-clay/20 bg-white/90 p-2.5 shadow-sm">
+                    <div key={item.product.id} className="flex items-center gap-3 rounded-2xl border border-clay/20 bg-white/90 p-2.5 shadow-sm w-full sm:w-auto">
                       <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl bg-ivory">
                         {img ? (
                           <img src={apiAssetUrl(img)} alt={item.product.name} className="h-full w-full object-cover" />
@@ -344,7 +344,7 @@ export default function RecommendationsPage() {
                           <div className="h-full w-full bg-stone" />
                         )}
                       </div>
-                      <div className="pr-2">
+                      <div className="min-w-0 pr-2">
                         <div className="text-xs font-black text-ink line-clamp-1">{item.product.name}</div>
                         <div className="text-[11px] font-bold text-clay">{Number(item.product.price).toLocaleString("vi-VN")} đ</div>
                       </div>
@@ -355,9 +355,9 @@ export default function RecommendationsPage() {
             )}
 
             {/* V1.5 PRO: Budget Bundle Summary & Explanation */}
-            <div className="mt-4 flex flex-wrap items-center gap-4 rounded-2xl border border-ink/10 bg-white/80 p-3.5 text-xs text-charcoal/75">
+            <div className="mt-4 flex flex-wrap items-center gap-2 sm:gap-4 rounded-2xl border border-ink/10 bg-white/80 p-3 sm:p-3.5 text-xs text-charcoal/75">
               <div className="flex items-center gap-2">
-                <Wallet size={16} className="text-clay" />
+                <Wallet size={16} className="text-clay shrink-0" />
                 <span>Tổng giá bộ nội thất: <strong className="text-ink font-black">{totalSelectedPrice.toLocaleString("vi-VN")} đ</strong></span>
               </div>
               {userBudgetMax !== null && (
@@ -396,15 +396,15 @@ export default function RecommendationsPage() {
           </div>
 
           {/* Nút bấm DUY NHẤT */}
-          <div className="flex flex-col items-stretch lg:items-end gap-2 flex-shrink-0">
+          <div className="flex flex-col items-stretch lg:items-end gap-2 flex-shrink-0 w-full lg:w-auto">
             <button
               type="button"
               onClick={handleCreateAIDesign}
               disabled={generating || selectedIds.length === 0}
-              className="primary-cta inline-flex items-center justify-center gap-3 rounded-2xl px-10 py-5 text-lg font-black shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
+              className="primary-cta w-full lg:w-auto inline-flex items-center justify-center gap-2.5 sm:gap-3 rounded-2xl px-5 py-3.5 sm:px-10 sm:py-5 text-sm sm:text-lg font-black shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
             >
-              {generating ? <Loader2 size={24} className="animate-spin" /> : <Sparkles size={24} />}
-              <span>{generating ? "Đang tạo thiết kế nội thất AI..." : "✨ TẠO THIẾT KẾ AI"}</span>
+              {generating ? <Loader2 size={20} className="animate-spin shrink-0 sm:h-6 sm:w-6" /> : <Sparkles size={20} className="shrink-0 sm:h-6 sm:w-6" />}
+              <span>{generating ? "Đang tạo thiết kế AI..." : "✨ TẠO THIẾT KẾ AI"}</span>
             </button>
             <span className="text-[11px] text-center lg:text-right font-medium text-charcoal/50">
               Tạo ảnh phối cảnh ánh sáng tự nhiên qua Cloudflare FLUX
@@ -429,12 +429,12 @@ export default function RecommendationsPage() {
             Điểm phù hợp (0–100) được tính dựa trên 8 tiêu chí MCDA (phong cách, loại phòng, màu sắc, vật liệu, ngân sách, công năng, không gian).
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <select value={category} onChange={(event) => setCategory(event.target.value)} className="premium-input py-2">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-2 w-full xl:w-auto">
+          <select value={category} onChange={(event) => setCategory(event.target.value)} className="premium-input py-2 w-full sm:w-auto">
             <option value="">Tất cả danh mục</option>
             {categories.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
           </select>
-          <select value={sort} onChange={(event) => setSort(event.target.value)} className="premium-input py-2">
+          <select value={sort} onChange={(event) => setSort(event.target.value)} className="premium-input py-2 w-full sm:w-auto">
             <option value="match">Độ phù hợp cao nhất</option>
             <option value="price_asc">Giá thấp đến cao</option>
             <option value="price_desc">Giá cao đến thấp</option>

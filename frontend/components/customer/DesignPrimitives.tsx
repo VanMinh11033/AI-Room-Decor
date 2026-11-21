@@ -22,7 +22,7 @@ export function PageHeader({
             {eyebrow}
           </div>
         )}
-        <h1 className="mt-4 max-w-4xl text-3xl font-black tracking-tight text-ink md:text-5xl">{title}</h1>
+        <h1 className="mt-4 max-w-4xl text-2xl sm:text-3xl md:text-5xl font-black tracking-tight text-ink break-words">{title}</h1>
         {description && <p className="mt-4 max-w-2xl text-base leading-7 text-charcoal/70 md:text-lg">{description}</p>}
       </div>
       {action}
@@ -82,11 +82,11 @@ export function ScoreBadge({ score }: { score: number }) {
 
 export function RoomFlowStepper({ steps }: { steps: { label: string; state: StepState }[] }) {
   return (
-    <div className="grid gap-3 rounded-3xl border border-ink/10 bg-white/85 p-3 shadow-card backdrop-blur sm:grid-cols-5">
+    <div className="flex sm:grid gap-2 sm:gap-3 rounded-2xl sm:rounded-3xl border border-ink/10 bg-white/85 p-2 sm:p-3 shadow-card backdrop-blur overflow-x-auto sm:grid-cols-5">
       {steps.map((step, index) => (
         <div
           key={step.label}
-          className={`rounded-2xl px-3 py-3 transition ${
+          className={`shrink-0 min-w-[130px] sm:min-w-0 rounded-xl sm:rounded-2xl px-2.5 py-2 sm:px-3 sm:py-3 transition ${
             step.state === "current"
               ? "border border-clay/30 bg-clay/10 shadow-sm"
               : step.state === "done"
@@ -98,7 +98,7 @@ export function RoomFlowStepper({ steps }: { steps: { label: string; state: Step
         >
           <div className="flex items-center gap-2">
             <span
-              className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-black ${
+              className={`flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full text-xs font-black ${
                 step.state === "done"
                   ? "bg-moss text-white"
                   : step.state === "current"
@@ -108,9 +108,11 @@ export function RoomFlowStepper({ steps }: { steps: { label: string; state: Step
                       : "bg-white text-charcoal/45"
               }`}
             >
-              {step.state === "done" ? <Check size={16} /> : index + 1}
+              {step.state === "done" ? <Check size={14} className="sm:hidden" /> : null}
+              {step.state === "done" ? <Check size={16} className="hidden sm:block" /> : null}
+              {step.state !== "done" ? index + 1 : null}
             </span>
-            <span className="text-sm font-black text-ink">{step.label}</span>
+            <span className="text-xs sm:text-sm font-black text-ink truncate">{step.label}</span>
           </div>
         </div>
       ))}

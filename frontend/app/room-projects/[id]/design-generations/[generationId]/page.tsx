@@ -98,7 +98,7 @@ export default function DesignGenerationPage() {
           <Link href={`/room-projects/${params.id}/recommendations`} className="inline-flex items-center gap-2 text-sm font-semibold text-black/60">
             <ChevronLeft size={16} /> Quay lại gợi ý
           </Link>
-          <h1 className="mt-4 text-4xl font-bold tracking-normal text-ink">
+          <h1 className="mt-4 text-2xl sm:text-3xl md:text-4xl font-bold tracking-normal text-ink break-words">
             {generation.provider === "cloudflare"
               ? "Phương án phối cảnh AI (Cloudflare FLUX)"
               : generation.provider === "composite"
@@ -109,10 +109,10 @@ export default function DesignGenerationPage() {
           </h1>
           <p className="mt-2 text-black/60">{project.title}</p>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
           <Link
             href={`/room-projects/${params.id}/recommendations`}
-            className="inline-flex items-center justify-center gap-2 rounded-2xl bg-ink px-6 py-3 text-sm font-black text-white hover:bg-black transition-colors shadow-sm"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-2xl bg-ink px-6 py-3.5 sm:py-3 text-sm font-black text-white hover:bg-black transition-colors shadow-sm"
           >
             <Sparkles size={16} />
             Tạo phương án khác

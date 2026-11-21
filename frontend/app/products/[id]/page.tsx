@@ -54,7 +54,7 @@ export default function ProductDetailPage() {
           </div>
         </div>
         {product.images.length > 0 && (
-          <div className="grid grid-cols-5 gap-3">
+          <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 sm:gap-3">
             {product.images.map((image) => (
               <button
                 key={image.id}
@@ -73,10 +73,10 @@ export default function ProductDetailPage() {
       <div className="space-y-5">
         <SectionCard>
           <p className="text-sm font-black uppercase tracking-[0.16em] text-clay">{displayCategory(product.category.name)}</p>
-          <h1 className="mt-3 text-3xl font-black tracking-tight text-ink md:text-5xl">{product.name}</h1>
+          <h1 className="mt-3 text-2xl sm:text-3xl font-black tracking-tight text-ink md:text-5xl break-words">{product.name}</h1>
           <p className="mt-4 leading-7 text-charcoal/70">{product.description}</p>
-          <p className="mt-6 text-3xl font-black text-clay">{Number(product.price).toLocaleString("vi-VN")} đ</p>
-          <button onClick={handleAddToCart} disabled={adding} className="primary-cta mt-7">
+          <p className="mt-6 text-2xl sm:text-3xl font-black text-clay">{Number(product.price).toLocaleString("vi-VN")} đ</p>
+          <button onClick={handleAddToCart} disabled={adding} className="primary-cta mt-7 w-full sm:w-auto">
             <ShoppingCart size={18} /> {adding ? "Đang thêm..." : "Thêm vào giỏ hàng"}
           </button>
           {cartMessage && <p className="mt-3 text-sm font-bold text-green-700">{cartMessage}</p>}

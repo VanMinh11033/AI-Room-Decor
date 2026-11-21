@@ -40,7 +40,7 @@ export default function HomePage() {
               </span>
             </div>
 
-            <h1 className="motion-fade-up motion-delay-100 max-w-2xl text-3xl font-bold leading-[1.12] tracking-tight text-[#242424] sm:text-4xl md:text-5xl xl:text-[3.4rem] 2xl:text-[3.75rem]">
+            <h1 className="motion-fade-up motion-delay-100 max-w-2xl text-2xl sm:text-4xl md:text-5xl xl:text-[3.4rem] 2xl:text-[3.75rem] font-bold leading-[1.15] tracking-tight text-[#242424] break-words">
               Kiến tạo không gian sống chuẩn mực cùng{" "}
               <span className="relative inline-block text-[#2D332C]">
                 <span className="relative z-10 text-[#A68B6D]">Trí tuệ Nhân tạo</span>
@@ -54,17 +54,17 @@ export default function HomePage() {
             </p>
 
             {/* Primary & Secondary CTAs */}
-            <div className="flex flex-wrap items-center gap-4 pt-1">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 pt-1">
               <Link
                 href="/room-projects/new"
-                className="motion-fade-up motion-delay-200 primary-cta group border border-[#C9A77A]/40 bg-[#2D332C] px-7 py-4 text-sm font-semibold text-[#FAF8F5] hover:bg-[#A68B6D] hover:text-white"
+                className="motion-fade-up motion-delay-200 primary-cta group w-full sm:w-auto border border-[#C9A77A]/40 bg-[#2D332C] px-5 py-3.5 sm:px-7 sm:py-4 text-sm font-semibold text-[#FAF8F5] hover:bg-[#A68B6D] hover:text-white"
               >
                 Bắt đầu thiết kế với AI
                 <ArrowRight size={18} className="transition-transform duration-300 group-hover:translate-x-1" />
               </Link>
               <Link
                 href="/products"
-                className="motion-fade-up motion-delay-300 secondary-cta group px-7 py-4 text-sm font-semibold"
+                className="motion-fade-up motion-delay-300 secondary-cta group w-full sm:w-auto px-5 py-3.5 sm:px-7 sm:py-4 text-sm font-semibold"
               >
                 Khám phá nội thất
                 <ArrowUpRight
@@ -105,11 +105,11 @@ export default function HomePage() {
                   className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
                 />
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#2D332C]/50 via-transparent to-transparent" />
-                <div className="absolute bottom-3 left-3 right-3 flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/25 bg-[#2D332C]/80 px-4 py-2.5 text-xs text-[#FAF8F5] backdrop-blur-md sm:bottom-4 sm:left-4 sm:right-4">
-                  <span className="font-semibold tracking-wide">
-                    Không gian tham khảo · Modern Luxury & Minimalist
+                <div className="absolute bottom-2.5 left-2.5 right-2.5 sm:bottom-4 sm:left-4 sm:right-4 flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 rounded-xl sm:rounded-2xl border border-white/25 bg-[#2D332C]/85 px-3 py-2 sm:px-4 sm:py-2.5 text-[11px] sm:text-xs text-[#FAF8F5] backdrop-blur-md">
+                  <span className="font-semibold tracking-wide truncate max-w-[210px] sm:max-w-none">
+                    Không gian tham khảo · Modern Luxury
                   </span>
-                  <span className="rounded-full bg-[#C9A77A]/25 px-3 py-0.5 font-semibold text-[#C9A77A]">
+                  <span className="rounded-full bg-[#C9A77A]/25 px-2.5 py-0.5 font-semibold text-[#C9A77A]">
                     Interior Studio
                   </span>
                 </div>
@@ -172,7 +172,7 @@ export default function HomePage() {
             <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-[#A68B6D]">
               <Compass size={15} /> Hệ sinh thái tính năng AI
             </span>
-            <h2 className="mt-2.5 text-3xl font-bold tracking-tight text-[#242424] md:text-4xl">
+            <h2 className="mt-2.5 text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#242424] break-words">
               Nền tảng thiết kế & mua sắm nội thất khép kín
             </h2>
           </div>
@@ -190,7 +190,7 @@ export default function HomePage() {
                   <div className="inline-flex items-center gap-2 rounded-full bg-[#FAF8F5] px-3.5 py-1 text-xs font-bold uppercase tracking-[0.16em] text-[#A68B6D] ring-1 ring-[#C9A77A]/35">
                     <ScanSearch size={14} /> 01 · AI Room Analysis
                   </div>
-                  <h3 className="mt-4 text-2xl font-bold text-[#242424] xl:text-3xl">
+                  <h3 className="mt-4 text-xl sm:text-2xl font-bold text-[#242424] xl:text-3xl break-words">
                     Phân tích không gian phòng bằng thị giác AI
                   </h3>
                   <p className="mt-3 text-sm leading-7 text-[#777777] md:text-base">
@@ -236,7 +236,7 @@ export default function HomePage() {
               <div className="inline-flex items-center gap-2 rounded-full bg-[#FAF8F5] px-3.5 py-1 text-xs font-bold uppercase tracking-[0.16em] text-[#A68B6D] ring-1 ring-[#C9A77A]/35">
                 <SlidersHorizontal size={14} /> 02 · Personalized Recommendations
               </div>
-              <h3 className="mt-4 text-2xl font-bold text-[#242424] xl:text-3xl">
+              <h3 className="mt-4 text-xl sm:text-2xl font-bold text-[#242424] xl:text-3xl break-words">
                 Gợi ý nội thất cá nhân hóa theo luật
               </h3>
               <p className="mt-3 text-sm leading-7 text-[#777777] md:text-base">
@@ -349,7 +349,7 @@ export default function HomePage() {
             <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-[#A68B6D]">
               <Clock size={15} /> Quy trình thực tế trên hệ thống
             </span>
-            <h2 className="mt-2.5 text-3xl font-bold tracking-tight text-[#242424] md:text-4xl">
+            <h2 className="mt-2.5 text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#242424] break-words">
               5 bước từ bức ảnh căn phòng đến không gian hoàn thiện
             </h2>
           </div>
@@ -476,7 +476,7 @@ export default function HomePage() {
             <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-[#A68B6D]">
               <Wand2 size={15} /> Trực quan hóa trước khi mua
             </span>
-            <h2 className="text-3xl font-bold tracking-tight text-[#242424] md:text-4xl">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#242424] break-words">
               So sánh trực diện Trước & Sau ngay trên từng dự án phòng
             </h2>
             <p className="text-base leading-7 text-[#777777]">
@@ -504,12 +504,12 @@ export default function HomePage() {
               </li>
             </ul>
 
-            <div className="flex flex-wrap gap-3.5 pt-2">
-              <Link href="/room-projects/new" className="primary-cta group px-6 py-3.5">
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+              <Link href="/room-projects/new" className="primary-cta group w-full sm:w-auto px-6 py-3.5">
                 Tạo dự án phòng của bạn
                 <ArrowRight size={17} className="transition-transform duration-300 group-hover:translate-x-1" />
               </Link>
-              <Link href="/room-projects" className="secondary-cta px-6 py-3.5">
+              <Link href="/room-projects" className="secondary-cta w-full sm:w-auto px-6 py-3.5">
                 Xem các dự án đã lưu
               </Link>
             </div>
@@ -520,7 +520,7 @@ export default function HomePage() {
       {/* =========================================================
           5. FULL-WIDTH FINAL STUDIO CALL TO ACTION BANNER
       ========================================================= */}
-      <section className="relative overflow-hidden rounded-[2rem] border border-[#C9A77A]/35 bg-[#2D332C] px-6 py-12 text-[#FAF8F5] shadow-luxury sm:px-10 md:px-14 md:py-16">
+      <section className="relative overflow-hidden rounded-[2rem] border border-[#C9A77A]/35 bg-[#2D332C] px-5 py-10 sm:px-10 md:px-14 md:py-16 text-[#FAF8F5] shadow-luxury">
         <div className="pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full bg-[#C9A77A]/15 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-24 -left-20 h-80 w-80 rounded-full bg-[#A68B6D]/15 blur-3xl" />
 
@@ -529,7 +529,7 @@ export default function HomePage() {
             <span className="inline-flex items-center gap-2 rounded-full border border-[#C9A77A]/40 bg-white/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#C9A77A]">
               <Sparkles size={14} /> Bắt đầu hành trình Decor
             </span>
-            <h2 className="text-3xl font-bold tracking-tight text-white md:text-4xl">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-white break-words">
               Sẵn sàng biến căn phòng của bạn thành không gian đáng sống?
             </h2>
             <p className="text-base leading-7 text-[#FAF8F5]/80 md:text-lg">
@@ -540,14 +540,14 @@ export default function HomePage() {
           <div className="flex w-full shrink-0 flex-col gap-3 sm:w-auto sm:flex-row">
             <Link
               href="/room-projects/new"
-              className="group inline-flex items-center justify-center gap-2.5 rounded-xl border border-[#C9A77A]/50 bg-[#A68B6D] px-7 py-4 text-sm font-semibold tracking-wide text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#C9A77A] hover:text-[#242424] active:scale-[0.98]"
+              className="group inline-flex items-center justify-center gap-2.5 rounded-xl border border-[#C9A77A]/50 bg-[#A68B6D] px-5 py-3.5 sm:px-7 sm:py-4 text-sm font-semibold tracking-wide text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#C9A77A] hover:text-[#242424] active:scale-[0.98]"
             >
               Bắt đầu thiết kế với AI
               <ArrowRight size={18} className="transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
             <Link
               href="/products"
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-7 py-4 text-sm font-semibold tracking-wide text-[#FAF8F5] backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-[#C9A77A] hover:bg-white hover:text-[#242424] active:scale-[0.98]"
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-5 py-3.5 sm:px-7 sm:py-4 text-sm font-semibold tracking-wide text-[#FAF8F5] backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-[#C9A77A] hover:bg-white hover:text-[#242424] active:scale-[0.98]"
             >
               Khám phá Catalog
             </Link>

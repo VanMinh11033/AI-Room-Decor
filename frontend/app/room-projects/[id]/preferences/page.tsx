@@ -151,11 +151,11 @@ export default function RoomPreferencesPage() {
             <div className="mt-8 inline-flex items-center gap-2 rounded-full bg-stone px-3 py-1 text-sm font-semibold text-clay">
               <Sparkles size={16} /> Cá nhân hóa decor
             </div>
-            <h1 className="mt-4 text-4xl font-bold tracking-normal text-ink">Cá nhân hóa không gian của bạn</h1>
-            <p className="mt-4 max-w-2xl text-lg leading-8 text-black/65">
+            <h1 className="mt-4 text-2xl sm:text-3xl md:text-4xl font-bold tracking-normal text-ink break-words">Cá nhân hóa không gian của bạn</h1>
+            <p className="mt-4 max-w-2xl text-base sm:text-lg leading-7 sm:leading-8 text-black/65">
               Cho AI Room Decor biết phong cách, ngân sách và những món nội thất bạn mong muốn.
             </p>
-            <div className="mt-6 grid gap-3 sm:grid-cols-4">
+            <div className="mt-6 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
               <Step label="Ảnh phòng" state={project.room_image_url ? "done" : "pending"} />
               <Step label="Phân tích AI" state={analysis?.status === "COMPLETED" ? "done" : "pending"} />
               <Step label="Sở thích decor" state="current" />
@@ -249,11 +249,11 @@ export default function RoomPreferencesPage() {
             {saved ? <p className="font-semibold text-green-700">Bạn đã hoàn tất thông tin cá nhân hóa.</p> : <p className="font-semibold text-ink">Thông tin cá nhân hóa đã sẵn sàng để lưu.</p>}
             <p className="text-sm text-black/55">Bước tiếp theo: Nhận gợi ý nội thất phù hợp từ catalog thật.</p>
           </div>
-          <div className="flex flex-wrap gap-3">
-            <Link href={`/room-projects/${project.id}/recommendations`} className={`rounded-md border border-black/10 px-4 py-2 text-sm font-semibold ${saved ? "bg-white text-ink" : "pointer-events-none bg-stone text-black/40"}`}>
+          <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 w-full sm:w-auto">
+            <Link href={`/room-projects/${project.id}/recommendations`} className={`w-full sm:w-auto text-center rounded-xl border border-black/10 px-4 py-3 sm:py-2 text-sm font-semibold ${saved ? "bg-white text-ink shadow-xs" : "pointer-events-none bg-stone text-black/40"}`}>
               Nhận gợi ý nội thất
             </Link>
-            <button disabled={saving} onClick={savePreferences} className="rounded-md bg-ink px-5 py-2 text-sm font-semibold text-white transition hover:bg-black disabled:opacity-50">
+            <button disabled={saving} onClick={savePreferences} className="w-full sm:w-auto rounded-xl bg-ink px-5 py-3 sm:py-2 text-sm font-semibold text-white transition hover:bg-black disabled:opacity-50 shadow-xs">
               {saving ? "Đang lưu..." : "Lưu sở thích decor"}
             </button>
           </div>
