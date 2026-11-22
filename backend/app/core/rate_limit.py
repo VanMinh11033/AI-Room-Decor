@@ -88,7 +88,7 @@ class SlidingWindowRateLimiter:
 
 
 # Standard rate limiters for sensitive endpoints
-auth_rate_limiter = SlidingWindowRateLimiter(max_requests=5, window_seconds=60, scope="auth")
+auth_rate_limiter = SlidingWindowRateLimiter(max_requests=10, window_seconds=60, scope="auth")
 room_upload_rate_limiter = SlidingWindowRateLimiter(max_requests=10, window_seconds=300, scope="room_upload")
 room_analyze_rate_limiter = SlidingWindowRateLimiter(max_requests=5, window_seconds=300, scope="room_analyze")
 design_generation_rate_limiter = SlidingWindowRateLimiter(max_requests=3, window_seconds=300, scope="design_generation")

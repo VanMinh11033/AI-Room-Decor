@@ -1,6 +1,6 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.database import get_db
 from app.core.security import decode_token
@@ -18,7 +18,12 @@ def get_current_user(
     user_id = decode_token(credentials.credentials, "access")
     if user_id is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-    user = db.get(User, int(user_id))
+    user = (
+        db.query(User)
+        .options(joinedload(User.role))
+        .filter(User.id == int(user_id))
+        .first()
+    )
     if user is None or not user.is_active:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User is inactive or missing")
     return user

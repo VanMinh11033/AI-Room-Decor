@@ -38,7 +38,7 @@ class UserRead(BaseModel):
     email: str
     full_name: str
     is_active: bool
-    role: RoleRead
+    role: RoleRead | None = None
     created_at: datetime
     updated_at: datetime
 

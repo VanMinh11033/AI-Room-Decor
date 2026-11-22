@@ -11,7 +11,8 @@ export function useAuth(requiredRole?: "ADMIN" | "CUSTOMER") {
   useEffect(() => {
     apiFetch<User>("/api/auth/me")
       .then((me) => {
-        if (requiredRole && me.role.name !== requiredRole) {
+        // ADMIN can access all areas. Only non-ADMIN is restricted from ADMIN pages.
+        if (requiredRole === "ADMIN" && me.role?.name !== "ADMIN") {
           window.location.href = "/";
           return;
         }
@@ -19,7 +20,12 @@ export function useAuth(requiredRole?: "ADMIN" | "CUSTOMER") {
       })
       .catch(() => {
         clearTokens();
-        window.location.href = "/login";
+        const currentPath = typeof window !== "undefined" ? window.location.pathname : "";
+        const loginUrl =
+          currentPath && currentPath !== "/" && currentPath !== "/login"
+            ? `/login?redirect=${encodeURIComponent(currentPath)}`
+            : "/login";
+        window.location.href = loginUrl;
       })
       .finally(() => setLoading(false));
   }, [requiredRole]);

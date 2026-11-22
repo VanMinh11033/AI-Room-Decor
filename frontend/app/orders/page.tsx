@@ -57,7 +57,11 @@ export default function OrdersPage() {
               </div>
               <div className="flex items-center gap-4 sm:flex-col sm:items-end">
                 <span className="rounded-full bg-ivory px-3 py-1 text-sm font-black text-clay">{displayStatus(order.status)}</span>
-                <span className="text-xl font-black text-clay">{Number(order.total_amount).toLocaleString("vi-VN")} đ</span>
+                <span className="text-xl font-black text-clay">
+                  {order.total_amount != null
+                    ? `${Number(order.total_amount).toLocaleString("vi-VN")} đ`
+                    : "Chờ báo phí"}
+                </span>
               </div>
             </Link>
           ))}

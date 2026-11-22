@@ -1,7 +1,9 @@
 import json
+import logging
 from decimal import Decimal
 
 from fastapi import HTTPException, status
+from pydantic import ValidationError
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.entities import (
@@ -47,9 +49,12 @@ def _cart_query(db: Session, user_id: int):
     ).filter(Cart.user_id == user_id)
 
 
+logger = logging.getLogger(__name__)
+
+
 def _order_query(db: Session):
     return db.query(Order).options(
-        joinedload(Order.user),
+        joinedload(Order.user).joinedload(User.role),
         joinedload(Order.items).joinedload(OrderItem.product).options(*_product_load_options()),
     )
 
@@ -57,7 +62,14 @@ def _order_query(db: Session):
 def _serialize_order(order: Order) -> OrderRead:
     items: list[OrderItemRead] = []
     for item in order.items:
-        unit_price = Decimal(str(item.unit_price))
+        unit_price = Decimal(str(item.unit_price)) if item.unit_price is not None else Decimal("0")
+        product_read = None
+        if item.product:
+            try:
+                product_read = ProductRead.model_validate(item.product)
+            except (ValidationError, AttributeError, ValueError) as exc:
+                logger.warning("Failed to serialize product %s for order %s: %s", item.product_id, order.id, exc)
+                product_read = None
         items.append(
             OrderItemRead(
                 id=item.id,
@@ -65,9 +77,16 @@ def _serialize_order(order: Order) -> OrderRead:
                 quantity=item.quantity,
                 unit_price=unit_price,
                 subtotal=unit_price * item.quantity,
-                product=ProductRead.model_validate(item.product) if item.product else None,
+                product=product_read,
             )
         )
+    customer_read = None
+    if order.user:
+        try:
+            customer_read = UserRead.model_validate(order.user)
+        except (ValidationError, AttributeError, ValueError) as exc:
+            logger.warning("Failed to serialize user %s for order %s: %s", order.user_id, order.id, exc)
+            customer_read = None
     return OrderRead(
         id=order.id,
         user_id=order.user_id,
@@ -79,14 +98,14 @@ def _serialize_order(order: Order) -> OrderRead:
         street_address=order.street_address or "",
         delivery_notes=order.delivery_notes,
         shipping_address=order.shipping_address,
-        subtotal_amount=Decimal(str(order.subtotal_amount or 0)),
+        subtotal_amount=Decimal(str(order.subtotal_amount)) if order.subtotal_amount is not None else Decimal("0"),
         shipping_fee=Decimal(str(order.shipping_fee)) if order.shipping_fee is not None else None,
         shipping_fee_status=getattr(order, "shipping_fee_status", ShippingFeeStatus.CALCULATED.value)
         or ShippingFeeStatus.CALCULATED.value,
         total_amount=Decimal(str(order.total_amount)) if order.total_amount is not None else None,
         payment_method=order.payment_method or PaymentMethod.COD.value,
         payment_status=order.payment_status or PaymentStatus.UNPAID.value,
-        customer=UserRead.model_validate(order.user) if order.user else None,
+        customer=customer_read,
         items=items,
         created_at=order.created_at,
         updated_at=order.updated_at,

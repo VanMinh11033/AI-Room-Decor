@@ -26,7 +26,7 @@ class DashboardStats(BaseModel):
 class AdminRecentOrder(BaseModel):
     id: int
     customer: UserRead | None = None
-    total_amount: Decimal
+    total_amount: Decimal | None = None
     status: str
     created_at: datetime
 
@@ -53,7 +53,7 @@ class AdminRecentAIUsage(BaseModel):
     input_tokens: int
     output_tokens: int
     total_tokens: int
-    estimated_cost: Decimal
+    estimated_cost: Decimal = Decimal("0")
     error_code: str | None = None
     created_at: datetime
 

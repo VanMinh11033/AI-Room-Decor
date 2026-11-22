@@ -53,7 +53,9 @@ class ShippingService:
 
         for item in items:
             product = item.product
-            unit_price = Decimal(str(product.price))
+            if not product:
+                continue
+            unit_price = Decimal(str(product.price)) if product.price is not None else Decimal("0")
             subtotal += unit_price * item.quantity
 
             if self.is_product_bulky(product):

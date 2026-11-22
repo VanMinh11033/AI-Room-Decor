@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.core.security import create_access_token, create_refresh_token, get_password_hash, verify_password
 from app.models.entities import Cart, Role, RoleName, User, UserProfile
@@ -28,7 +28,12 @@ def create_customer(db: Session, email: str, password: str, full_name: str) -> U
 
 
 def authenticate(db: Session, email: str, password: str) -> User:
-    user = db.query(User).filter(User.email == email.lower()).first()
+    user = (
+        db.query(User)
+        .options(joinedload(User.role))
+        .filter(User.email == email.lower())
+        .first()
+    )
     if user is None or not verify_password(password, user.hashed_password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid email or password")
     if not user.is_active:

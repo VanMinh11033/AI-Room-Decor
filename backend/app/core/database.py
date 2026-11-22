@@ -31,7 +31,18 @@ connect_args = build_connect_args(
     ssl_ca=settings.database_ssl_ca,
 )
 
-engine = create_engine(settings.database_url, pool_pre_ping=True, connect_args=connect_args)
+engine_kwargs = {
+    "pool_pre_ping": True,
+    "connect_args": connect_args,
+}
+if not settings.database_url.startswith("sqlite"):
+    engine_kwargs.update({
+        "pool_recycle": 300,
+        "pool_size": 10,
+        "max_overflow": 20,
+    })
+
+engine = create_engine(settings.database_url, **engine_kwargs)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 

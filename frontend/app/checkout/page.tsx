@@ -104,6 +104,7 @@ export default function CheckoutPage() {
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (submitting) return; // Prevent double submit
     if (!validateForm()) {
       setError("Vui lòng kiểm tra và điền đầy đủ các thông tin nhận hàng bắt buộc.");
       return;

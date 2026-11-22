@@ -1,11 +1,16 @@
+import logging
 from decimal import Decimal
 
 from fastapi import HTTPException, status
+from pydantic import ValidationError
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.entities import Cart, CartItem, Product, ProductStatus, User
 from app.schemas.cart import CartItemRead, CartRead
 from app.schemas.product import ProductRead
+
+logger = logging.getLogger(__name__)
 
 
 def _product_load_options():
@@ -28,9 +33,17 @@ def _cart_query(db: Session, user_id: int):
 def _get_or_create_cart(db: Session, user_id: int) -> Cart:
     cart = _cart_query(db, user_id).first()
     if cart is None:
-        cart = Cart(user_id=user_id)
-        db.add(cart)
-        db.flush()
+        try:
+            cart = Cart(user_id=user_id)
+            db.add(cart)
+            db.commit()
+        except IntegrityError:
+            db.rollback()
+        except Exception as exc:
+            db.rollback()
+            logger.error("Failed to create cart for user %s: %s", user_id, exc)
+            raise
+        cart = _cart_query(db, user_id).first()
     return cart
 
 
@@ -39,8 +52,16 @@ def _serialize_cart(cart: Cart) -> CartRead:
     subtotal = Decimal("0")
     total_items = 0
     for item in cart.items:
-        unit_price = Decimal(str(item.product.price))
+        if not item.product:
+            continue
+        unit_price = Decimal(str(item.product.price)) if item.product.price is not None else Decimal("0")
         line_subtotal = unit_price * item.quantity
+        product_read = None
+        try:
+            product_read = ProductRead.model_validate(item.product)
+        except (ValidationError, AttributeError, ValueError) as exc:
+            logger.warning("Failed to serialize product %s in cart %s: %s", item.product_id, cart.id, exc)
+            product_read = None
         items.append(
             CartItemRead(
                 id=item.id,
@@ -48,7 +69,7 @@ def _serialize_cart(cart: Cart) -> CartRead:
                 quantity=item.quantity,
                 unit_price=unit_price,
                 subtotal=line_subtotal,
-                product=ProductRead.model_validate(item.product),
+                product=product_read,
             )
         )
         subtotal += line_subtotal

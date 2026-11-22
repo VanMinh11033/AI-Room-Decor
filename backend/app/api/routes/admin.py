@@ -74,7 +74,7 @@ def dashboard(db: Session = Depends(get_db), _: User = Depends(require_admin)):
             AdminRecentOrder(
                 id=order.id,
                 customer=UserRead.model_validate(order.user) if order.user else None,
-                total_amount=Decimal(str(order.total_amount)),
+                total_amount=Decimal(str(order.total_amount)) if order.total_amount is not None else None,
                 status=order.status.value if hasattr(order.status, "value") else str(order.status),
                 created_at=order.created_at,
             )
@@ -287,7 +287,7 @@ def _serialize_ai_usage(log: AIUsageLog) -> AdminRecentAIUsage:
         input_tokens=log.input_tokens,
         output_tokens=log.output_tokens,
         total_tokens=log.total_tokens,
-        estimated_cost=Decimal(str(log.estimated_cost)),
+        estimated_cost=Decimal(str(log.estimated_cost)) if log.estimated_cost is not None else Decimal("0"),
         error_code=log.error_code,
         created_at=log.created_at,
     )
