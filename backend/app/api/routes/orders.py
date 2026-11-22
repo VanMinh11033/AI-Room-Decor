@@ -3,6 +3,11 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user, require_admin
 from app.core.database import get_db
+from app.core.maintenance import (
+    get_order_maintenance_status,
+    require_order_writable,
+    set_order_maintenance_mode,
+)
 from app.models.entities import User
 from app.schemas.order import (
     AdminConfirmPayment,
@@ -23,6 +28,15 @@ def get_order_service(db: Session = Depends(get_db)) -> OrderService:
     return OrderService(db)
 
 
+@router.get("/maintenance-status")
+def check_order_maintenance_status():
+    """
+    Public probe endpoint để kiểm tra trạng thái đóng băng tạo đơn hàng (Maintenance Gate).
+    Không yêu cầu authentication. Phục vụ monitoring và One-off Migration Runner.
+    """
+    return get_order_maintenance_status()
+
+
 @router.get("/shipping-preview", response_model=ShippingPreviewResponse)
 def get_shipping_preview(
     current_user: User = Depends(get_current_user),
@@ -31,7 +45,7 @@ def get_shipping_preview(
     return service.get_shipping_preview(current_user)
 
 
-@router.post("", response_model=OrderRead, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=OrderRead, status_code=status.HTTP_201_CREATED, dependencies=[Depends(require_order_writable)])
 def checkout(
     payload: OrderCreate,
     current_user: User = Depends(get_current_user),
@@ -57,7 +71,7 @@ def get_order(
     return service.get_order(current_user, order_id)
 
 
-@router.post("/{order_id}/cancel", response_model=OrderRead)
+@router.post("/{order_id}/cancel", response_model=OrderRead, dependencies=[Depends(require_order_writable)])
 def cancel_order(
     order_id: int,
     current_user: User = Depends(get_current_user),
@@ -66,13 +80,26 @@ def cancel_order(
     return service.cancel_order(current_user, order_id)
 
 
-@router.post("/{order_id}/confirm-shipping-fee", response_model=OrderRead)
+@router.post("/{order_id}/confirm-shipping-fee", response_model=OrderRead, dependencies=[Depends(require_order_writable)])
 def customer_confirm_shipping_fee(
     order_id: int,
     current_user: User = Depends(get_current_user),
     service: OrderService = Depends(get_order_service),
 ):
     return service.customer_confirm_shipping_fee(current_user, order_id)
+
+
+@admin_router.post("/maintenance-toggle")
+def admin_toggle_order_maintenance(
+    active: bool,
+    _: User = Depends(require_admin),
+):
+    """
+    Cho phép Quản trị viên bật/tắt đóng băng tạo đơn hàng tức thì tại runtime.
+    Không cần restart container Render.
+    """
+    set_order_maintenance_mode(active)
+    return get_order_maintenance_status()
 
 
 @admin_router.get("", response_model=OrderListResponse)
@@ -92,7 +119,7 @@ def admin_get_order(
     return service.admin_get_order(order_id)
 
 
-@admin_router.patch("/{order_id}/status", response_model=OrderRead)
+@admin_router.patch("/{order_id}/status", response_model=OrderRead, dependencies=[Depends(require_order_writable)])
 def admin_update_order_status(
     order_id: int,
     payload: OrderStatusUpdate,
@@ -102,7 +129,7 @@ def admin_update_order_status(
     return service.admin_update_status(admin_user, order_id, payload.status)
 
 
-@admin_router.patch("/{order_id}/payment-status", response_model=OrderRead)
+@admin_router.patch("/{order_id}/payment-status", response_model=OrderRead, dependencies=[Depends(require_order_writable)])
 def admin_confirm_payment(
     order_id: int,
     payload: AdminConfirmPayment,
@@ -112,7 +139,7 @@ def admin_confirm_payment(
     return service.admin_confirm_payment(admin_user, order_id, payload.payment_status, payload.note)
 
 
-@admin_router.patch("/{order_id}/shipping-fee", response_model=OrderRead)
+@admin_router.patch("/{order_id}/shipping-fee", response_model=OrderRead, dependencies=[Depends(require_order_writable)])
 def admin_update_shipping_fee(
     order_id: int,
     payload: AdminUpdateShippingFee,

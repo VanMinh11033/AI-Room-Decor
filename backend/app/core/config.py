@@ -87,6 +87,13 @@ class Settings(BaseSettings):
     shipping_bulky_categories: str = "sofa,table,storage,bed"
     shipping_bulky_weight_threshold: float = 20.0
 
+    # Order Maintenance Mode / Order Freeze Gate (P0 Safety)
+    order_maintenance_mode: bool = False
+    order_maintenance_message: str = (
+        "Hệ thống đang trong thời gian bảo trì nâng cấp thanh toán và xử lý đơn hàng. "
+        "Quý khách vui lòng thử lại sau ít phút."
+    )
+
     model_config = SettingsConfigDict(
         env_file=(PROJECT_ROOT / ".env", BACKEND_ROOT / ".env"),
         env_file_encoding="utf-8",
