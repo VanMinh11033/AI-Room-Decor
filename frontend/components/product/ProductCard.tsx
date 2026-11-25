@@ -5,7 +5,7 @@ import { displayCategory, displayStyle, joinDisplay } from "@/lib/display";
 import { EmptyImagePlaceholder } from "@/components/customer/DesignPrimitives";
 import type { Product } from "@/types/api";
 
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({ product, priority = false }: { product: Product; priority?: boolean }) {
   const image = product.images.find((item) => item.is_primary)?.image_url || product.images[0]?.image_url;
 
   return (
@@ -15,7 +15,13 @@ export function ProductCard({ product }: { product: Product }) {
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-ivory">
         {image ? (
-          <img src={apiAssetUrl(image)} alt={product.name} className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.04]" />
+          <img
+            src={apiAssetUrl(image, { width: 600 })}
+            alt={product.name}
+            loading={priority ? undefined : "lazy"}
+            decoding="async"
+            className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.04]"
+          />
         ) : (
           <EmptyImagePlaceholder />
         )}

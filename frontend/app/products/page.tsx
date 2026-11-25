@@ -4,7 +4,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { Filter, Search } from "lucide-react";
 import { PageHeader, SectionCard } from "@/components/customer/DesignPrimitives";
 import { ProductCard } from "@/components/product/ProductCard";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, cachedApiFetch } from "@/lib/api";
 import { displayCategory, displayColor, displayMaterial, displayRoomType, displayStyle } from "@/lib/display";
 import type { CatalogItem, Category, Color, Paginated, Product } from "@/types/api";
 
@@ -46,11 +46,11 @@ export default function ProductsPage() {
 
   useEffect(() => {
     load();
-    apiFetch<Paginated<Category>>("/api/categories?page=1&page_size=100").then((data) => setCategories(data.items)).catch(() => null);
-    apiFetch<Paginated<CatalogItem>>("/api/materials?page=1&page_size=100").then((data) => setMaterials(data.items)).catch(() => null);
-    apiFetch<Paginated<CatalogItem>>("/api/styles?page=1&page_size=100").then((data) => setStyles(data.items)).catch(() => null);
-    apiFetch<Paginated<CatalogItem>>("/api/room-types?page=1&page_size=100").then((data) => setRoomTypes(data.items)).catch(() => null);
-    apiFetch<Paginated<Color>>("/api/colors?page=1&page_size=100").then((data) => setColors(data.items)).catch(() => null);
+    cachedApiFetch<Paginated<Category>>("/api/categories?page=1&page_size=100").then((data) => setCategories(data.items)).catch(() => null);
+    cachedApiFetch<Paginated<CatalogItem>>("/api/materials?page=1&page_size=100").then((data) => setMaterials(data.items)).catch(() => null);
+    cachedApiFetch<Paginated<CatalogItem>>("/api/styles?page=1&page_size=100").then((data) => setStyles(data.items)).catch(() => null);
+    cachedApiFetch<Paginated<CatalogItem>>("/api/room-types?page=1&page_size=100").then((data) => setRoomTypes(data.items)).catch(() => null);
+    cachedApiFetch<Paginated<Color>>("/api/colors?page=1&page_size=100").then((data) => setColors(data.items)).catch(() => null);
   }, []);
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -90,7 +90,9 @@ export default function ProductsPage() {
       {error && <p className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-semibold text-red-700">{error}</p>}
 
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 w-full min-w-0">
-        {products.map((product) => <ProductCard key={product.id} product={product} />)}
+        {products.map((product, idx) => (
+          <ProductCard key={product.id} product={product} priority={idx < 3} />
+        ))}
       </div>
 
       {!loading && products.length === 0 && !error && <SectionCard>Không tìm thấy sản phẩm phù hợp.</SectionCard>}

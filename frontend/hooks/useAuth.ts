@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { apiFetch, clearTokens } from "@/lib/api";
+import { clearTokens, getAccessToken, getAuthMe } from "@/lib/api";
 import type { User } from "@/types/api";
 
 export function useAuth(requiredRole?: "ADMIN" | "CUSTOMER") {
@@ -9,7 +9,24 @@ export function useAuth(requiredRole?: "ADMIN" | "CUSTOMER") {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    apiFetch<User>("/api/auth/me")
+    const token = getAccessToken();
+    if (!token) {
+      if (requiredRole) {
+        clearTokens();
+        const currentPath = typeof window !== "undefined" ? window.location.pathname : "";
+        const loginUrl =
+          currentPath && currentPath !== "/" && currentPath !== "/login"
+            ? `/login?redirect=${encodeURIComponent(currentPath)}`
+            : "/login";
+        window.location.href = loginUrl;
+      } else {
+        setUser(null);
+        setLoading(false);
+      }
+      return;
+    }
+
+    getAuthMe()
       .then((me) => {
         // ADMIN can access all areas. Only non-ADMIN is restricted from ADMIN pages.
         if (requiredRole === "ADMIN" && me.role?.name !== "ADMIN") {
@@ -32,4 +49,3 @@ export function useAuth(requiredRole?: "ADMIN" | "CUSTOMER") {
 
   return { user, loading };
 }
-

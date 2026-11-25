@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogOut, Menu, Sparkles, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { apiFetch, clearTokens, getAccessToken } from "@/lib/api";
+import { clearTokens, getAccessToken, getAuthMe } from "@/lib/api";
 import type { User } from "@/types/api";
 
 type NavItem = {
@@ -24,7 +24,7 @@ export function Navigation() {
       setChecked(true);
       return;
     }
-    apiFetch<User>("/api/auth/me")
+    getAuthMe()
       .then(setUser)
       .catch(() => {
         clearTokens();
@@ -88,14 +88,25 @@ export function Navigation() {
             </span>
           </Link>
 
-          {/* DESKTOP NAVIGATION (100% PRESERVED FOR lg: SCREEN AND ABOVE) */}
+          {/* DESKTOP NAVIGATION */}
           <div className="hidden lg:flex lg:items-center lg:gap-1.5 text-sm font-medium">
             {items.map((item) => (
               <Link key={item.href} href={item.href} className={navClass(isActive(pathname, item.href))}>
                 {item.label}
               </Link>
             ))}
-            {checked && !user && (
+
+            {/* If user is logged in, show logout. Otherwise, ALWAYS show Login and Register */}
+            {user ? (
+              <button
+                type="button"
+                onClick={logout}
+                className="ml-1 inline-flex items-center gap-2 rounded-xl border border-[#2D332C]/15 bg-white px-4 py-2.5 text-sm font-semibold text-[#777777] shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[#A68B6D] hover:bg-[#FAF8F5] hover:text-[#242424] active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A77A] focus-visible:ring-offset-2"
+              >
+                <LogOut size={16} className="text-[#A68B6D] transition-transform duration-200" />
+                Đăng xuất
+              </button>
+            ) : (
               <div className="ml-1 flex items-center gap-2 border-l border-[#2D332C]/10 pl-3">
                 <Link href="/login" className={navClass(isActive(pathname, "/login"))}>
                   Đăng nhập
@@ -108,20 +119,18 @@ export function Navigation() {
                 </Link>
               </div>
             )}
-            {checked && user && (
-              <button
-                type="button"
-                onClick={logout}
-                className="ml-1 inline-flex items-center gap-2 rounded-xl border border-[#2D332C]/15 bg-white px-4 py-2.5 text-sm font-semibold text-[#777777] shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[#A68B6D] hover:bg-[#FAF8F5] hover:text-[#242424] active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A77A] focus-visible:ring-offset-2"
-              >
-                <LogOut size={16} className="text-[#A68B6D] transition-transform duration-200" />
-                Đăng xuất
-              </button>
-            )}
           </div>
 
-          {/* MOBILE HAMBURGER BUTTON (< lg) */}
+          {/* MOBILE HAMBURGER & QUICK AUTH (< lg) */}
           <div className="flex items-center gap-2 lg:hidden">
+            {!user && (
+              <Link
+                href="/login"
+                className="rounded-xl border border-[#2D332C]/15 bg-white px-3 py-2 text-xs font-semibold text-[#242424] shadow-sm transition-all hover:bg-[#FAF8F5] active:scale-95"
+              >
+                Đăng nhập
+              </Link>
+            )}
             <button
               type="button"
               onClick={() => setMobileOpen((prev) => !prev)}
@@ -159,9 +168,9 @@ export function Navigation() {
               })}
             </div>
 
-            {/* Auth Actions */}
+            {/* Auth Actions in Drawer */}
             <div className="pt-3">
-              {checked && !user && (
+              {!user ? (
                 <div className="grid grid-cols-2 gap-2">
                   <Link
                     href="/login"
@@ -178,9 +187,7 @@ export function Navigation() {
                     Đăng ký
                   </Link>
                 </div>
-              )}
-
-              {checked && user && (
+              ) : (
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between px-2 py-1 text-xs text-[#777777]">
                     <span className="truncate font-medium">{user.email}</span>
@@ -218,5 +225,3 @@ function isActive(pathname: string, href: string) {
   if (href === "/") return pathname === "/";
   return pathname === href || pathname.startsWith(`${href}/`);
 }
-
-
