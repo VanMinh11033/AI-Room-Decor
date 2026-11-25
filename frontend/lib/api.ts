@@ -68,18 +68,26 @@ export function apiAssetUrl(path?: string | null, options?: { width?: number }) 
 
 export interface ApiFetchOptions extends RequestInit {
   timeoutMs?: number;
+  retries?: number;
 }
 
 export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): Promise<T> {
   const method = (options.method || "GET").toUpperCase();
   const isOrderCreation = method === "POST" && path.includes("/api/orders");
+  const isSafeRead = method === "GET";
 
-  // Non-idempotent order creation receives 45s to avoid cutting off TiDB commits; safe reads default to 15s
-  const defaultTimeout = isOrderCreation ? 45000 : 15000;
+  // First attempt timeout: 32s (matches Render Free boot); retry timeout: 15s; order creation: 45s
+  const defaultTimeout = isOrderCreation ? 45000 : 32000;
   const timeoutMs = options.timeoutMs ?? defaultTimeout;
+
+  // Safe read requests allow 1 bounded retry; non-idempotent operations strictly enforce 0 retries
+  const maxRetries = isSafeRead ? (options.retries ?? 1) : 0;
+  const callerSignal = options.signal;
 
   const fetchOptions: RequestInit = { ...options };
   delete (fetchOptions as ApiFetchOptions).timeoutMs;
+  delete (fetchOptions as ApiFetchOptions).retries;
+
   const headers = new Headers(fetchOptions.headers);
   if (!(fetchOptions.body instanceof FormData)) {
     headers.set("Content-Type", "application/json");
@@ -89,37 +97,83 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
 
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
 
-  // AbortController for timeout protection against slow Render Free instances
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  let attempt = 0;
+  while (attempt <= maxRetries) {
+    attempt++;
+    const currentTimeoutMs = attempt === 1 ? timeoutMs : 15000;
+    const timeoutController = new AbortController();
+    const timeoutId = setTimeout(() => timeoutController.abort(), currentTimeoutMs);
 
-  let response: Response;
-  try {
-    response = await fetch(`${API_URL}${normalizedPath}`, {
-      ...fetchOptions,
-      headers,
-      signal: fetchOptions.signal || controller.signal,
-    });
-  } catch (err: unknown) {
-    clearTimeout(timeoutId);
-    if (err instanceof Error && err.name === "AbortError") {
-      if (isOrderCreation) {
-        throw new Error(
-          "Yêu cầu tạo đơn hàng quá thời gian phản hồi. Đơn hàng có thể đang được hệ thống xử lý. Vui lòng kiểm tra trang 'Đơn hàng' trước khi thử lại để tránh đặt trùng lặp."
-        );
+    let combinedSignal = timeoutController.signal;
+    let cleanupListeners: (() => void) | null = null;
+
+    if (callerSignal) {
+      if (callerSignal.aborted) {
+        clearTimeout(timeoutId);
+        throw new Error("AbortError");
       }
-      throw new Error("Máy chủ phản hồi chậm hoặc đang khởi động. Vui lòng thử lại sau giây lát.");
+      const combinedController = new AbortController();
+      const onCallerAbort = () => combinedController.abort();
+      const onTimeoutAbort = () => combinedController.abort();
+      callerSignal.addEventListener("abort", onCallerAbort, { once: true });
+      timeoutController.signal.addEventListener("abort", onTimeoutAbort, { once: true });
+      cleanupListeners = () => {
+        callerSignal.removeEventListener("abort", onCallerAbort);
+        timeoutController.signal.removeEventListener("abort", onTimeoutAbort);
+      };
+      combinedSignal = combinedController.signal;
     }
-    throw new Error("Không thể kết nối đến máy chủ.");
-  } finally {
-    clearTimeout(timeoutId);
+
+    try {
+      const response = await fetch(`${API_URL}${normalizedPath}`, {
+        ...fetchOptions,
+        headers,
+        signal: combinedSignal,
+      });
+      clearTimeout(timeoutId);
+      if (cleanupListeners) cleanupListeners();
+
+      if (!response.ok) {
+        const body = await response.json().catch(() => ({ detail: "Request failed" }));
+        throw new Error(mapApiError(typeof body.detail === "string" ? body.detail : "Request failed"));
+      }
+      return await response.json();
+    } catch (err: unknown) {
+      clearTimeout(timeoutId);
+      if (cleanupListeners) cleanupListeners();
+
+      // 1. INTENTIONAL CALLER CANCELLATION (filter change, unmount, navigation):
+      if (callerSignal?.aborted) {
+        // Never retry intentional cancellations! Rethrow immediately.
+        throw err;
+      }
+
+      const isTimeout = timeoutController.signal.aborted;
+      const isNetwork = err instanceof Error && (err.message.includes("Failed to fetch") || err.message.includes("NetworkError"));
+
+      // 2. Only safe reads (GET) with retry budget can retry upon internal timeout or network error:
+      if (isSafeRead && attempt <= maxRetries && (isTimeout || isNetwork)) {
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        continue;
+      }
+
+      if (isTimeout) {
+        if (isOrderCreation) {
+          throw new Error(
+            "Yêu cầu tạo đơn hàng quá thời gian phản hồi. Đơn hàng có thể đang được hệ thống xử lý. Vui lòng kiểm tra trang 'Đơn hàng' trước khi thử lại để tránh đặt trùng lặp."
+          );
+        }
+        throw new Error("Máy chủ phản hồi chậm hoặc đang khởi động. Vui lòng thử lại sau giây lát.");
+      }
+
+      if (err instanceof Error && err.message && err.message !== "Failed to fetch") {
+        throw err;
+      }
+      throw new Error("Không thể kết nối đến máy chủ.");
+    }
   }
 
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({ detail: "Request failed" }));
-    throw new Error(mapApiError(typeof body.detail === "string" ? body.detail : "Request failed"));
-  }
-  return response.json();
+  throw new Error("Không thể kết nối đến máy chủ.");
 }
 
 /**
@@ -152,7 +206,7 @@ export async function getAuthMe(options?: { forceRefresh?: boolean }): Promise<U
   }
 
   inFlightToken = currentToken;
-  inFlightAuthPromise = apiFetch<User>("/api/auth/me")
+  inFlightAuthPromise = apiFetch<User>("/api/auth/me", { timeoutMs: 32000, retries: 1 })
     .then((user) => {
       // CRITICAL: Only cache if the active token STILL matches the token when this request started!
       if (getAccessToken() === currentToken) {
@@ -181,7 +235,7 @@ export async function getAuthMe(options?: { forceRefresh?: boolean }): Promise<U
 }
 
 /**
- * In-memory client cache for lookup tables (categories, materials, styles, etc.)
+ * In-memory client cache for lookup tables and public catalog
  */
 const lookupCache = new Map<string, { data: unknown; timestamp: number }>();
 const inFlightLookups = new Map<string, Promise<unknown>>();
@@ -197,7 +251,7 @@ export async function cachedApiFetch<T>(path: string, ttlMs = 5 * 60 * 1000): Pr
     return inFlight as Promise<T>;
   }
 
-  const promise = apiFetch<T>(path)
+  const promise = apiFetch<T>(path, { timeoutMs: 32000, retries: 1 })
     .then((data) => {
       lookupCache.set(path, { data, timestamp: Date.now() });
       return data;
