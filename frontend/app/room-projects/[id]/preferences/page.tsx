@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Check, ChevronLeft, Sparkles } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { apiAssetUrl, apiFetch } from "@/lib/api";
+import { apiAssetUrl, apiFetch, cachedApiFetch } from "@/lib/api";
 import { displayCategory, displayColor, displayMaterial, displayStyle } from "@/lib/display";
 import { useAuth } from "@/hooks/useAuth";
 import type { CatalogItem, Category, Color, Paginated, RoomAnalysis, RoomPreference, RoomProject } from "@/types/api";
@@ -49,38 +49,38 @@ export default function RoomPreferencesPage() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (signal?: AbortSignal) => {
     setLoading(true);
     setError("");
     try {
-      const [projectData, styleData, colorData, materialData, categoryData] = await Promise.all([
-        apiFetch<RoomProject>(`/api/room-projects/${params.id}`),
-        apiFetch<Paginated<CatalogItem>>("/api/styles?page=1&page_size=100"),
-        apiFetch<Paginated<Color>>("/api/colors?page=1&page_size=100"),
-        apiFetch<Paginated<CatalogItem>>("/api/materials?page=1&page_size=100"),
-        apiFetch<Paginated<Category>>("/api/categories?page=1&page_size=100"),
+      const [projectData, styleData, colorData, materialData, categoryData, storedPref, analysisData] = await Promise.all([
+        apiFetch<RoomProject>(`/api/room-projects/${params.id}`, { signal }),
+        cachedApiFetch<Paginated<CatalogItem>>("/api/styles?page=1&page_size=100"),
+        cachedApiFetch<Paginated<Color>>("/api/colors?page=1&page_size=100"),
+        cachedApiFetch<Paginated<CatalogItem>>("/api/materials?page=1&page_size=100"),
+        cachedApiFetch<Paginated<Category>>("/api/categories?page=1&page_size=100"),
+        apiFetch<RoomPreference>(`/api/room-projects/${params.id}/preferences`, { signal }).catch(() => null),
+        apiFetch<RoomAnalysis>(`/api/room-projects/${params.id}/analysis`, { signal }).catch(() => null),
       ]);
       setProject(projectData);
       setStyles(styleData.items);
       setColors(colorData.items);
       setMaterials(materialData.items);
       setCategories(categoryData.items);
-      try {
-        const storedPreference = await apiFetch<RoomPreference>(`/api/room-projects/${params.id}/preferences`);
-        hydrateForm(storedPreference);
+      if (storedPref) {
+        hydrateForm(storedPref);
         setSaved(true);
-      } catch {
+      } else {
         setSaved(false);
       }
-      try {
-        setAnalysis(await apiFetch<RoomAnalysis>(`/api/room-projects/${params.id}/analysis`));
-      } catch {
-        setAnalysis(null);
-      }
+      setAnalysis(analysisData);
     } catch (err) {
+      if (signal?.aborted) return;
       setError(err instanceof Error ? err.message : "Không thể tải dữ liệu. Vui lòng thử lại.");
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) {
+        setLoading(false);
+      }
     }
   }, [params.id]);
 
@@ -128,7 +128,12 @@ export default function RoomPreferencesPage() {
   }
 
   useEffect(() => {
-    if (!authLoading) load();
+    if (authLoading) return;
+    const controller = new AbortController();
+    load(controller.signal);
+    return () => {
+      controller.abort();
+    };
   }, [authLoading, load]);
 
   const budgetPreview = useMemo(() => {

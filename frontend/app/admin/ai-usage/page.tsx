@@ -36,7 +36,7 @@ export default function AdminAIUsagePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  async function load() {
+  async function load(signal?: AbortSignal) {
     const params = new URLSearchParams();
     if (provider) params.set("provider", provider);
     if (taskType) params.set("task_type", taskType);
@@ -44,18 +44,24 @@ export default function AdminAIUsagePage() {
     setLoading(true);
     try {
       const res = await apiFetch<AdminAIUsageListResponse>(
-        `/api/admin/ai-usage?${params.toString()}`
+        `/api/admin/ai-usage?${params.toString()}`,
+        { signal }
       );
       setData(res);
+      setError("");
     } catch (err) {
+      if (signal?.aborted) return;
       setError(err instanceof Error ? err.message : "Không tải được log AI.");
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) setLoading(false);
     }
   }
 
   useEffect(() => {
-    if (!authLoading) load();
+    if (authLoading) return;
+    const controller = new AbortController();
+    load(controller.signal);
+    return () => controller.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authLoading, provider, taskType, status]);
 

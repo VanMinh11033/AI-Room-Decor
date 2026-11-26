@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ChevronLeft, Clock, Download, ImageIcon, ShoppingCart, Sparkles } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { apiAssetUrl, apiFetch } from "@/lib/api";
 import { addToCart } from "@/lib/cart";
 import { displayCategory } from "@/lib/display";
@@ -21,31 +21,38 @@ export default function DesignGenerationPage() {
   const [addingIds, setAddingIds] = useState<number[]>([]);
   const [addingAll, setAddingAll] = useState(false);
   const [cartMessage, setCartMessage] = useState("");
+  const addingAllInFlight = useRef(false);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (signal?: AbortSignal) => {
     setLoading(true);
     setError("");
     try {
       const [projectData, generationData, historyData] = await Promise.all([
-        apiFetch<RoomProject>(`/api/room-projects/${params.id}`),
-        apiFetch<DesignGeneration>(`/api/room-projects/${params.id}/design-generations/${params.generationId}`),
-        apiFetch<DesignGenerationListResponse>(`/api/room-projects/${params.id}/design-generations`),
+        apiFetch<RoomProject>(`/api/room-projects/${params.id}`, { signal }),
+        apiFetch<DesignGeneration>(`/api/room-projects/${params.id}/design-generations/${params.generationId}`, { signal }),
+        apiFetch<DesignGenerationListResponse>(`/api/room-projects/${params.id}/design-generations`, { signal }),
       ]);
       setProject(projectData);
       setGeneration(generationData);
       setHistory(historyData.items);
     } catch (err) {
+      if (signal?.aborted) return;
       setError(err instanceof Error ? err.message : "Không thể tải phương án thiết kế");
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) setLoading(false);
     }
   }, [params.generationId, params.id]);
 
   useEffect(() => {
-    if (!authLoading) load();
+    const controller = new AbortController();
+    if (!authLoading) {
+      load(controller.signal);
+    }
+    return () => controller.abort();
   }, [authLoading, load]);
 
   async function handleAddOne(productId: number) {
+    if (addingIds.includes(productId)) return;
     setAddingIds((ids) => [...ids, productId]);
     setCartMessage("");
     try {
@@ -59,17 +66,39 @@ export default function DesignGenerationPage() {
   }
 
   async function handleAddAll() {
-    if (!generation) return;
+    if (addingAllInFlight.current || !generation || generation.products.length === 0) return;
+    addingAllInFlight.current = true;
     setAddingAll(true);
     setCartMessage("");
+
+    // Deduplicate distinct products and count required quantities
+    const productMap = new Map<number, number>();
+    for (const product of generation.products) {
+      productMap.set(product.id, (productMap.get(product.id) || 0) + 1);
+    }
+
+    let addedCount = 0;
+    let lastError = "";
     try {
-      for (const product of generation.products) {
-        await addToCart(product.id);
+      // Safe sequential addition to guarantee backend transaction isolation & avoid unique constraint races
+      for (const [productId, quantity] of productMap.entries()) {
+        try {
+          await addToCart(productId, quantity);
+          addedCount++;
+        } catch (err) {
+          lastError = err instanceof Error ? err.message : "Lỗi thêm sản phẩm";
+        }
       }
-      setCartMessage("Đã thêm tất cả vào giỏ.");
-    } catch (err) {
-      setCartMessage(err instanceof Error ? err.message : "Không thêm được vào giỏ.");
+
+      if (addedCount === productMap.size) {
+        setCartMessage("Đã thêm tất cả vào giỏ.");
+      } else if (addedCount > 0) {
+        setCartMessage(`Đã thêm ${addedCount}/${productMap.size} sản phẩm vào giỏ.${lastError ? ` (${lastError})` : ""}`);
+      } else {
+        setCartMessage(lastError || "Không thêm được vào giỏ.");
+      }
     } finally {
+      addingAllInFlight.current = false;
       setAddingAll(false);
     }
   }
@@ -350,7 +379,13 @@ function ImagePanel({
       </div>
       <div className="relative min-h-[360px] md:min-h-[440px] max-h-[580px] bg-stone/20 flex items-center justify-center overflow-hidden">
         {imageUrl ? (
-          <img src={apiAssetUrl(imageUrl)} alt={alt} className="max-h-[580px] w-full object-contain" />
+          <img
+            src={apiAssetUrl(imageUrl, { width: 1200 })}
+            alt={alt}
+            fetchPriority="high"
+            decoding="async"
+            className="max-h-[580px] w-full object-contain"
+          />
         ) : (
           <div className="flex h-full items-center justify-center px-6 text-center text-sm text-black/45">Chưa có ảnh kết quả.</div>
         )}
@@ -364,7 +399,15 @@ function ProductRow({ product, adding, onAdd }: { product: Product; adding: bool
   return (
     <div className="grid grid-cols-[80px_1fr] gap-3 rounded-2xl border border-black/10 bg-white p-3 shadow-xs">
       <Link href={`/products/${product.id}`} className="aspect-square overflow-hidden rounded-xl bg-ivory">
-        {primaryImage ? <img src={apiAssetUrl(primaryImage)} alt={product.name} className="h-full w-full object-cover" /> : null}
+        {primaryImage ? (
+          <img
+            src={apiAssetUrl(primaryImage, { width: 160 })}
+            alt={product.name}
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-cover"
+          />
+        ) : null}
       </Link>
       <div className="min-w-0 flex flex-col justify-between">
         <div>

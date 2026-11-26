@@ -38,12 +38,23 @@ export default function AdminOrdersPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (authLoading) return;
+    const controller = new AbortController();
     setLoading(true);
-    apiFetch<OrderListResponse>("/api/admin/orders")
-      .then((data) => setOrders(data.items))
-      .catch((err) => setError(err instanceof Error ? err.message : "Không tải được đơn hàng."))
-      .finally(() => setLoading(false));
-  }, []);
+    apiFetch<OrderListResponse>("/api/admin/orders", { signal: controller.signal })
+      .then((data) => {
+        setOrders(data.items);
+        setError("");
+      })
+      .catch((err) => {
+        if (controller.signal.aborted) return;
+        setError(err instanceof Error ? err.message : "Không tải được đơn hàng.");
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+    return () => controller.abort();
+  }, [authLoading]);
 
   const filteredOrders = useMemo(() => {
     return orders.filter((order) => {

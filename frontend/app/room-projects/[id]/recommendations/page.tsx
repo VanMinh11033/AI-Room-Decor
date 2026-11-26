@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Check, ChevronLeft, Heart, Loader2, ShoppingCart, SlidersHorizontal, Sparkles, Wallet } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { EmptyImagePlaceholder, ScoreBadge, SectionCard } from "@/components/customer/DesignPrimitives";
 import { apiAssetUrl, apiFetch } from "@/lib/api";
 import { addToCart } from "@/lib/cart";
@@ -75,14 +75,14 @@ export default function RecommendationsPage() {
   const [error, setError] = useState("");
   const [generationError, setGenerationError] = useState("");
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (signal?: AbortSignal) => {
     setLoading(true);
     setError("");
     try {
       const [projectData, analysisData, recommendationData] = await Promise.all([
-        apiFetch<RoomProject>(`/api/room-projects/${params.id}`),
-        apiFetch<RoomAnalysis>(`/api/room-projects/${params.id}/analysis`),
-        apiFetch<RecommendationResponse>(`/api/room-projects/${params.id}/recommendations?limit=50`),
+        apiFetch<RoomProject>(`/api/room-projects/${params.id}`, { signal }),
+        apiFetch<RoomAnalysis>(`/api/room-projects/${params.id}/analysis`, { signal }),
+        apiFetch<RecommendationResponse>(`/api/room-projects/${params.id}/recommendations?limit=50`, { signal }),
       ]);
       setProject(projectData);
       setAnalysis(analysisData);
@@ -97,17 +97,25 @@ export default function RecommendationsPage() {
         setSelectedIds(topSelected);
       }
     } catch (err) {
+      if (signal?.aborted) return;
       const message = err instanceof Error ? err.message : "Không thể tải gợi ý nội thất";
       if (message === "ROOM_PREFERENCES_REQUIRED") setError("Bạn cần lưu sở thích decor trước khi nhận gợi ý nội thất.");
       else if (message === "ROOM_ANALYSIS_REQUIRED") setError("Bạn cần hoàn tất phân tích ảnh phòng trước khi nhận gợi ý nội thất.");
       else setError(message);
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) {
+        setLoading(false);
+      }
     }
   }, [params.id]);
 
   useEffect(() => {
-    if (!authLoading) load();
+    if (authLoading) return;
+    const controller = new AbortController();
+    load(controller.signal);
+    return () => {
+      controller.abort();
+    };
   }, [authLoading, load]);
 
   const categories = useMemo(() => {
@@ -157,18 +165,19 @@ export default function RecommendationsPage() {
     return sortedSelected.every((id, idx) => id === sortedBundle[idx]);
   }, [recommendations, selectedIds]);
 
-  const toggleProduct = (productId: number) => {
+  const toggleProduct = useCallback((productId: number) => {
     setGenerationError("");
-    if (selectedIds.includes(productId)) {
-      setSelectedIds((current) => current.filter((id) => id !== productId));
-      return;
-    }
-    if (selectedIds.length >= MAX_SELECTED_PRODUCTS) {
-      setGenerationError("Bạn đã chọn tối đa 3 sản phẩm tham chiếu cho AI. Vui lòng bỏ bớt 1 món để chọn món mới.");
-      return;
-    }
-    setSelectedIds((current) => [...current, productId]);
-  };
+    setSelectedIds((current) => {
+      if (current.includes(productId)) {
+        return current.filter((id) => id !== productId);
+      }
+      if (current.length >= MAX_SELECTED_PRODUCTS) {
+        setGenerationError("Bạn đã chọn tối đa 3 sản phẩm tham chiếu cho AI. Vui lòng bỏ bớt 1 món để chọn món mới.");
+        return current;
+      }
+      return [...current, productId];
+    });
+  }, []);
 
   /**
    * Nút bấm duy nhất: Tạo thiết kế AI với Cloudflare FLUX.2 Dev
@@ -257,7 +266,13 @@ export default function RecommendationsPage() {
         <div className="grid lg:grid-cols-[0.78fr_1.22fr]">
           <div className="min-h-80 bg-stone/20 flex items-center justify-center">
             {project?.room_image_url ? (
-              <img src={apiAssetUrl(project.room_image_url)} alt={project.title} className="h-full min-h-80 w-full object-contain" />
+              <img
+                src={apiAssetUrl(project.room_image_url, { width: 800 })}
+                alt={project.title}
+                fetchPriority="high"
+                decoding="async"
+                className="h-full min-h-80 w-full object-contain"
+              />
             ) : (
               <EmptyImagePlaceholder label="Không có ảnh phòng" />
             )}
@@ -461,7 +476,7 @@ export default function RecommendationsPage() {
   );
 }
 
-function RecommendationCard({
+const RecommendationCard = memo(function RecommendationCard({
   item,
   selected,
   onToggle,
@@ -495,7 +510,13 @@ function RecommendationCard({
     <article className={`group overflow-hidden rounded-2xl border bg-white shadow-card transition hover:-translate-y-1 hover:shadow-soft ${selected ? "border-clay ring-2 ring-clay/20" : "border-ink/10"}`}>
       <div className="relative aspect-[4/3] bg-ivory">
         {primaryImage ? (
-          <img src={apiAssetUrl(primaryImage)} alt={item.product.name} className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.04]" />
+          <img
+            src={apiAssetUrl(primaryImage, { width: 480 })}
+            alt={item.product.name}
+            loading="lazy"
+            decoding="async"
+            className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.04]"
+          />
         ) : (
           <EmptyImagePlaceholder label="Sản phẩm chưa có ảnh" />
         )}
@@ -563,7 +584,7 @@ function RecommendationCard({
       </div>
     </article>
   );
-}
+});
 
 function ContextTile({ label, value, provenance }: { label: string; value: string; provenance?: string }) {
   let provBadge = null;

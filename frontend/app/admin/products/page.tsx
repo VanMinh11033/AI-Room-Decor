@@ -42,7 +42,17 @@ export default function AdminProductsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const latestRequestIdRef = useRef(0);
+
   async function load(nextPage = 1) {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+    const requestId = ++latestRequestIdRef.current;
+
     const params = new URLSearchParams({ page: String(nextPage), page_size: "10" });
     if (formRef.current) {
       new FormData(formRef.current).forEach((value, key) => {
@@ -52,20 +62,34 @@ export default function AdminProductsPage() {
     setLoading(true);
     setError("");
     try {
-      const data = await apiFetch<Paginated<Product>>(`/api/admin/products?${params.toString()}`);
-      setProducts(data.items);
-      setPage(data.page);
-      setTotal(data.total);
+      const data = await apiFetch<Paginated<Product>>(`/api/admin/products?${params.toString()}`, {
+        signal: controller.signal,
+      });
+      if (requestId === latestRequestIdRef.current) {
+        setProducts(data.items);
+        setPage(data.page);
+        setTotal(data.total);
+      }
     } catch (err) {
+      if (controller.signal.aborted || requestId !== latestRequestIdRef.current) return;
       setError(err instanceof Error ? err.message : "Không tải được sản phẩm");
     } finally {
-      setLoading(false);
+      if (requestId === latestRequestIdRef.current) {
+        setLoading(false);
+      }
     }
   }
 
   useEffect(() => {
-    load();
-  }, []);
+    if (!authLoading) {
+      load();
+    }
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, [authLoading]);
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

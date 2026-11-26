@@ -44,16 +44,16 @@ export default function AdminProductImagesPage() {
   const [notice, setNotice] = useState("");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  async function loadProducts() {
+  async function loadProducts(signal?: AbortSignal) {
     try {
-      const data = await apiFetch<Paginated<Product>>("/api/admin/products?page=1&page_size=100");
+      const data = await apiFetch<Paginated<Product>>("/api/admin/products?page=1&page_size=100", { signal });
       setProducts(data.items);
     } catch {
       // best-effort
     }
   }
 
-  async function loadCandidates(nextPage = 1) {
+  async function loadCandidates(nextPage = 1, signal?: AbortSignal) {
     const params = new URLSearchParams({ page: String(nextPage), page_size: "12" });
     if (productId) params.set("product_id", productId);
     if (status) params.set("status", status);
@@ -61,23 +61,28 @@ export default function AdminProductImagesPage() {
     setError("");
     try {
       const data = await apiFetch<ProductImageCandidateList>(
-        `/api/admin/product-image-candidates?${params.toString()}`
+        `/api/admin/product-image-candidates?${params.toString()}`,
+        { signal }
       );
       setCandidates(data.items);
       setPage(data.page);
       setTotal(data.total);
     } catch (err) {
+      if (signal?.aborted) return;
       setError(err instanceof Error ? err.message : "Không tải được danh sách ảnh.");
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) setLoading(false);
     }
   }
 
   useEffect(() => {
-    loadProducts();
-    loadCandidates();
+    if (authLoading) return;
+    const controller = new AbortController();
+    loadProducts(controller.signal);
+    loadCandidates(1, controller.signal);
+    return () => controller.abort();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [authLoading]);
 
   async function onSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

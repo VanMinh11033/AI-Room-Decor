@@ -41,15 +41,24 @@ export default function AdminRoomProjectsPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (authLoading) return;
+    const controller = new AbortController();
     setLoading(true);
-    apiFetch<AdminRoomProjectListResponse>("/api/admin/room-projects")
+    apiFetch<AdminRoomProjectListResponse>("/api/admin/room-projects", { signal: controller.signal })
       .then((data) => {
         setItems(data.items);
         setTotal(data.total);
+        setError("");
       })
-      .catch((err) => setError(err instanceof Error ? err.message : "Không tải được dự án phòng."))
-      .finally(() => setLoading(false));
-  }, []);
+      .catch((err) => {
+        if (controller.signal.aborted) return;
+        setError(err instanceof Error ? err.message : "Không tải được dự án phòng.");
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setLoading(false);
+      });
+    return () => controller.abort();
+  }, [authLoading]);
 
   const filteredItems = useMemo(() => {
     return items.filter((item) => {

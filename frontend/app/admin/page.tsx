@@ -15,7 +15,7 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { apiFetch } from "@/lib/api";
 import { displayRoomType, displayStatus } from "@/lib/display";
@@ -23,15 +23,32 @@ import type { AdminDashboard } from "@/types/api";
 import { AdminStatusBadge } from "@/components/admin/AdminPrimitives";
 
 export default function AdminPage() {
-  const { loading } = useAuth("ADMIN");
+  const { user, loading } = useAuth("ADMIN");
   const [dashboard, setDashboard] = useState<AdminDashboard | null>(null);
   const [error, setError] = useState("");
+  const inFlightRef = useRef(false);
 
   useEffect(() => {
-    apiFetch<AdminDashboard>("/api/admin/dashboard")
-      .then(setDashboard)
-      .catch((err) => setError(err instanceof Error ? err.message : "Không tải được dashboard."));
-  }, []);
+    if (loading || !user) return;
+    if (inFlightRef.current) return;
+    inFlightRef.current = true;
+
+    const controller = new AbortController();
+    apiFetch<AdminDashboard>("/api/admin/dashboard", { signal: controller.signal })
+      .then((data) => {
+        setDashboard(data);
+        setError("");
+      })
+      .catch((err) => {
+        if (controller.signal.aborted) return;
+        setError(err instanceof Error ? err.message : "Không tải được dashboard.");
+      })
+      .finally(() => {
+        inFlightRef.current = false;
+      });
+
+    return () => controller.abort();
+  }, [loading, user]);
 
   if (loading) {
     return (

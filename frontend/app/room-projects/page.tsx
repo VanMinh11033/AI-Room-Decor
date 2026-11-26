@@ -16,18 +16,19 @@ export default function RoomProjectsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  async function load(nextPage = 1) {
+  async function load(nextPage = 1, signal?: AbortSignal) {
     setLoading(true);
     setError("");
     try {
-      const data = await apiFetch<Paginated<RoomProject>>(`/api/room-projects?page=${nextPage}&page_size=12`);
+      const data = await apiFetch<Paginated<RoomProject>>(`/api/room-projects?page=${nextPage}&page_size=12`, { signal });
       setProjects(data.items);
       setTotal(data.total);
       setPage(data.page);
     } catch (err) {
+      if (signal?.aborted) return;
       setError(err instanceof Error ? err.message : "Không tải được dự án phòng");
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) setLoading(false);
     }
   }
 
@@ -38,7 +39,11 @@ export default function RoomProjectsPage() {
   }
 
   useEffect(() => {
-    if (!authLoading) load();
+    const controller = new AbortController();
+    if (!authLoading) {
+      load(1, controller.signal);
+    }
+    return () => controller.abort();
   }, [authLoading]);
 
   if (authLoading) return <p className="font-semibold text-charcoal/60">Đang kiểm tra tài khoản...</p>;
@@ -61,7 +66,13 @@ export default function RoomProjectsPage() {
             <Link href={`/room-projects/${project.id}`}>
               <div className="aspect-[4/3] bg-ivory">
                 {project.room_image_url ? (
-                  <img src={apiAssetUrl(project.room_image_url)} alt={project.title} className="h-full w-full object-cover" />
+                  <img
+                    src={apiAssetUrl(project.room_image_url, { width: 480 })}
+                    alt={project.title}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover"
+                  />
                 ) : (
                   <EmptyImagePlaceholder label="Chưa có ảnh phòng" />
                 )}

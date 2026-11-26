@@ -13,6 +13,8 @@ import type { RoomAnalysis, RoomProject } from "@/types/api";
 export default function RoomProjectDetailPage() {
   const params = useParams<{ id: string }>();
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const uploadInFlight = useRef(false);
+  const analyzeInFlight = useRef(false);
   const { loading: authLoading } = useAuth("CUSTOMER");
   const [project, setProject] = useState<RoomProject | null>(null);
   const [analysis, setAnalysis] = useState<RoomAnalysis | null>(null);
@@ -24,26 +26,33 @@ export default function RoomProjectDetailPage() {
   const [pageError, setPageError] = useState("");
   const [actionError, setActionError] = useState("");
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (signal?: AbortSignal) => {
     setLoading(true);
     setPageError("");
     try {
-      const data = await apiFetch<RoomProject>(`/api/room-projects/${params.id}`);
-      setProject(data);
-      try {
-        setAnalysis(await apiFetch<RoomAnalysis>(`/api/room-projects/${params.id}/analysis`));
-      } catch {
-        setAnalysis(null);
-      }
+      const [projectData, analysisData] = await Promise.all([
+        apiFetch<RoomProject>(`/api/room-projects/${params.id}`, { signal }),
+        apiFetch<RoomAnalysis>(`/api/room-projects/${params.id}/analysis`, { signal }).catch(() => null),
+      ]);
+      setProject(projectData);
+      setAnalysis(analysisData);
     } catch (err) {
+      if (signal?.aborted) return;
       setPageError(err instanceof Error ? err.message : "Không tải được dự án phòng");
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) {
+        setLoading(false);
+      }
     }
   }, [params.id]);
 
   useEffect(() => {
-    if (!authLoading) load();
+    if (authLoading) return;
+    const controller = new AbortController();
+    load(controller.signal);
+    return () => {
+      controller.abort();
+    };
   }, [authLoading, load]);
 
   useEffect(() => {
@@ -57,11 +66,23 @@ export default function RoomProjectDetailPage() {
   }, [file]);
 
   async function uploadImage() {
-    if (!file) return;
-    const formData = new FormData();
-    formData.append("file", file);
+    if (!file || uploadInFlight.current) return;
+    // Client-side pre-validation: size <= 15MB, valid image type
+    if (file.size > 15 * 1024 * 1024) {
+      setActionError("Kích thước tệp quá lớn (tối đa 15MB). Vui lòng chọn ảnh nhỏ hơn.");
+      return;
+    }
+    const validMimes = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
+    if (file.type && !validMimes.includes(file.type.toLowerCase())) {
+      setActionError("Định dạng ảnh không hợp lệ. Vui lòng tải ảnh JPG, PNG hoặc WEBP.");
+      return;
+    }
+
+    uploadInFlight.current = true;
     setUploading(true);
     setActionError("");
+    const formData = new FormData();
+    formData.append("file", file);
     try {
       const updated = await apiFetch<RoomProject>(`/api/room-projects/${params.id}/image`, { method: "POST", body: formData });
       setProject(updated);
@@ -70,11 +91,14 @@ export default function RoomProjectDetailPage() {
     } catch (err) {
       setActionError(mapUploadError(err instanceof Error ? err.message : ""));
     } finally {
+      uploadInFlight.current = false;
       setUploading(false);
     }
   }
 
   async function analyze(force = false) {
+    if (analyzeInFlight.current) return;
+    analyzeInFlight.current = true;
     setAnalyzing(true);
     setActionError("");
     try {
@@ -85,6 +109,7 @@ export default function RoomProjectDetailPage() {
       setActionError(mapAnalysisError(err instanceof Error ? err.message : ""));
       await load();
     } finally {
+      analyzeInFlight.current = false;
       setAnalyzing(false);
     }
   }
@@ -134,7 +159,13 @@ export default function RoomProjectDetailPage() {
           <div className="overflow-hidden rounded-3xl border border-ink/10 bg-white shadow-soft">
             <div className="aspect-[16/10] bg-stone/20 flex items-center justify-center">
               {project.room_image_url ? (
-                <img src={apiAssetUrl(project.room_image_url)} alt={project.title} className="h-full w-full object-contain" />
+                <img
+                  src={apiAssetUrl(project.room_image_url, { width: 1000 })}
+                  alt={project.title}
+                  fetchPriority="high"
+                  decoding="async"
+                  className="h-full w-full object-contain"
+                />
               ) : (
                 <EmptyImagePlaceholder label="Chưa có ảnh phòng" />
               )}
@@ -340,7 +371,7 @@ function AnalysisResult({ analysis }: { analysis: RoomAnalysis }) {
       <div className="rounded-2xl bg-ivory p-4">
         <h3 className="font-black text-ink">Màu chủ đạo</h3>
         <div className="mt-3 flex flex-wrap gap-2">
-          {analysis.dominant_colors.length > 0 ? analysis.dominant_colors.map((color, index) => (
+          {(analysis.dominant_colors || []).length > 0 ? (analysis.dominant_colors || []).map((color, index) => (
             <span key={`${index}-${color.name}-${color.hex || ""}`} className="inline-flex items-center gap-2 rounded-full border border-ink/10 bg-white px-3 py-1 text-sm font-bold">
               <span className="h-5 w-5 rounded-full border border-ink/10" style={{ backgroundColor: color.hex || "#ffffff" }} />
               {displayColor(color.name) || color.name} {color.percentage ? `${color.percentage}%` : ""}
@@ -348,8 +379,8 @@ function AnalysisResult({ analysis }: { analysis: RoomAnalysis }) {
           )) : <span className="text-sm text-charcoal/50">-</span>}
         </div>
       </div>
-      <Panel title="Vật thể hiện có" items={analysis.existing_objects.map((item) => `${item.name} (${Math.round(item.confidence * 100)}%)`)} />
-      <Panel title="Khu vực trống" items={analysis.empty_areas.map((area) => `${area.location}: ${area.description || "-"}`)} />
+      <Panel title="Vật thể hiện có" items={(analysis.existing_objects || []).map((item) => `${item.name} (${Math.round(item.confidence * 100)}%)`)} />
+      <Panel title="Khu vực trống" items={(analysis.empty_areas || []).map((area) => `${area.location}: ${area.description || "-"}`)} />
       <Panel title="Mô tả bố cục" items={[analysis.layout_summary || "-"]} />
     </div>
   );
