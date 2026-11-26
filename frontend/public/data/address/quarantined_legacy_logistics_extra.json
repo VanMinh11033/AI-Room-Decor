@@ -1,0 +1,1107 @@
+{
+  "title": "Danh mục 75 bản ghi địa giới lịch sử / phi chuẩn / chuyển vị được cách ly kiểm toán",
+  "purpose": "Lưu trữ độc lập, bảo toàn 100% dữ liệu gốc phục vụ kiểm tra đối chiếu; không tính vào 3.321 đơn vị hành chính chính thức theo Quyết định 19/2025/QĐ-TTg.",
+  "auditTimestamp": "2026-11-26T20:00:00+07:00",
+  "totalQuarantinedRecords": 75,
+  "records": [
+    {
+      "name": "Xã Sơn Kim 1",
+      "provinceCode": "01",
+      "provinceName": "Thành phố Hà Nội",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "42",
+          "Tỉnh Hà Tĩnh",
+          "Xã Sơn Kim 1",
+          "18196",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Sơn Kim 2",
+      "provinceCode": "01",
+      "provinceName": "Thành phố Hà Nội",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "42",
+          "Tỉnh Hà Tĩnh",
+          "Xã Sơn Kim 2",
+          "18199",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Phường phườngThục Phán",
+      "provinceCode": "04",
+      "provinceName": "Tỉnh Cao Bằng",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": []
+    },
+    {
+      "name": "Xã Tam Hải",
+      "provinceCode": "04",
+      "provinceName": "Tỉnh Cao Bằng",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "48",
+          "Thành phố Đà Nẵng",
+          "Xã Tam Hải",
+          "20992",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Tân Hiệp",
+      "provinceCode": "04",
+      "provinceName": "Tỉnh Cao Bằng",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "48",
+          "Thành phố Đà Nẵng",
+          "Xã Tân Hiệp",
+          "20434",
+          "Xã"
+        ],
+        [
+          "79",
+          "Thành phố Hồ Chí Minh",
+          "Phường Tân Hiệp",
+          "25920",
+          "Phường"
+        ],
+        [
+          "91",
+          "Tỉnh An Giang",
+          "Xã Tân Hiệp",
+          "30850",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Hòa Minh",
+      "provinceCode": "08",
+      "provinceName": "Tỉnh Tuyên Quang",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "86",
+          "Tỉnh Vĩnh Long",
+          "Xã Hòa Minh",
+          "29410",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Long Hòa",
+      "provinceCode": "08",
+      "provinceName": "Tỉnh Tuyên Quang",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "79",
+          "Thành phố Hồ Chí Minh",
+          "Xã Long Hòa",
+          "25792",
+          "Xã"
+        ],
+        [
+          "86",
+          "Tỉnh Vĩnh Long",
+          "Xã Long Hòa",
+          "29413",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Long Vĩnh",
+      "provinceCode": "08",
+      "provinceName": "Tỉnh Tuyên Quang",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "86",
+          "Tỉnh Vĩnh Long",
+          "Xã Long Vĩnh",
+          "29533",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã xãHồng Thái",
+      "provinceCode": "08",
+      "provinceName": "Tỉnh Tuyên Quang",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": []
+    },
+    {
+      "name": "Xã xãThượng Nông",
+      "provinceCode": "08",
+      "provinceName": "Tỉnh Tuyên Quang",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": []
+    },
+    {
+      "name": "Xã Đông Hải",
+      "provinceCode": "08",
+      "provinceName": "Tỉnh Tuyên Quang",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "31",
+          "Thành phố Hải Phòng",
+          "Phường Đông Hải",
+          "11411",
+          "Phường"
+        ],
+        [
+          "56",
+          "Tỉnh Khánh Hòa",
+          "Phường Đông Hải",
+          "22780",
+          "Phường"
+        ],
+        [
+          "86",
+          "Tỉnh Vĩnh Long",
+          "Xã Đông Hải",
+          "29536",
+          "Xã"
+        ],
+        [
+          "96",
+          "Tỉnh Cà Mau",
+          "Xã Đông Hải",
+          "31975",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Phường Phước Tân",
+      "provinceCode": "11",
+      "provinceName": "Tỉnh Điện Biên",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "75",
+          "Tỉnh Đồng Nai",
+          "Phường Phước Tân",
+          "26377",
+          "Phường"
+        ]
+      ]
+    },
+    {
+      "name": "Phường Tam Phước",
+      "provinceCode": "11",
+      "provinceName": "Tỉnh Điện Biên",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "75",
+          "Tỉnh Đồng Nai",
+          "Phường Tam Phước",
+          "26374",
+          "Phường"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Bù Gia Mập",
+      "provinceCode": "11",
+      "provinceName": "Tỉnh Điện Biên",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "75",
+          "Tỉnh Đồng Nai",
+          "Xã Bù Gia Mập",
+          "25222",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Phú Lý",
+      "provinceCode": "11",
+      "provinceName": "Tỉnh Điện Biên",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "75",
+          "Tỉnh Đồng Nai",
+          "Xã Phú Lý",
+          "26173",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Thanh Sơn",
+      "provinceCode": "11",
+      "provinceName": "Tỉnh Điện Biên",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "25",
+          "Tỉnh Phú Thọ",
+          "Xã Thanh Sơn",
+          "08542",
+          "Xã"
+        ],
+        [
+          "37",
+          "Tỉnh Ninh Bình",
+          "Xã Thanh Sơn",
+          "14434",
+          "Xã"
+        ],
+        [
+          "75",
+          "Tỉnh Đồng Nai",
+          "Xã Thanh Sơn",
+          "26209",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Đak Lua",
+      "provinceCode": "11",
+      "provinceName": "Tỉnh Điện Biên",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "75",
+          "Tỉnh Đồng Nai",
+          "Xã Đak Lua",
+          "26119",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Đăk Ơ",
+      "provinceCode": "11",
+      "provinceName": "Tỉnh Điện Biên",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "75",
+          "Tỉnh Đồng Nai",
+          "Xã Đăk Ơ",
+          "25225",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Ninh Gia",
+      "provinceCode": "12",
+      "provinceName": "Tỉnh Lai Châu",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "68",
+          "Tỉnh Lâm Đồng",
+          "Xã Ninh Gia",
+          "24985",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Quảng Hòa",
+      "provinceCode": "12",
+      "provinceName": "Tỉnh Lai Châu",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "68",
+          "Tỉnh Lâm Đồng",
+          "Xã Quảng Hòa",
+          "24620",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Quảng Sơn",
+      "provinceCode": "12",
+      "provinceName": "Tỉnh Lai Châu",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "68",
+          "Tỉnh Lâm Đồng",
+          "Xã Quảng Sơn",
+          "24616",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Quảng Trực",
+      "provinceCode": "12",
+      "provinceName": "Tỉnh Lai Châu",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "68",
+          "Tỉnh Lâm Đồng",
+          "Xã Quảng Trực",
+          "24736",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã xãBình Thành",
+      "provinceCode": "19",
+      "provinceName": "Tỉnh Thái Nguyên",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": []
+    },
+    {
+      "name": "Huyện đảo Cô Tô",
+      "provinceCode": "22",
+      "provinceName": "Tỉnh Quảng Ninh",
+      "is_dup_special": true,
+      "dup_target": "cô tô",
+      "found_elsewhere": []
+    },
+    {
+      "name": "Xã Tân Thành",
+      "provinceCode": "22",
+      "provinceName": "Tỉnh Quảng Ninh",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "19",
+          "Tỉnh Thái Nguyên",
+          "Xã Tân Thành",
+          "05923",
+          "Xã"
+        ],
+        [
+          "20",
+          "Tỉnh Lạng Sơn",
+          "Xã Tân Thành",
+          "06445",
+          "Xã"
+        ],
+        [
+          "38",
+          "Tỉnh Thanh Hóa",
+          "Xã Tân Thành",
+          "15661",
+          "Xã"
+        ],
+        [
+          "44",
+          "Tỉnh Quảng Trị",
+          "Xã Tân Thành",
+          "18919",
+          "Xã"
+        ],
+        [
+          "68",
+          "Tỉnh Lâm Đồng",
+          "Xã Tân Thành",
+          "23143",
+          "Xã"
+        ],
+        [
+          "80",
+          "Tỉnh Tây Ninh",
+          "Xã Tân Thành",
+          "25534",
+          "Xã"
+        ],
+        [
+          "79",
+          "Thành phố Hồ Chí Minh",
+          "Phường Tân Thành",
+          "26725",
+          "Phường"
+        ],
+        [
+          "82",
+          "Tỉnh Đồng Tháp",
+          "Xã Tân Thành",
+          "29938",
+          "Xã"
+        ],
+        [
+          "96",
+          "Tỉnh Cà Mau",
+          "Phường Tân Thành",
+          "32025",
+          "Phường"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Phúc Hoà",
+      "provinceCode": "24",
+      "provinceName": "Tỉnh Bắc Ninh",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": []
+    },
+    {
+      "name": "Xã Ba Xa",
+      "provinceCode": "25",
+      "provinceName": "Tỉnh Phú Thọ",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "51",
+          "Tỉnh Quảng Ngãi",
+          "Xã Ba Xa",
+          "21538",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Ia Đal",
+      "provinceCode": "25",
+      "provinceName": "Tỉnh Phú Thọ",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "51",
+          "Tỉnh Quảng Ngãi",
+          "Xã Ia Đal",
+          "23535",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Mô Rai",
+      "provinceCode": "25",
+      "provinceName": "Tỉnh Phú Thọ",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "51",
+          "Tỉnh Quảng Ngãi",
+          "Xã Mô Rai",
+          "23536",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Rờ Kơi",
+      "provinceCode": "25",
+      "provinceName": "Tỉnh Phú Thọ",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "51",
+          "Tỉnh Quảng Ngãi",
+          "Xã Rờ Kơi",
+          "23530",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Đăk Long",
+      "provinceCode": "25",
+      "provinceName": "Tỉnh Phú Thọ",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "51",
+          "Tỉnh Quảng Ngãi",
+          "Xã Đăk Long",
+          "23368",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Huyện đảo Bạch Long Vĩ",
+      "provinceCode": "31",
+      "provinceName": "Thành phố Hải Phòng",
+      "is_dup_special": true,
+      "dup_target": "bạch long vĩ",
+      "found_elsewhere": []
+    },
+    {
+      "name": "Huyện đảo Cát Hải",
+      "provinceCode": "31",
+      "provinceName": "Thành phố Hải Phòng",
+      "is_dup_special": true,
+      "dup_target": "cát hải",
+      "found_elsewhere": []
+    },
+    {
+      "name": "Phường phườngChí Linh",
+      "provinceCode": "31",
+      "provinceName": "Thành phố Hải Phòng",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": []
+    },
+    {
+      "name": "Phường Dương Nỗ",
+      "provinceCode": "33",
+      "provinceName": "Tỉnh Hưng Yên",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "46",
+          "Thành phố Huế",
+          "Phường Dương Nỗ",
+          "19909",
+          "Phường"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Thu Cúc",
+      "provinceCode": "37",
+      "provinceName": "Tỉnh Ninh Bình",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "25",
+          "Tỉnh Phú Thọ",
+          "Xã Thu Cúc",
+          "08545",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Phường Thới Hòa",
+      "provinceCode": "38",
+      "provinceName": "Tỉnh Thanh Hóa",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "79",
+          "Thành phố Hồ Chí Minh",
+          "Phường Thới Hòa",
+          "25846",
+          "Phường"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Bình Châu",
+      "provinceCode": "38",
+      "provinceName": "Tỉnh Thanh Hóa",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "79",
+          "Thành phố Hồ Chí Minh",
+          "Xã Bình Châu",
+          "26656",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Hòa Hiệp",
+      "provinceCode": "38",
+      "provinceName": "Tỉnh Thanh Hóa",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "66",
+          "Tỉnh Đắk Lắk",
+          "Phường Hòa Hiệp",
+          "22261",
+          "Phường"
+        ],
+        [
+          "79",
+          "Thành phố Hồ Chí Minh",
+          "Xã Hòa Hiệp",
+          "26647",
+          "Xã"
+        ],
+        [
+          "86",
+          "Tỉnh Vĩnh Long",
+          "Xã Hòa Hiệp",
+          "29734",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Long Sơn",
+      "provinceCode": "38",
+      "provinceName": "Tỉnh Thanh Hóa",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "79",
+          "Thành phố Hồ Chí Minh",
+          "Xã Long Sơn",
+          "26545",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Thạnh An",
+      "provinceCode": "38",
+      "provinceName": "Tỉnh Thanh Hóa",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "79",
+          "Thành phố Hồ Chí Minh",
+          "Xã Thạnh An",
+          "27676",
+          "Xã"
+        ],
+        [
+          "92",
+          "Thành phố Cần Thơ",
+          "Xã Thạnh An",
+          "31231",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Phường phườngBắc Hồng Lĩnh",
+      "provinceCode": "42",
+      "provinceName": "Tỉnh Hà Tĩnh",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": []
+    },
+    {
+      "name": "Huyện đảo Cồn Cỏ",
+      "provinceCode": "44",
+      "provinceName": "Tỉnh Quảng Trị",
+      "is_dup_special": true,
+      "dup_target": "cồn cỏ",
+      "found_elsewhere": []
+    },
+    {
+      "name": "Xã Mường Bám",
+      "provinceCode": "44",
+      "provinceName": "Tỉnh Quảng Trị",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "14",
+          "Tỉnh Sơn La",
+          "Xã Mường Bám",
+          "03760",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Mường Lèo",
+      "provinceCode": "44",
+      "provinceName": "Tỉnh Quảng Trị",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "14",
+          "Tỉnh Sơn La",
+          "Xã Mường Lèo",
+          "04240",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Mường Lạn",
+      "provinceCode": "44",
+      "provinceName": "Tỉnh Quảng Trị",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "11",
+          "Tỉnh Điện Biên",
+          "Xã Mường Lạn",
+          "03313",
+          "Xã"
+        ],
+        [
+          "14",
+          "Tỉnh Sơn La",
+          "Xã Mường Lạn",
+          "04246",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Ngọc Chiến",
+      "provinceCode": "44",
+      "provinceName": "Tỉnh Quảng Trị",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "14",
+          "Tỉnh Sơn La",
+          "Xã Ngọc Chiến",
+          "03820",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Phiêng Khoài",
+      "provinceCode": "44",
+      "provinceName": "Tỉnh Quảng Trị",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "14",
+          "Tỉnh Sơn La",
+          "Xã Phiêng Khoài",
+          "04099",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Suối Tọ",
+      "provinceCode": "44",
+      "provinceName": "Tỉnh Quảng Trị",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "14",
+          "Tỉnh Sơn La",
+          "Xã Suối Tọ",
+          "03901",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Tân Yên",
+      "provinceCode": "44",
+      "provinceName": "Tỉnh Quảng Trị",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "14",
+          "Tỉnh Sơn La",
+          "Xã Tân Yên",
+          "03997",
+          "Xã"
+        ],
+        [
+          "24",
+          "Tỉnh Bắc Ninh",
+          "Xã Tân Yên",
+          "07339",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Huyện đảo Hoàng Sa",
+      "provinceCode": "48",
+      "provinceName": "Thành phố Đà Nẵng",
+      "is_dup_special": true,
+      "dup_target": "hoàng sa",
+      "found_elsewhere": []
+    },
+    {
+      "name": "Đô thị cổ Hội An",
+      "provinceCode": "48",
+      "provinceName": "Thành phố Đà Nẵng",
+      "is_dup_special": true,
+      "dup_target": "hội an",
+      "found_elsewhere": []
+    },
+    {
+      "name": "Huyện đảo Lý Sơn",
+      "provinceCode": "51",
+      "provinceName": "Tỉnh Quảng Ngãi",
+      "is_dup_special": true,
+      "dup_target": "lý sơn",
+      "found_elsewhere": []
+    },
+    {
+      "name": "Xã Cái Chiên",
+      "provinceCode": "51",
+      "provinceName": "Tỉnh Quảng Ngãi",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "22",
+          "Tỉnh Quảng Ninh",
+          "Xã Cái Chiên",
+          "06967",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Huyện đảo Trường Sa",
+      "provinceCode": "56",
+      "provinceName": "Tỉnh Khánh Hòa",
+      "is_dup_special": true,
+      "dup_target": "trường sa",
+      "found_elsewhere": []
+    },
+    {
+      "name": "Xã Mù Cả",
+      "provinceCode": "56",
+      "provinceName": "Tỉnh Khánh Hòa",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "12",
+          "Tỉnh Lai Châu",
+          "Xã Mù Cả",
+          "03451",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Tà Tổng",
+      "provinceCode": "56",
+      "provinceName": "Tỉnh Khánh Hòa",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "12",
+          "Tỉnh Lai Châu",
+          "Xã Tà Tổng",
+          "03463",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Cư M’gar",
+      "provinceCode": "66",
+      "provinceName": "Tỉnh Đắk Lắk",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": []
+    },
+    {
+      "name": "Xã Cư M’ta",
+      "provinceCode": "66",
+      "provinceName": "Tỉnh Đắk Lắk",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": []
+    },
+    {
+      "name": "Xã Ea H’Leo",
+      "provinceCode": "66",
+      "provinceName": "Tỉnh Đắk Lắk",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": []
+    },
+    {
+      "name": "Xã Ea M’Droh",
+      "provinceCode": "66",
+      "provinceName": "Tỉnh Đắk Lắk",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": []
+    },
+    {
+      "name": "Xã M’Drắk",
+      "provinceCode": "66",
+      "provinceName": "Tỉnh Đắk Lắk",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": []
+    },
+    {
+      "name": "Huyện đảo Phú Quý",
+      "provinceCode": "68",
+      "provinceName": "Tỉnh Lâm Đồng",
+      "is_dup_special": true,
+      "dup_target": "phú quý",
+      "found_elsewhere": []
+    },
+    {
+      "name": "Phường B’Lao",
+      "provinceCode": "68",
+      "provinceName": "Tỉnh Lâm Đồng",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": []
+    },
+    {
+      "name": "Xã D’Ran",
+      "provinceCode": "68",
+      "provinceName": "Tỉnh Lâm Đồng",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": []
+    },
+    {
+      "name": "Xã Sảng Mộc",
+      "provinceCode": "80",
+      "provinceName": "Tỉnh Tây Ninh",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "19",
+          "Tỉnh Thái Nguyên",
+          "Xã Sảng Mộc",
+          "05719",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Xã Thượng Quan",
+      "provinceCode": "80",
+      "provinceName": "Tỉnh Tây Ninh",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": [
+        [
+          "19",
+          "Tỉnh Thái Nguyên",
+          "Xã Thượng Quan",
+          "01957",
+          "Xã"
+        ]
+      ]
+    },
+    {
+      "name": "Phường Hoà Thuận",
+      "provinceCode": "86",
+      "provinceName": "Tỉnh Vĩnh Long",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": []
+    },
+    {
+      "name": "Phường Nguyệt Hoá",
+      "provinceCode": "86",
+      "provinceName": "Tỉnh Vĩnh Long",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": []
+    },
+    {
+      "name": "Phường Trường Long Hoà",
+      "provinceCode": "86",
+      "provinceName": "Tỉnh Vĩnh Long",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": []
+    },
+    {
+      "name": "Xã Hùng Hoà",
+      "provinceCode": "86",
+      "provinceName": "Tỉnh Vĩnh Long",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": []
+    },
+    {
+      "name": "Xã Tân Hoà",
+      "provinceCode": "86",
+      "provinceName": "Tỉnh Vĩnh Long",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": []
+    },
+    {
+      "name": "Thành phố đảo Phú Quốc",
+      "provinceCode": "91",
+      "provinceName": "Tỉnh An Giang",
+      "is_dup_special": true,
+      "dup_target": "phú quốc",
+      "found_elsewhere": []
+    },
+    {
+      "name": "Phường Hoà Thành",
+      "provinceCode": "96",
+      "provinceName": "Tỉnh Cà Mau",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": []
+    },
+    {
+      "name": "Xã Hoà Bình",
+      "provinceCode": "96",
+      "provinceName": "Tỉnh Cà Mau",
+      "is_dup_special": false,
+      "dup_target": "",
+      "found_elsewhere": []
+    }
+  ]
+}

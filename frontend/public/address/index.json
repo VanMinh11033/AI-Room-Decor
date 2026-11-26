@@ -1,0 +1,248 @@
+{
+  "datasetVersion": "2025.4-OFFICIAL-3321-QD19",
+  "authority": "Quyết định số 19/2025/QĐ-TTg của Thủ tướng Chính phủ",
+  "effectiveDate": "2025-07-01",
+  "verificationDate": "2026-11-26",
+  "totalProvinces": 34,
+  "grandTotalWards": 3321,
+  "provinces": {
+    "01": {
+      "provinceCode": "01",
+      "provinceName": "Thành phố Hà Nội",
+      "provinceShort": "Hà Nội",
+      "resolutionNumber": "1656/NQ-UBTVQH15",
+      "totalWards": 126
+    },
+    "04": {
+      "provinceCode": "04",
+      "provinceName": "Tỉnh Cao Bằng",
+      "provinceShort": "Cao Bằng",
+      "resolutionNumber": "1657/NQ-UBTVQH15",
+      "totalWards": 56
+    },
+    "08": {
+      "provinceCode": "08",
+      "provinceName": "Tỉnh Tuyên Quang",
+      "provinceShort": "Tuyên Quang",
+      "resolutionNumber": "1684/NQ-UBTVQH15",
+      "totalWards": 124
+    },
+    "11": {
+      "provinceCode": "11",
+      "provinceName": "Tỉnh Điện Biên",
+      "provinceShort": "Điện Biên",
+      "resolutionNumber": "1661/NQ-UBTVQH15",
+      "totalWards": 45
+    },
+    "12": {
+      "provinceCode": "12",
+      "provinceName": "Tỉnh Lai Châu",
+      "provinceShort": "Lai Châu",
+      "resolutionNumber": "1670/NQ-UBTVQH15",
+      "totalWards": 38
+    },
+    "14": {
+      "provinceCode": "14",
+      "provinceName": "Tỉnh Sơn La",
+      "provinceShort": "Sơn La",
+      "resolutionNumber": "1681/NQ-UBTVQH15",
+      "totalWards": 75
+    },
+    "15": {
+      "provinceCode": "15",
+      "provinceName": "Tỉnh Lào Cai",
+      "provinceShort": "Lào Cai",
+      "resolutionNumber": "1673/NQ-UBTVQH15",
+      "totalWards": 99
+    },
+    "19": {
+      "provinceCode": "19",
+      "provinceName": "Tỉnh Thái Nguyên",
+      "provinceShort": "Thái Nguyên",
+      "resolutionNumber": "1683/NQ-UBTVQH15",
+      "totalWards": 92
+    },
+    "20": {
+      "provinceCode": "20",
+      "provinceName": "Tỉnh Lạng Sơn",
+      "provinceShort": "Lạng Sơn",
+      "resolutionNumber": "1672/NQ-UBTVQH15",
+      "totalWards": 65
+    },
+    "22": {
+      "provinceCode": "22",
+      "provinceName": "Tỉnh Quảng Ninh",
+      "provinceShort": "Quảng Ninh",
+      "resolutionNumber": "1679/NQ-UBTVQH15",
+      "totalWards": 54
+    },
+    "24": {
+      "provinceCode": "24",
+      "provinceName": "Tỉnh Bắc Ninh",
+      "provinceShort": "Bắc Ninh",
+      "resolutionNumber": "1658/NQ-UBTVQH15",
+      "totalWards": 99
+    },
+    "25": {
+      "provinceCode": "25",
+      "provinceName": "Tỉnh Phú Thọ",
+      "provinceShort": "Phú Thọ",
+      "resolutionNumber": "1676/NQ-UBTVQH15",
+      "totalWards": 148
+    },
+    "31": {
+      "provinceCode": "31",
+      "provinceName": "Thành phố Hải Phòng",
+      "provinceShort": "Hải Phòng",
+      "resolutionNumber": "1669/NQ-UBTVQH15",
+      "totalWards": 114
+    },
+    "33": {
+      "provinceCode": "33",
+      "provinceName": "Tỉnh Hưng Yên",
+      "provinceShort": "Hưng Yên",
+      "resolutionNumber": "1666/NQ-UBTVQH15",
+      "totalWards": 104
+    },
+    "37": {
+      "provinceCode": "37",
+      "provinceName": "Tỉnh Ninh Bình",
+      "provinceShort": "Ninh Bình",
+      "resolutionNumber": "1674/NQ-UBTVQH15",
+      "totalWards": 129
+    },
+    "38": {
+      "provinceCode": "38",
+      "provinceName": "Tỉnh Thanh Hóa",
+      "provinceShort": "Thanh Hóa",
+      "resolutionNumber": "1686/NQ-UBTVQH15",
+      "totalWards": 166
+    },
+    "40": {
+      "provinceCode": "40",
+      "provinceName": "Tỉnh Nghệ An",
+      "provinceShort": "Nghệ An",
+      "resolutionNumber": "1678/NQ-UBTVQH15",
+      "totalWards": 130
+    },
+    "42": {
+      "provinceCode": "42",
+      "provinceName": "Tỉnh Hà Tĩnh",
+      "provinceShort": "Hà Tĩnh",
+      "resolutionNumber": "1665/NQ-UBTVQH15",
+      "totalWards": 69
+    },
+    "44": {
+      "provinceCode": "44",
+      "provinceName": "Tỉnh Quảng Trị",
+      "provinceShort": "Quảng Trị",
+      "resolutionNumber": "1680/NQ-UBTVQH15",
+      "totalWards": 78
+    },
+    "46": {
+      "provinceCode": "46",
+      "provinceName": "Thành phố Huế",
+      "provinceShort": "Huế",
+      "resolutionNumber": "1675/NQ-UBTVQH15",
+      "totalWards": 40
+    },
+    "48": {
+      "provinceCode": "48",
+      "provinceName": "Thành phố Đà Nẵng",
+      "provinceShort": "Đà Nẵng",
+      "resolutionNumber": "1659/NQ-UBTVQH15",
+      "totalWards": 94
+    },
+    "51": {
+      "provinceCode": "51",
+      "provinceName": "Tỉnh Quảng Ngãi",
+      "provinceShort": "Quảng Ngãi",
+      "resolutionNumber": "1677/NQ-UBTVQH15",
+      "totalWards": 96
+    },
+    "52": {
+      "provinceCode": "52",
+      "provinceName": "Tỉnh Gia Lai",
+      "provinceShort": "Gia Lai",
+      "resolutionNumber": "1664/NQ-UBTVQH15",
+      "totalWards": 135
+    },
+    "56": {
+      "provinceCode": "56",
+      "provinceName": "Tỉnh Khánh Hòa",
+      "provinceShort": "Khánh Hòa",
+      "resolutionNumber": "1667/NQ-UBTVQH15",
+      "totalWards": 65
+    },
+    "66": {
+      "provinceCode": "66",
+      "provinceName": "Tỉnh Đắk Lắk",
+      "provinceShort": "Đắk Lắk",
+      "resolutionNumber": "1660/NQ-UBTVQH15",
+      "totalWards": 102
+    },
+    "68": {
+      "provinceCode": "68",
+      "provinceName": "Tỉnh Lâm Đồng",
+      "provinceShort": "Lâm Đồng",
+      "resolutionNumber": "1671/NQ-UBTVQH15",
+      "totalWards": 124
+    },
+    "75": {
+      "provinceCode": "75",
+      "provinceName": "Tỉnh Đồng Nai",
+      "provinceShort": "Đồng Nai",
+      "resolutionNumber": "1662/NQ-UBTVQH15",
+      "totalWards": 95
+    },
+    "79": {
+      "provinceCode": "79",
+      "provinceName": "Thành phố Hồ Chí Minh",
+      "provinceShort": "Hồ Chí Minh",
+      "resolutionNumber": "1685/NQ-UBTVQH15",
+      "totalWards": 168
+    },
+    "80": {
+      "provinceCode": "80",
+      "provinceName": "Tỉnh Tây Ninh",
+      "provinceShort": "Tây Ninh",
+      "resolutionNumber": "1682/NQ-UBTVQH15",
+      "totalWards": 96
+    },
+    "82": {
+      "provinceCode": "82",
+      "provinceName": "Tỉnh Đồng Tháp",
+      "provinceShort": "Đồng Tháp",
+      "resolutionNumber": "1663/NQ-UBTVQH15",
+      "totalWards": 102
+    },
+    "86": {
+      "provinceCode": "86",
+      "provinceName": "Tỉnh Vĩnh Long",
+      "provinceShort": "Vĩnh Long",
+      "resolutionNumber": "1687/NQ-UBTVQH15",
+      "totalWards": 124
+    },
+    "91": {
+      "provinceCode": "91",
+      "provinceName": "Tỉnh An Giang",
+      "provinceShort": "An Giang",
+      "resolutionNumber": "1654/NQ-UBTVQH15",
+      "totalWards": 102
+    },
+    "92": {
+      "provinceCode": "92",
+      "provinceName": "Thành phố Cần Thơ",
+      "provinceShort": "Cần Thơ",
+      "resolutionNumber": "1668/NQ-UBTVQH15",
+      "totalWards": 103
+    },
+    "96": {
+      "provinceCode": "96",
+      "provinceName": "Tỉnh Cà Mau",
+      "provinceShort": "Cà Mau",
+      "resolutionNumber": "1655/NQ-UBTVQH15",
+      "totalWards": 64
+    }
+  }
+}

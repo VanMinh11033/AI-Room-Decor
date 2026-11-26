@@ -1,14 +1,29 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import { Check, ChevronLeft, Heart, Loader2, ShoppingCart, SlidersHorizontal, Sparkles, Wallet } from "lucide-react";
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { EmptyImagePlaceholder, ScoreBadge, SectionCard } from "@/components/customer/DesignPrimitives";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import {
+  Check,
+  ChevronLeft,
+  Heart,
+  Loader2,
+  Package,
+  ShoppingCart,
+  SlidersHorizontal,
+  Sparkles,
+  Wallet,
+} from "lucide-react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { getPreselectedProduct } from "@/lib/studio";
+import { EmptyImagePlaceholder, ScoreBadge } from "@/components/customer/DesignPrimitives";
 import { apiAssetUrl, apiFetch } from "@/lib/api";
 import { addToCart } from "@/lib/cart";
 import { displayCategory, displayColor, displayMaterial, displayRoomType, displayStyle, joinDisplay } from "@/lib/display";
 import { useAuth } from "@/hooks/useAuth";
+import { StudioNavHeader } from "@/components/studio/StudioNavHeader";
+import { EditorialHeading } from "@/components/ui/EditorialHeading";
+import { LuxuryButton } from "@/components/ui/LuxuryButton";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 import type { DesignGeneration, Product, ProductRecommendation, RecommendationResponse, RoomAnalysis, RoomProject } from "@/types/api";
 
 const MAX_SELECTED_PRODUCTS = 3;
@@ -59,7 +74,8 @@ function autoSelectTopProducts(items: ProductRecommendation[]): number[] {
   return selected;
 }
 
-export default function RecommendationsPage() {
+function RecommendationsContent() {
+  const searchParams = useSearchParams();
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const { loading: authLoading } = useAuth("CUSTOMER");
@@ -75,47 +91,70 @@ export default function RecommendationsPage() {
   const [error, setError] = useState("");
   const [generationError, setGenerationError] = useState("");
 
-  const load = useCallback(async (signal?: AbortSignal) => {
+  const load = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
       const [projectData, analysisData, recommendationData] = await Promise.all([
-        apiFetch<RoomProject>(`/api/room-projects/${params.id}`, { signal }),
-        apiFetch<RoomAnalysis>(`/api/room-projects/${params.id}/analysis`, { signal }),
-        apiFetch<RecommendationResponse>(`/api/room-projects/${params.id}/recommendations?limit=50`, { signal }),
+        apiFetch<RoomProject>(`/api/room-projects/${params.id}`),
+        apiFetch<RoomAnalysis>(`/api/room-projects/${params.id}/analysis`),
+        apiFetch<RecommendationResponse>(`/api/room-projects/${params.id}/recommendations?limit=50`),
       ]);
       setProject(projectData);
       setAnalysis(analysisData);
       setRecommendations(recommendationData);
 
-      // V1.5 PRO: Ưu tiên bộ sản phẩm đã được tối ưu hóa ngân sách (Bundle Optimizer)
+      // V1.5 PRO: Ưu tiên bộ sản phẩm đã được tối ưu hóa ngân sách hoặc sản phẩm preselected từ Catalog (AUD-P1-002)
       const bundleIds = recommendationData.bundle?.product_ids;
+      const preselected = getPreselectedProduct();
+      const preselectParam = searchParams.get("preselect_product_id");
+      const preselectedId = preselectParam ? Number(preselectParam) : preselected ? preselected.id : null;
+
+      let initialSelected: number[] = [];
       if (bundleIds && bundleIds.length > 0) {
-        setSelectedIds(bundleIds);
+        initialSelected = [...bundleIds];
       } else {
-        const topSelected = autoSelectTopProducts(recommendationData.items);
-        setSelectedIds(topSelected);
+        initialSelected = autoSelectTopProducts(recommendationData.items);
       }
+
+      if (preselectedId && preselectedId > 0) {
+        const existingItem = recommendationData.items.find((it) => it.product.id === preselectedId);
+        if (existingItem) {
+          existingItem.role = "CUSTOMER_PRESELECTED";
+        }
+        const existsInItems = Boolean(existingItem);
+        if (!existsInItems) {
+          try {
+            const singleProduct = await apiFetch<Product>(`/api/products/${preselectedId}`);
+            if (singleProduct) {
+              recommendationData.items.unshift({
+                product: singleProduct,
+                score: 99,
+                reasons: ["Sản phẩm do bạn chủ động chọn từ Catalog để đưa vào không gian này."],
+                breakdown: {},
+                role: "CUSTOMER_PRESELECTED",
+              });
+            }
+          } catch {
+            // non-fatal
+          }
+        }
+        initialSelected = Array.from(new Set([preselectedId, ...initialSelected])).slice(0, MAX_SELECTED_PRODUCTS);
+      }
+
+      setSelectedIds(initialSelected);
     } catch (err) {
-      if (signal?.aborted) return;
       const message = err instanceof Error ? err.message : "Không thể tải gợi ý nội thất";
       if (message === "ROOM_PREFERENCES_REQUIRED") setError("Bạn cần lưu sở thích decor trước khi nhận gợi ý nội thất.");
       else if (message === "ROOM_ANALYSIS_REQUIRED") setError("Bạn cần hoàn tất phân tích ảnh phòng trước khi nhận gợi ý nội thất.");
       else setError(message);
     } finally {
-      if (!signal?.aborted) {
-        setLoading(false);
-      }
+      setLoading(false);
     }
-  }, [params.id]);
+  }, [params.id, searchParams]);
 
   useEffect(() => {
-    if (authLoading) return;
-    const controller = new AbortController();
-    load(controller.signal);
-    return () => {
-      controller.abort();
-    };
+    if (!authLoading) load();
   }, [authLoading, load]);
 
   const categories = useMemo(() => {
@@ -165,19 +204,18 @@ export default function RecommendationsPage() {
     return sortedSelected.every((id, idx) => id === sortedBundle[idx]);
   }, [recommendations, selectedIds]);
 
-  const toggleProduct = useCallback((productId: number) => {
+  const toggleProduct = (productId: number) => {
     setGenerationError("");
-    setSelectedIds((current) => {
-      if (current.includes(productId)) {
-        return current.filter((id) => id !== productId);
-      }
-      if (current.length >= MAX_SELECTED_PRODUCTS) {
-        setGenerationError("Bạn đã chọn tối đa 3 sản phẩm tham chiếu cho AI. Vui lòng bỏ bớt 1 món để chọn món mới.");
-        return current;
-      }
-      return [...current, productId];
-    });
-  }, []);
+    if (selectedIds.includes(productId)) {
+      setSelectedIds((current) => current.filter((id) => id !== productId));
+      return;
+    }
+    if (selectedIds.length >= MAX_SELECTED_PRODUCTS) {
+      setGenerationError("Bạn đã chọn tối đa 3 sản phẩm tham chiếu cho AI. Vui lòng bỏ bớt 1 món để chọn món mới.");
+      return;
+    }
+    setSelectedIds((current) => [...current, productId]);
+  };
 
   /**
    * Nút bấm duy nhất: Tạo thiết kế AI với Cloudflare FLUX.2 Dev
@@ -205,27 +243,30 @@ export default function RecommendationsPage() {
       router.push(`/room-projects/${params.id}/design-generations/${generation.id}`);
     } catch (err) {
       const message = err instanceof Error ? err.message : "Không thể tạo thiết kế phòng";
-      if (message.includes("CLOUDFLARE_IMAGE_DAILY_QUOTA_EXCEEDED")) {
-        setGenerationError("Hạn mức 10.000 Neurons miễn phí hôm nay của tài khoản Cloudflare Free đã chạm trần (Mã lỗi 4006 từ Cloudflare). Hạn mức sẽ tự động được làm mới (reset) lúc 00:00 UTC (tương đương 07:00 sáng mai giờ Việt Nam).");
+      // Log diagnostic technical details internally (AUD-P1-004)
+      const sanitizedMsg = typeof message === "string" ? message.replace(/Bearer\s+[A-Za-z0-9-_.]+/gi, "Bearer ***").replace(/[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+/g, "***@***.***") : "Unknown Error";
+      console.error("AI Studio Generation Diagnostic:", sanitizedMsg);
+
+      if (message.includes("CLOUDFLARE_IMAGE_DAILY_QUOTA_EXCEEDED") || message.includes("4006")) {
+        setGenerationError("Studio hiện đang có lượng yêu cầu thiết kế cao trong ngày. Để đảm bảo chất lượng thẩm mỹ cao nhất, hệ thống sẽ mở thêm lượt tạo phối cảnh mới vào 07:00 sáng mai (giờ Việt Nam). Bạn vẫn có thể xem lại các phương án đã lưu hoặc tiếp tục chọn sản phẩm catalog.");
       } else if (message.includes("CLOUDFLARE_IMAGE_RATE_LIMIT_OR_BUSY") || message.includes("3040")) {
-        setGenerationError("Máy chủ Cloudflare AI đang xử lý quá nhiều yêu cầu đồng thời (Mã lỗi 3040 - Rate Limit). Hạn mức ngày vẫn còn, vui lòng đợi 30 - 60 giây rồi thử lại.");
+        setGenerationError("Hệ thống đang đồng thời xử lý phối cảnh cho nhiều khách hàng. Không gian của bạn đang được ưu tiên hàng đợi, vui lòng bấm thử lại sau 30–60 giây.");
       } else if (message.includes("CLOUDFLARE_IMAGE_LOCK_BUSY")) {
-        setGenerationError("Hệ thống đang bận điều phối quota hoặc xử lý tác vụ khác. Vui lòng thử lại sau vài giây.");
+        setGenerationError("Hệ thống đang hoàn tất xử lý không gian trước đó. Vui lòng bấm thử lại sau giây lát.");
       } else if (message.includes("CLOUDFLARE_IMAGE_QUOTA_ERROR") || message.includes("quota")) {
-        const detailPart = message.split(":").slice(1).join(":").trim();
-        setGenerationError(detailPart || "Hạn mức tạo ảnh Cloudflare AI hôm nay đã hết. Vui lòng thử lại vào 07:00 sáng mai (giờ Việt Nam).");
+        setGenerationError("Studio hiện đang điều phối hàng đợi tạo ảnh. Vui lòng thử lại sau giây lát hoặc vào khung giờ tiếp theo.");
       } else if (message.includes("CLOUDFLARE_IMAGE_SERVER_ERROR") || message.includes("3043")) {
-        setGenerationError("Máy chủ Cloudflare AI hiện đang quá tải hoặc gặp sự cố. Vui lòng thử lại sau giây lát.");
+        setGenerationError("Dịch vụ AI tạo phối cảnh tạm thời bận. Đội ngũ kỹ thuật đang tự động tối ưu đường truyền, vui lòng thử lại sau giây lát.");
       } else if (message.includes("CLOUDFLARE_IMAGE_AUTH_ERROR")) {
-        setGenerationError("Lỗi xác thực token Cloudflare AI. Vui lòng kiểm tra lại cấu hình hệ thống.");
+        setGenerationError("Không thể kết nối dịch vụ tạo phối cảnh. Vui lòng liên hệ quản trị viên để kiểm tra cấu hình.");
       } else if (message.includes("FLOOR_PLANE_NOT_RELIABLE") || message.includes("FLOOR_NOT_DETECTED")) {
-        setGenerationError("Không thể xác định mặt sàn an toàn từ ảnh phòng để bố trí nội thất tự động. Vui lòng chụp lại ảnh với góc nhìn bao quát rõ mặt sàn.");
+        setGenerationError("Góc chụp hiện tại chưa hiển thị rõ mặt sàn để bố trí nội thất chính xác. Bạn vui lòng tải lên ảnh chụp bao quát không gian sàn phòng rõ hơn.");
       } else if (message.includes("NO_COMPOSITIBLE_PRODUCT_IMAGES")) {
-        setGenerationError("Các sản phẩm đã chọn chưa có ảnh tham chiếu hợp lệ trong catalog.");
+        setGenerationError("Các sản phẩm đã chọn chưa có ảnh tham chiếu chất lượng cao để phối cảnh. Vui lòng chọn sản phẩm khác từ danh mục.");
       } else if (message.startsWith("IMAGE_PROVIDER_NOT_CONFIGURED")) {
-        setGenerationError("Chưa cấu hình dịch vụ AI tạo ảnh cho hệ thống.");
+        setGenerationError("Dịch vụ AI tạo phối cảnh chưa được kích hoạt cho không gian này.");
       } else {
-        setGenerationError(message);
+        setGenerationError(message.includes("status 5") ? "Hệ thống tạm thời bận. Vui lòng thử lại sau giây lát." : message);
       }
     } finally {
       generationInFlight.current = false;
@@ -233,135 +274,167 @@ export default function RecommendationsPage() {
     }
   };
 
-  if (authLoading || loading) return <p className="font-semibold text-charcoal/60">Đang tải gợi ý nội thất...</p>;
+  if (authLoading || loading) {
+    return (
+      <div className="flex min-h-[400px] flex-col items-center justify-center gap-3">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#8A6B4E] border-t-transparent" />
+        <p className="text-sm font-medium text-[#5A6258]">Đang phân tích độ tương thích và chuẩn bị danh mục gợi ý...</p>
+      </div>
+    );
+  }
 
   if (error) {
     return (
-      <SectionCard className="mx-auto max-w-2xl">
-        <Link href={`/room-projects/${params.id}`} className="inline-flex items-center gap-2 text-sm font-bold text-charcoal/60">
-          <ChevronLeft size={16} /> Quay lại dự án
-        </Link>
-        <h1 className="mt-5 text-3xl font-black text-ink">Chưa thể tạo gợi ý</h1>
-        <p className="mt-3 text-charcoal/65">{error}</p>
-        <div className="mt-5 flex flex-wrap gap-3">
-          <Link href={`/room-projects/${params.id}`} className="secondary-cta">Kiểm tra dự án</Link>
-          <Link href={`/room-projects/${params.id}/preferences`} className="primary-cta">Chọn sở thích decor</Link>
+      <div className="mx-auto max-w-xl rounded-2xl border border-red-200 bg-white p-6 sm:p-8 shadow-sm text-center">
+        <h2 className="font-serif text-2xl font-bold text-[#242B23]">Chưa thể tải gợi ý nội thất</h2>
+        <p className="mt-3 text-sm text-[#5A6258] leading-relaxed">{error}</p>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <Link href={`/room-projects/${params.id}`}>
+            <LuxuryButton variant="secondary" size="sm">Kiểm tra dự án</LuxuryButton>
+          </Link>
+          <Link href={`/room-projects/${params.id}/preferences`}>
+            <LuxuryButton variant="primary" size="sm">Cài đặt sở thích decor</LuxuryButton>
+          </Link>
         </div>
-      </SectionCard>
+      </div>
     );
   }
 
   const effPref = recommendations?.effective_preference;
-  const stylesDisplay = effPref?.styles && effPref.styles.length > 0 
-    ? effPref.styles.join(", ") 
+  const stylesDisplay = effPref?.styles && effPref.styles.length > 0
+    ? effPref.styles.join(", ")
     : joinDisplay(recommendations?.preference.styles, (item) => displayStyle(item.name));
   const colorsDisplay = effPref?.colors && effPref.colors.length > 0
     ? effPref.colors.join(", ")
     : joinDisplay(recommendations?.preference.colors, (item) => displayColor(item.name));
 
   return (
-    <section className="space-y-8">
-      {/* 1. Project Info Header with Provenance */}
-      <div className="overflow-hidden rounded-3xl border border-ink/10 bg-white shadow-soft">
-        <div className="grid lg:grid-cols-[0.78fr_1.22fr]">
-          <div className="min-h-80 bg-stone/20 flex items-center justify-center">
+    <div className="space-y-8 pb-20">
+      {/* 1. Cohesive Studio Navigation Stepper */}
+      <StudioNavHeader
+        projectId={params.id}
+        projectTitle={project?.title || "Dự án thiết kế phòng"}
+        roomImageUrl={project?.room_image_url}
+        currentStep={generating ? 4 : 3}
+        hasRoomImage={Boolean(project?.room_image_url)}
+        hasPreferences={true}
+        selectedProductsCount={selectedIds.length}
+        saveState="saved"
+      />
+
+      {/* 2. Editorial Header */}
+      <EditorialHeading
+        eyebrow="BƯỚC 03 · TUYỂN CHỌN NỘI THẤT CATALOG"
+        title="Gợi ý nội thất tương thích không gian"
+        subtitle="Hệ thống MCDA phân tích độ tương thích kiến trúc từ phong cách, màu sắc và ngân sách đã thiết lập. Chọn từ 1 đến 3 sản phẩm catalog thật để AI tiến hành phối cảnh."
+      />
+
+      {/* 3. Project Context Summary Strip */}
+      <div className="overflow-hidden rounded-2xl border border-[#242B23]/10 bg-white shadow-sm">
+        <div className="grid lg:grid-cols-[0.8fr_1.2fr]">
+          <div className="relative aspect-[16/10] lg:aspect-auto bg-[#F7F4EE] flex items-center justify-center overflow-hidden">
             {project?.room_image_url ? (
               <img
-                src={apiAssetUrl(project.room_image_url, { width: 800 })}
+                src={apiAssetUrl(project.room_image_url)}
                 alt={project.title}
-                fetchPriority="high"
-                decoding="async"
-                className="h-full min-h-80 w-full object-contain"
+                className="h-full w-full object-cover"
               />
             ) : (
               <EmptyImagePlaceholder label="Không có ảnh phòng" />
             )}
-          </div>
-          <div className="p-6 md:p-8">
-            <Link href={`/room-projects/${params.id}`} className="inline-flex items-center gap-2 text-sm font-bold text-charcoal/60">
-              <ChevronLeft size={16} /> Quay lại dự án
-            </Link>
-            <div className="mt-6 flex flex-wrap items-center gap-2">
-              <span className="inline-flex rounded-full bg-clay/10 px-3 py-1 text-sm font-bold text-clay">Bước 4 · Gợi ý & Tạo thiết kế AI</span>
-              {recommendations?.recommendation_version && (
-                <span className="inline-flex rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-black text-emerald-800">
-                  Engine {recommendations.recommendation_version.toUpperCase()} PRO
-                </span>
-              )}
+            <div className="absolute top-3 left-3">
+              <StatusBadge variant="neutral">Không gian thiết kế</StatusBadge>
             </div>
-            <h1 className="mt-4 text-2xl sm:text-3xl md:text-5xl font-black tracking-tight text-ink break-words">Gợi ý sản phẩm dành cho căn phòng này</h1>
-            <p className="mt-4 max-w-2xl text-lg leading-8 text-charcoal/65">
-              Hệ thống đã phân tích không gian, kết hợp sở thích cá nhân và ngân sách để tính toán tổ hợp nội thất hài hòa nhất. Bạn có thể xem giải thích lý do bên dưới hoặc bấm nút để tạo ảnh phối cảnh ngay.
-            </p>
-            <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              <ContextTile 
-                label="Loại phòng" 
-                value={displayRoomType(effPref?.room_type || analysis?.room_type || project?.room_type) || "-"} 
-                provenance={effPref?.provenance?.room_type}
-              />
-              <ContextTile 
-                label="Ngân sách dự kiến" 
-                value={budgetLabel(recommendations)} 
-                provenance={effPref?.provenance?.budget}
-              />
-              <ContextTile 
-                label="Phong cách" 
-                value={stylesDisplay || "Hiện đại tự nhiên"} 
-                provenance={effPref?.provenance?.styles}
-              />
-              <ContextTile 
-                label="Màu sắc chủ đạo" 
-                value={colorsDisplay || "Hài hòa theo phòng"} 
-                provenance={effPref?.provenance?.colors}
-              />
+          </div>
+          <div className="p-5 sm:p-6 lg:p-8 flex flex-col justify-between">
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <StatusBadge variant="customer_pick">MCDA PRO Engine</StatusBadge>
+                {recommendations?.recommendation_version && (
+                  <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-800 border border-emerald-200">
+                    V{recommendations.recommendation_version.toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <h3 className="mt-3 font-serif text-xl sm:text-2xl font-bold text-[#242B23]">{project?.title}</h3>
+              <p className="mt-2 text-xs sm:text-sm text-[#5A6258] leading-relaxed">
+                Tổ hợp nội thất được tuyển chọn kỹ lưỡng để tôn vinh cấu trúc kiến trúc gốc, tạo điểm nhấn và cân bằng thẩm mỹ tổng thể.
+              </p>
+            </div>
+
+            <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4 border-t border-[#242B23]/10 pt-4">
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#5A6258]/70">Loại phòng</span>
+                <p className="mt-0.5 text-xs font-bold text-[#242B23] truncate">
+                  {displayRoomType(effPref?.room_type || analysis?.room_type || project?.room_type) || "Phòng khách"}
+                </p>
+              </div>
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#5A6258]/70">Ngân sách</span>
+                <p className="mt-0.5 text-xs font-bold text-[#8A6B4E] truncate">{budgetLabel(recommendations)}</p>
+              </div>
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#5A6258]/70">Phong cách</span>
+                <p className="mt-0.5 text-xs font-bold text-[#242B23] truncate">{stylesDisplay || "Hiện đại tự nhiên"}</p>
+              </div>
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#5A6258]/70">Bảng màu</span>
+                <p className="mt-0.5 text-xs font-bold text-[#242B23] truncate">{colorsDisplay || "Hài hòa tự nhiên"}</p>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 2. Hero Action Card & Budget Bundle Optimizer */}
-      <div className="overflow-hidden rounded-3xl border-2 border-clay bg-gradient-to-r from-clay/5 via-white to-ivory p-4 sm:p-6 md:p-8 shadow-md">
+      {/* 4. Signature AI Studio Generation Card */}
+      <div className="overflow-hidden rounded-2xl border-2 border-[#8A6B4E]/30 bg-gradient-to-br from-[#F7F4EE] via-white to-[#F7F4EE]/60 p-5 sm:p-7 shadow-md">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-3 flex-1 min-w-0">
-            <div className="inline-flex items-center gap-2 rounded-full bg-clay px-3 py-1 text-xs font-black uppercase tracking-wider text-white">
-              <Sparkles size={14} /> {isAIBundle ? "Tự động 100% · Một chạm tạo thiết kế" : "Tùy chọn của bạn · Tạo thiết kế AI"}
+          <div className="space-y-4 flex-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#8A6B4E] px-3 py-1 text-xs font-bold uppercase tracking-wider text-white shadow-xs">
+                <Sparkles size={13} />
+                {isAIBundle ? "Tổ hợp tối ưu tự động" : "Bộ sưu tập tùy chỉnh"}
+              </span>
+              <span className="text-xs font-semibold text-[#5A6258]">
+                {selectedProducts.length}/3 sản phẩm được chọn
+              </span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-black text-ink md:text-3xl break-words">Tạo phương án thiết kế phòng với AI</h2>
-            <p className="max-w-xl text-sm leading-relaxed text-charcoal/70">
-              {selectedProducts.length > 0 ? (
-                isAIBundle ? (
-                  <>
-                    Hệ thống đã chọn <strong>{selectedProducts.length}</strong> sản phẩm tối ưu công năng (Anchor, Functional, Accent) theo ngân sách của bạn:
-                  </>
-                ) : (
-                  <>
-                    Bạn đã chọn <strong>{selectedProducts.length}</strong> sản phẩm cho phương án thiết kế phòng này:
-                  </>
-                )
-              ) : (
-                <>
-                  Vui lòng chọn từ 1 đến 3 sản phẩm catalog bên dưới để tạo thiết kế:
-                </>
-              )}
-            </p>
 
-            {/* Showcase các sản phẩm được chọn */}
+            <div>
+              <h2 className="font-serif text-xl sm:text-2xl md:text-3xl font-bold text-[#242B23]">
+                Khởi tạo phối cảnh kiến trúc AI
+              </h2>
+              <p className="mt-1 max-w-xl text-xs sm:text-sm text-[#5A6258] leading-relaxed">
+                {selectedProducts.length > 0
+                  ? isAIBundle
+                    ? "Tổ hợp 3 món cân bằng theo công năng (Chính - Tiện ích - Điểm nhấn) khớp với hạn mức ngân sách của bạn."
+                    : `Bạn đã chọn ${selectedProducts.length} sản phẩm từ catalog để AI tính toán tỷ lệ đặt vào không gian.`
+                  : "Vui lòng chọn từ 1 đến 3 sản phẩm catalog bên dưới trước khi khởi tạo phối cảnh."}
+              </p>
+            </div>
+
+            {/* Selected Products Thumbnails */}
             {selectedProducts.length > 0 && (
-              <div className="flex flex-wrap gap-2.5 sm:gap-3 pt-1">
+              <div className="flex flex-wrap gap-2.5 pt-1">
                 {selectedProducts.map((item) => {
                   const img = item.product.images.find((i) => i.is_primary)?.image_url || item.product.images[0]?.image_url;
                   return (
-                    <div key={item.product.id} className="flex items-center gap-3 rounded-2xl border border-clay/20 bg-white/90 p-2.5 shadow-sm w-full sm:w-auto">
-                      <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-xl bg-ivory">
+                    <div
+                      key={item.product.id}
+                      className="flex items-center gap-2.5 rounded-xl border border-[#8A6B4E]/20 bg-white p-2 shadow-xs"
+                    >
+                      <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-[#F7F4EE]">
                         {img ? (
                           <img src={apiAssetUrl(img)} alt={item.product.name} className="h-full w-full object-cover" />
                         ) : (
-                          <div className="h-full w-full bg-stone" />
+                          <div className="h-full w-full bg-[#ECE7DE]" />
                         )}
                       </div>
-                      <div className="min-w-0 pr-2">
-                        <div className="text-xs font-black text-ink line-clamp-1">{item.product.name}</div>
-                        <div className="text-[11px] font-bold text-clay">{Number(item.product.price).toLocaleString("vi-VN")} đ</div>
+                      <div className="min-w-0 pr-1 max-w-[160px]">
+                        <div className="truncate text-xs font-bold text-[#242B23]">{item.product.name}</div>
+                        <div className="text-[11px] font-semibold text-[#8A6B4E]">
+                          {Number(item.product.price).toLocaleString("vi-VN")} ₫
+                        </div>
                       </div>
                     </div>
                   );
@@ -369,99 +442,106 @@ export default function RecommendationsPage() {
               </div>
             )}
 
-            {/* V1.5 PRO: Budget Bundle Summary & Explanation */}
-            <div className="mt-4 flex flex-wrap items-center gap-2 sm:gap-4 rounded-2xl border border-ink/10 bg-white/80 p-3 sm:p-3.5 text-xs text-charcoal/75">
-              <div className="flex items-center gap-2">
-                <Wallet size={16} className="text-clay shrink-0" />
-                <span>Tổng giá bộ nội thất: <strong className="text-ink font-black">{totalSelectedPrice.toLocaleString("vi-VN")} đ</strong></span>
+            {/* Budget Analytics Bar */}
+            <div className="flex flex-wrap items-center gap-3 sm:gap-5 rounded-xl border border-[#242B23]/10 bg-white/80 p-3 text-xs text-[#5A6258]">
+              <div className="flex items-center gap-1.5">
+                <Wallet size={15} className="text-[#8A6B4E] shrink-0" />
+                <span>
+                  Tổng giá trị: <strong className="font-bold text-[#242B23]">{totalSelectedPrice.toLocaleString("vi-VN")} ₫</strong>
+                </span>
               </div>
               {userBudgetMax !== null && (
-                <div className="flex items-center gap-2">
-                  <span>Hạn mức: <strong className="text-ink font-black">{userBudgetMax.toLocaleString("vi-VN")} đ</strong></span>
+                <div>
+                  Hạn mức: <strong className="font-bold text-[#242B23]">{userBudgetMax.toLocaleString("vi-VN")} ₫</strong>
                 </div>
               )}
               {remainingBudget !== null && (
-                <div className="flex items-center gap-2">
-                  <span className={`rounded-full px-2.5 py-0.5 font-black text-[11px] ${
-                    remainingBudget >= 0 ? "bg-emerald-100 text-emerald-800" : "bg-red-100 text-red-800"
-                  }`}>
-                    {remainingBudget >= 0 
-                      ? `Còn lại ${remainingBudget.toLocaleString("vi-VN")} đ` 
-                      : `Vượt ${Math.abs(remainingBudget).toLocaleString("vi-VN")} đ`}
+                <div>
+                  <span
+                    className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
+                      remainingBudget >= 0
+                        ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                        : "bg-red-50 text-red-800 border border-red-200"
+                    }`}
+                  >
+                    {remainingBudget >= 0
+                      ? `Còn lại ${remainingBudget.toLocaleString("vi-VN")} ₫`
+                      : `Vượt ${Math.abs(remainingBudget).toLocaleString("vi-VN")} ₫`}
                   </span>
                 </div>
               )}
             </div>
-
-            {isAIBundle && recommendations?.bundle?.bundle_explanation ? (
-              <p className="text-xs font-medium italic text-charcoal/60">
-                💡 {recommendations.bundle.bundle_explanation}
-              </p>
-            ) : selectedProducts.length > 0 ? (
-              <p className="text-xs font-medium italic text-charcoal/60">
-                💡 Bộ sản phẩm bạn chọn gồm {selectedProducts.length} món với tổng giá {totalSelectedPrice.toLocaleString("vi-VN")} đ{
-                  remainingBudget !== null
-                    ? remainingBudget >= 0
-                      ? ` (tiết kiệm ${remainingBudget.toLocaleString("vi-VN")} đ so với ngân sách)`
-                      : ` (vượt ${Math.abs(remainingBudget).toLocaleString("vi-VN")} đ so với ngân sách)`
-                    : ""
-                }. AI sẽ phối cảnh chuẩn xác các sản phẩm này vào phòng.
-              </p>
-            ) : null}
           </div>
 
-          {/* Nút bấm DUY NHẤT */}
-          <div className="flex flex-col items-stretch lg:items-end gap-2 flex-shrink-0 w-full lg:w-auto">
-            <button
-              type="button"
-              onClick={handleCreateAIDesign}
+          {/* Action Trigger Button */}
+          <div className="flex flex-col items-stretch lg:items-end gap-2 shrink-0 w-full lg:w-auto">
+            <LuxuryButton
+              variant="primary"
+              size="lg"
+              loading={generating}
               disabled={generating || selectedIds.length === 0}
-              className="primary-cta w-full lg:w-auto inline-flex items-center justify-center gap-2.5 sm:gap-3 rounded-2xl px-5 py-3.5 sm:px-10 sm:py-5 text-sm sm:text-lg font-black shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
+              onClick={handleCreateAIDesign}
+              className="w-full lg:w-auto shadow-lg"
             >
-              {generating ? <Loader2 size={20} className="animate-spin shrink-0 sm:h-6 sm:w-6" /> : <Sparkles size={20} className="shrink-0 sm:h-6 sm:w-6" />}
-              <span>{generating ? "Đang tạo thiết kế AI..." : "✨ TẠO THIẾT KẾ AI"}</span>
-            </button>
-            <span className="text-[11px] text-center lg:text-right font-medium text-charcoal/50">
-              Tạo ảnh phối cảnh ánh sáng tự nhiên qua Cloudflare FLUX
+              <Sparkles size={18} className="text-[#F7F4EE]" />
+              <span>{generating ? "Đang xử lý phối cảnh AI..." : "Tạo thiết kế AI Studio"}</span>
+            </LuxuryButton>
+            <span className="text-[11px] text-center lg:text-right text-[#5A6258]">
+              Mô phỏng ánh sáng tự nhiên và chất liệu nội thất chân thực
             </span>
           </div>
         </div>
 
         {generationError && (
-          <div className="mt-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">
+          <div className="mt-4 rounded-xl border border-red-200 bg-red-50/80 p-4 text-xs font-semibold text-red-700 leading-relaxed">
             {generationError}
           </div>
         )}
       </div>
 
-      {/* 3. Catalog Showcase Header */}
-      <div className="surface-card flex flex-col gap-4 p-4 xl:flex-row xl:items-center xl:justify-between">
-        <div>
-          <div className="inline-flex items-center gap-2 text-sm font-black text-ink">
-            <SlidersHorizontal size={18} /> Danh mục sản phẩm đề xuất ({visibleItems.length})
-          </div>
-          <p className="mt-1 text-sm text-charcoal/55">
-            Điểm phù hợp (0–100) được tính dựa trên 8 tiêu chí MCDA (phong cách, loại phòng, màu sắc, vật liệu, ngân sách, công năng, không gian).
-          </p>
+      {/* 5. Filter & Sorting Controls */}
+      <div className="flex flex-col gap-4 rounded-2xl border border-[#242B23]/10 bg-white p-4 sm:flex-row sm:items-center sm:justify-between shadow-sm">
+        <div className="flex items-center gap-2">
+          <SlidersHorizontal size={17} className="text-[#8A6B4E]" />
+          <h3 className="text-sm font-bold text-[#242B23]">
+            Danh mục đề xuất ({visibleItems.length} sản phẩm)
+          </h3>
         </div>
-        <div className="flex flex-col sm:flex-row flex-wrap gap-2 w-full xl:w-auto">
-          <select value={category} onChange={(event) => setCategory(event.target.value)} className="premium-input py-2 w-full sm:w-auto">
-            <option value="">Tất cả danh mục</option>
-            {categories.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+        <div className="flex flex-col sm:flex-row gap-2.5 w-full sm:w-auto">
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="rounded-xl border border-[#242B23]/10 bg-[#F7F4EE] px-3 py-2 text-xs font-medium text-[#242B23] outline-none transition focus:border-[#8A6B4E] focus:bg-white w-full sm:w-auto"
+          >
+            <option value="">Tất cả phân loại</option>
+            {categories.map((item) => (
+              <option key={item.id} value={item.id}>
+                {item.name}
+              </option>
+            ))}
           </select>
-          <select value={sort} onChange={(event) => setSort(event.target.value)} className="premium-input py-2 w-full sm:w-auto">
-            <option value="match">Độ phù hợp cao nhất</option>
-            <option value="price_asc">Giá thấp đến cao</option>
-            <option value="price_desc">Giá cao đến thấp</option>
+          <select
+            value={sort}
+            onChange={(e) => setSort(e.target.value)}
+            className="rounded-xl border border-[#242B23]/10 bg-[#F7F4EE] px-3 py-2 text-xs font-medium text-[#242B23] outline-none transition focus:border-[#8A6B4E] focus:bg-white w-full sm:w-auto"
+          >
+            <option value="match">Độ phù hợp cao nhất (MCDA)</option>
+            <option value="price_asc">Giá tăng dần</option>
+            <option value="price_desc">Giá giảm dần</option>
           </select>
         </div>
       </div>
 
-      {/* 4. Products Grid */}
+      {/* 6. Products Recommendation Grid */}
       {visibleItems.length === 0 ? (
-        <SectionCard>Chưa có sản phẩm catalog phù hợp với điều kiện hiện tại.</SectionCard>
+        <div className="rounded-2xl border border-[#242B23]/10 bg-white p-12 text-center">
+          <Package size={32} className="mx-auto text-[#5A6258]/50" />
+          <p className="mt-3 text-sm font-medium text-[#5A6258]">
+            Không tìm thấy sản phẩm phù hợp với bộ lọc đã chọn.
+          </p>
+        </div>
       ) : (
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {visibleItems.map((item) => (
             <RecommendationCard
               key={item.product.id}
@@ -472,11 +552,11 @@ export default function RecommendationsPage() {
           ))}
         </div>
       )}
-    </section>
+    </div>
   );
 }
 
-const RecommendationCard = memo(function RecommendationCard({
+function RecommendationCard({
   item,
   selected,
   onToggle,
@@ -486,133 +566,178 @@ const RecommendationCard = memo(function RecommendationCard({
   onToggle: (productId: number) => void;
 }) {
   const primaryImage = item.product.images.find((image) => image.is_primary)?.image_url || item.product.images[0]?.image_url;
-  const tags = [...item.product.styles, ...item.product.colors, ...item.product.materials].slice(0, 4);
+  const tags = [...item.product.styles, ...item.product.colors, ...item.product.materials].slice(0, 3);
   const [adding, setAdding] = useState(false);
   const [message, setMessage] = useState("");
 
-  const roleLabel = item.role === "ANCHOR" ? "Món chính" : item.role === "FUNCTIONAL" ? "Tiện ích" : "Trang trí";
-  const roleColor = item.role === "ANCHOR" ? "bg-amber-100 text-amber-900 border-amber-300" : item.role === "FUNCTIONAL" ? "bg-blue-100 text-blue-900 border-blue-300" : "bg-purple-100 text-purple-900 border-purple-300";
+  const roleLabel =
+    item.role === "CUSTOMER_PRESELECTED"
+      ? "Lựa chọn từ Catalog"
+      : item.role === "ANCHOR"
+      ? "Nội thất chính"
+      : item.role === "FUNCTIONAL"
+      ? "Công năng phụ trợ"
+      : "Chi tiết điểm nhấn";
+
+  const roleBadgeVariant =
+    item.role === "CUSTOMER_PRESELECTED"
+      ? "customer_pick"
+      : item.role === "ANCHOR"
+      ? "neutral"
+      : item.role === "FUNCTIONAL"
+      ? "neutral"
+      : "neutral";
 
   async function handleAddToCart() {
     setAdding(true);
     setMessage("");
     try {
       await addToCart(item.product.id);
-      setMessage("Đã thêm vào giỏ.");
+      setMessage("Đã thêm vào giỏ hàng");
     } catch (err) {
-      setMessage(err instanceof Error ? err.message : "Không thêm được vào giỏ.");
+      setMessage(err instanceof Error ? err.message : "Chưa thể thêm vào giỏ");
     } finally {
       setAdding(false);
     }
   }
 
   return (
-    <article className={`group overflow-hidden rounded-2xl border bg-white shadow-card transition hover:-translate-y-1 hover:shadow-soft ${selected ? "border-clay ring-2 ring-clay/20" : "border-ink/10"}`}>
-      <div className="relative aspect-[4/3] bg-ivory">
-        {primaryImage ? (
-          <img
-            src={apiAssetUrl(primaryImage, { width: 480 })}
-            alt={item.product.name}
-            loading="lazy"
-            decoding="async"
-            className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.04]"
-          />
-        ) : (
-          <EmptyImagePlaceholder label="Sản phẩm chưa có ảnh" />
-        )}
-        <div className="absolute left-3 top-3 flex flex-col gap-1 items-start">
-          <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-black text-clay shadow-sm">{displayCategory(item.product.category.name)}</span>
-          <div className="flex items-center gap-1">
-            <span className={`rounded-full border px-2 py-0.5 text-[10px] font-bold shadow-xs ${roleColor}`}>
-              {roleLabel}
-            </span>
-            {item.boost && item.boost >= 10.0 && (
-              <span className="inline-flex items-center gap-0.5 rounded-full bg-rose-600 text-white px-2 py-0.5 text-[10px] font-bold shadow-xs">
-                <Heart size={10} fill="currentColor" /> Yêu thích (+10)
-              </span>
-            )}
-          </div>
-          <span className="rounded-full bg-emerald-600/90 text-white px-2 py-0.5 text-[10px] font-bold shadow-xs">✓ Sẵn sàng tạo ảnh AI</span>
-        </div>
-        <span className="absolute right-3 top-3" title={`Điểm phù hợp: ${item.score}/100`}><ScoreBadge score={item.score} /></span>
-
-        {/* Badge trạng thái chọn */}
-        <button
-          type="button"
-          onClick={() => onToggle(item.product.id)}
-          className={`absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-black shadow-sm transition ${
-            selected
-              ? "bg-ink text-white"
-              : "bg-white/90 text-charcoal/70 hover:bg-white hover:text-ink"
-          }`}
-        >
-          {selected ? (
-            <>
-              <Check size={14} className="text-emerald-400" />
-              <span>Đang dùng trong AI</span>
-            </>
+    <article
+      className={`group flex flex-col justify-between overflow-hidden rounded-2xl border bg-white transition duration-200 ${
+        selected
+          ? "border-[#8A6B4E] ring-2 ring-[#8A6B4E]/20 shadow-md"
+          : "border-[#242B23]/10 hover:border-[#8A6B4E]/40 hover:shadow-sm"
+      }`}
+    >
+      <div>
+        {/* Product Image */}
+        <div className="relative aspect-[4/3] bg-[#F7F4EE] overflow-hidden">
+          {primaryImage ? (
+            <img
+              src={apiAssetUrl(primaryImage)}
+              alt={item.product.name}
+              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+            />
           ) : (
-            <span>Chọn món này</span>
+            <EmptyImagePlaceholder label="Sản phẩm chưa có ảnh" />
           )}
-        </button>
-      </div>
-      <div className="p-5">
-        <Link href={`/products/${item.product.id}`} className="block text-lg font-black text-ink hover:underline">{item.product.name}</Link>
-        <p className="mt-2 text-xl font-black text-clay">{Number(item.product.price).toLocaleString("vi-VN")} đ</p>
-        
-        {/* Reasons explainability */}
-        <ul className="mt-4 space-y-1.5 text-sm text-charcoal/70">
-          {item.reasons.slice(0, 3).map((reason) => (
-            <li key={reason} className="flex items-start gap-1.5 text-xs">
-              <span className="text-emerald-600 font-bold">✓</span>
-              <span>{reason}</span>
-            </li>
-          ))}
-        </ul>
 
-        <div className="mt-4 flex flex-wrap gap-2 text-xs font-bold text-charcoal/60">
-          {tags.map((tag) => (
-            <span key={`${tag.id}-${tag.name}`} className="rounded-full bg-ivory px-2 py-1">
-              {"hex_code" in tag ? displayColor(tag.name) : displayStyle(tag.name) !== tag.name ? displayStyle(tag.name) : displayMaterial(tag.name)}
+          {/* Badges Overlay */}
+          <div className="absolute left-3 top-3 flex flex-col items-start gap-1.5">
+            <span className="rounded-full bg-white/90 px-2.5 py-0.5 text-[11px] font-bold text-[#242B23] shadow-xs backdrop-blur-sm">
+              {displayCategory(item.product.category.name)}
             </span>
-          ))}
+            <StatusBadge variant={roleBadgeVariant}>{roleLabel}</StatusBadge>
+          </div>
+
+          <div className="absolute right-3 top-3">
+            <ScoreBadge score={item.score} />
+          </div>
+
+          {/* Selection Toggle CTA */}
+          <button
+            type="button"
+            onClick={() => onToggle(item.product.id)}
+            className={`absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition shadow-sm ${
+              selected
+                ? "bg-[#242B23] text-white"
+                : "bg-white/95 text-[#242B23] hover:bg-white"
+            }`}
+          >
+            {selected ? (
+              <>
+                <Check size={14} className="text-[#8A6B4E]" />
+                <span>Đang chọn cho AI</span>
+              </>
+            ) : (
+              <span>Chọn món này</span>
+            )}
+          </button>
         </div>
-        <button type="button" onClick={handleAddToCart} disabled={adding} className="secondary-cta mt-4 w-full">
-          <ShoppingCart size={16} /> {adding ? "Đang thêm..." : "Thêm vào giỏ"}
-        </button>
-        {message && <p className="mt-2 text-sm font-bold text-green-700">{message}</p>}
+
+        {/* Content Details */}
+        <div className="p-4 sm:p-5">
+          <Link
+            href={`/products/${item.product.id}`}
+            className="block font-serif text-base font-bold text-[#242B23] hover:text-[#8A6B4E] transition line-clamp-1"
+          >
+            {item.product.name}
+          </Link>
+          <p className="mt-1 font-serif text-lg font-bold text-[#8A6B4E]">
+            {Number(item.product.price).toLocaleString("vi-VN")} ₫
+          </p>
+
+          {/* Reasoning */}
+          <ul className="mt-3 space-y-1 text-xs text-[#5A6258]">
+            {item.reasons.slice(0, 2).map((reason, idx) => (
+              <li key={idx} className="flex items-start gap-1.5">
+                <span className="text-[#8A6B4E] font-bold">✓</span>
+                <span className="line-clamp-1">{reason}</span>
+              </li>
+            ))}
+          </ul>
+
+          {/* Tags */}
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {tags.map((tag) => (
+              <span
+                key={`${tag.id}-${tag.name}`}
+                className="rounded-full bg-[#F7F4EE] px-2.5 py-0.5 text-[10px] font-medium text-[#5A6258]"
+              >
+                {"hex_code" in tag
+                  ? displayColor(tag.name)
+                  : displayStyle(tag.name) !== tag.name
+                  ? displayStyle(tag.name)
+                  : displayMaterial(tag.name)}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Card Footer Actions */}
+      <div className="border-t border-[#242B23]/5 p-4 pt-3">
+        <LuxuryButton
+          variant="secondary"
+          size="sm"
+          loading={adding}
+          onClick={handleAddToCart}
+          className="w-full text-xs"
+        >
+          <ShoppingCart size={14} />
+          <span>Thêm vào giỏ</span>
+        </LuxuryButton>
+        {message && (
+          <p className="mt-1.5 text-center text-[11px] font-semibold text-emerald-700">
+            {message}
+          </p>
+        )}
       </div>
     </article>
-  );
-});
-
-function ContextTile({ label, value, provenance }: { label: string; value: string; provenance?: string }) {
-  let provBadge = null;
-  if (provenance === "INHERITED_PROFILE") {
-    provBadge = <span className="rounded bg-sky-100 px-1.5 py-0.5 text-[10px] font-bold text-sky-800">Từ tài khoản</span>;
-  } else if (provenance === "ROOM_PREFERENCE" || provenance === "EXPLICIT_OVERRIDE") {
-    provBadge = <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-800">Theo phòng</span>;
-  } else if (provenance === "ROOM_ANALYSIS") {
-    provBadge = <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-bold text-emerald-800">Từ ảnh phòng</span>;
-  }
-
-  return (
-    <div className="rounded-2xl border border-ink/10 bg-ivory/60 p-4">
-      <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-charcoal/50">
-        <span>{label}</span>
-        {provBadge}
-      </div>
-      <div className="mt-1 text-sm font-black text-ink">{value}</div>
-    </div>
   );
 }
 
 function budgetLabel(recommendations: RecommendationResponse | null) {
   const eff = recommendations?.effective_preference?.budget_max;
-  if (typeof eff === "number") return `Tối đa ${Number(eff).toLocaleString("vi-VN")} đ`;
+  if (typeof eff === "number") return `Tối đa ${Number(eff).toLocaleString("vi-VN")} ₫`;
   const pref = recommendations?.preference;
-  if (!pref) return "-";
-  if (pref.budget_max) return `${Number(pref.budget_max).toLocaleString("vi-VN")} đ`;
-  if (pref.budget_min) return `Từ ${Number(pref.budget_min).toLocaleString("vi-VN")} đ`;
+  if (!pref) return "—";
+  if (pref.budget_max) return `${Number(pref.budget_max).toLocaleString("vi-VN")} ₫`;
+  if (pref.budget_min) return `Từ ${Number(pref.budget_min).toLocaleString("vi-VN")} ₫`;
   return "Không giới hạn";
+}
+
+export default function RecommendationsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[400px] flex-col items-center justify-center gap-3">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#8A6B4E] border-t-transparent" />
+          <p className="text-sm font-medium text-[#5A6258]">Đang tải gợi ý nội thất...</p>
+        </div>
+      }
+    >
+      <RecommendationsContent />
+    </Suspense>
+  );
 }

@@ -1,0 +1,373 @@
+{
+  "provinceCode": "11",
+  "provinceName": "Tỉnh Điện Biên",
+  "provinceShort": "Điện Biên",
+  "resolutionNumber": "1661/NQ-UBTVQH15",
+  "authority": "Quyết định số 19/2025/QĐ-TTg của Thủ tướng Chính phủ",
+  "effectiveDate": "2025-07-01",
+  "totalWards": 45,
+  "wards": [
+    "Phường Điện Biên Phủ",
+    "Phường Mường Lay",
+    "Xã Sín Thầu",
+    "Xã Mường Nhé",
+    "Xã Nậm Kè",
+    "Xã Mường Toong",
+    "Xã Quảng Lâm",
+    "Xã Mường Chà",
+    "Xã Nà Hỳ",
+    "Xã Na Sang",
+    "Xã Chà Tở",
+    "Xã Nà Bủng",
+    "Xã Mường Tùng",
+    "Xã Pa Ham",
+    "Xã Nậm Nèn",
+    "Xã Si Pa Phìn",
+    "Xã Mường Pồn",
+    "Xã Na Son",
+    "Xã Xa Dung",
+    "Xã Mường Luân",
+    "Xã Tủa Chùa",
+    "Xã Tủa Thàng",
+    "Xã Sín Chải",
+    "Xã Sính Phình",
+    "Xã Sáng Nhè",
+    "Xã Tuần Giáo",
+    "Xã Mường Ảng",
+    "Xã Pú Nhung",
+    "Xã Mường Mùn",
+    "Xã Chiềng Sinh",
+    "Xã Quài Tở",
+    "Xã Búng Lao",
+    "Xã Mường Lạn",
+    "Xã Nà Tấu",
+    "Xã Mường Phăng",
+    "Xã Thanh Nưa",
+    "Phường Mường Thanh",
+    "Xã Thanh Yên",
+    "Xã Thanh An",
+    "Xã Sam Mứn",
+    "Xã Núa Ngam",
+    "Xã Mường Nhà",
+    "Xã Pu Nhi",
+    "Xã Phình Giàng",
+    "Xã Tìa Dình"
+  ],
+  "wardDetails": [
+    {
+      "code": "03127",
+      "name": "Phường Điện Biên Phủ",
+      "shortName": "Điện Biên Phủ",
+      "type": "Phường",
+      "areaKm2": 56.75
+    },
+    {
+      "code": "03151",
+      "name": "Phường Mường Lay",
+      "shortName": "Mường Lay",
+      "type": "Phường",
+      "areaKm2": 222.65
+    },
+    {
+      "code": "03158",
+      "name": "Xã Sín Thầu",
+      "shortName": "Sín Thầu",
+      "type": "Xã",
+      "areaKm2": 516.42
+    },
+    {
+      "code": "03160",
+      "name": "Xã Mường Nhé",
+      "shortName": "Mường Nhé",
+      "type": "Xã",
+      "areaKm2": 489.47
+    },
+    {
+      "code": "03162",
+      "name": "Xã Nậm Kè",
+      "shortName": "Nậm Kè",
+      "type": "Xã",
+      "areaKm2": 224.7
+    },
+    {
+      "code": "03163",
+      "name": "Xã Mường Toong",
+      "shortName": "Mường Toong",
+      "type": "Xã",
+      "areaKm2": 230.69
+    },
+    {
+      "code": "03164",
+      "name": "Xã Quảng Lâm",
+      "shortName": "Quảng Lâm",
+      "type": "Xã",
+      "areaKm2": 233.25
+    },
+    {
+      "code": "03166",
+      "name": "Xã Mường Chà",
+      "shortName": "Mường Chà",
+      "type": "Xã",
+      "areaKm2": 462.28
+    },
+    {
+      "code": "03169",
+      "name": "Xã Nà Hỳ",
+      "shortName": "Nà Hỳ",
+      "type": "Xã",
+      "areaKm2": 275.64
+    },
+    {
+      "code": "03172",
+      "name": "Xã Na Sang",
+      "shortName": "Na Sang",
+      "type": "Xã",
+      "areaKm2": 360.15
+    },
+    {
+      "code": "03175",
+      "name": "Xã Chà Tở",
+      "shortName": "Chà Tở",
+      "type": "Xã",
+      "areaKm2": 227.92
+    },
+    {
+      "code": "03176",
+      "name": "Xã Nà Bủng",
+      "shortName": "Nà Bủng",
+      "type": "Xã",
+      "areaKm2": 162.52
+    },
+    {
+      "code": "03181",
+      "name": "Xã Mường Tùng",
+      "shortName": "Mường Tùng",
+      "type": "Xã",
+      "areaKm2": 278.93
+    },
+    {
+      "code": "03193",
+      "name": "Xã Pa Ham",
+      "shortName": "Pa Ham",
+      "type": "Xã",
+      "areaKm2": 135.84
+    },
+    {
+      "code": "03194",
+      "name": "Xã Nậm Nèn",
+      "shortName": "Nậm Nèn",
+      "type": "Xã",
+      "areaKm2": 175.0
+    },
+    {
+      "code": "03199",
+      "name": "Xã Si Pa Phìn",
+      "shortName": "Si Pa Phìn",
+      "type": "Xã",
+      "areaKm2": 241.65
+    },
+    {
+      "code": "03202",
+      "name": "Xã Mường Pồn",
+      "shortName": "Mường Pồn",
+      "type": "Xã",
+      "areaKm2": 258.76
+    },
+    {
+      "code": "03203",
+      "name": "Xã Na Son",
+      "shortName": "Na Son",
+      "type": "Xã",
+      "areaKm2": 230.71
+    },
+    {
+      "code": "03208",
+      "name": "Xã Xa Dung",
+      "shortName": "Xa Dung",
+      "type": "Xã",
+      "areaKm2": 215.5
+    },
+    {
+      "code": "03214",
+      "name": "Xã Mường Luân",
+      "shortName": "Mường Luân",
+      "type": "Xã",
+      "areaKm2": 186.22
+    },
+    {
+      "code": "03217",
+      "name": "Xã Tủa Chùa",
+      "shortName": "Tủa Chùa",
+      "type": "Xã",
+      "areaKm2": 108.33
+    },
+    {
+      "code": "03220",
+      "name": "Xã Tủa Thàng",
+      "shortName": "Tủa Thàng",
+      "type": "Xã",
+      "areaKm2": 150.92
+    },
+    {
+      "code": "03226",
+      "name": "Xã Sín Chải",
+      "shortName": "Sín Chải",
+      "type": "Xã",
+      "areaKm2": 189.13
+    },
+    {
+      "code": "03241",
+      "name": "Xã Sính Phình",
+      "shortName": "Sính Phình",
+      "type": "Xã",
+      "areaKm2": 174.53
+    },
+    {
+      "code": "03244",
+      "name": "Xã Sáng Nhè",
+      "shortName": "Sáng Nhè",
+      "type": "Xã",
+      "areaKm2": 190.02
+    },
+    {
+      "code": "03253",
+      "name": "Xã Tuần Giáo",
+      "shortName": "Tuần Giáo",
+      "type": "Xã",
+      "areaKm2": 108.49
+    },
+    {
+      "code": "03256",
+      "name": "Xã Mường Ảng",
+      "shortName": "Mường Ảng",
+      "type": "Xã",
+      "areaKm2": 85.94
+    },
+    {
+      "code": "03260",
+      "name": "Xã Pú Nhung",
+      "shortName": "Pú Nhung",
+      "type": "Xã",
+      "areaKm2": 209.93
+    },
+    {
+      "code": "03268",
+      "name": "Xã Mường Mùn",
+      "shortName": "Mường Mùn",
+      "type": "Xã",
+      "areaKm2": 252.84
+    },
+    {
+      "code": "03283",
+      "name": "Xã Chiềng Sinh",
+      "shortName": "Chiềng Sinh",
+      "type": "Xã",
+      "areaKm2": 218.01
+    },
+    {
+      "code": "03295",
+      "name": "Xã Quài Tở",
+      "shortName": "Quài Tở",
+      "type": "Xã",
+      "areaKm2": 182.01
+    },
+    {
+      "code": "03301",
+      "name": "Xã Búng Lao",
+      "shortName": "Búng Lao",
+      "type": "Xã",
+      "areaKm2": 145.85
+    },
+    {
+      "code": "03313",
+      "name": "Xã Mường Lạn",
+      "shortName": "Mường Lạn",
+      "type": "Xã",
+      "areaKm2": 264.89
+    },
+    {
+      "code": "03316",
+      "name": "Xã Nà Tấu",
+      "shortName": "Nà Tấu",
+      "type": "Xã",
+      "areaKm2": 188.55
+    },
+    {
+      "code": "03325",
+      "name": "Xã Mường Phăng",
+      "shortName": "Mường Phăng",
+      "type": "Xã",
+      "areaKm2": 166.7
+    },
+    {
+      "code": "03328",
+      "name": "Xã Thanh Nưa",
+      "shortName": "Thanh Nưa",
+      "type": "Xã",
+      "areaKm2": 176.97
+    },
+    {
+      "code": "03334",
+      "name": "Phường Mường Thanh",
+      "shortName": "Mường Thanh",
+      "type": "Phường",
+      "areaKm2": 27.56
+    },
+    {
+      "code": "03349",
+      "name": "Xã Thanh Yên",
+      "shortName": "Thanh Yên",
+      "type": "Xã",
+      "areaKm2": 130.1
+    },
+    {
+      "code": "03352",
+      "name": "Xã Thanh An",
+      "shortName": "Thanh An",
+      "type": "Xã",
+      "areaKm2": 136.72
+    },
+    {
+      "code": "03356",
+      "name": "Xã Sam Mứn",
+      "shortName": "Sam Mứn",
+      "type": "Xã",
+      "areaKm2": 156.12
+    },
+    {
+      "code": "03358",
+      "name": "Xã Núa Ngam",
+      "shortName": "Núa Ngam",
+      "type": "Xã",
+      "areaKm2": 264.78
+    },
+    {
+      "code": "03368",
+      "name": "Xã Mường Nhà",
+      "shortName": "Mường Nhà",
+      "type": "Xã",
+      "areaKm2": 463.0
+    },
+    {
+      "code": "03370",
+      "name": "Xã Pu Nhi",
+      "shortName": "Pu Nhi",
+      "type": "Xã",
+      "areaKm2": 181.22
+    },
+    {
+      "code": "03382",
+      "name": "Xã Phình Giàng",
+      "shortName": "Phình Giàng",
+      "type": "Xã",
+      "areaKm2": 226.37
+    },
+    {
+      "code": "03385",
+      "name": "Xã Tìa Dình",
+      "shortName": "Tìa Dình",
+      "type": "Xã",
+      "areaKm2": 166.76
+    }
+  ]
+}

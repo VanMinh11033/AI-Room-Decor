@@ -185,7 +185,7 @@ export type RoomAnalysis = {
   confidence?: string | null;
   error_code?: string | null;
   error_message?: string | null;
-  raw_response?: Record<string, any> | null;
+  raw_response?: Record<string, unknown> | null;
   completed_at?: string | null;
   created_at: string;
   updated_at: string;
@@ -253,6 +253,24 @@ export type RecommendationResponse = {
   recommendation_version?: string;
 };
 
+export type VerificationComponentScores = {
+  catalog?: number | null;
+  architecture?: number | null;
+  proportion?: number | null;
+  perspective?: number | null;
+  lighting?: number | null;
+  realism?: number | null;
+  [key: string]: unknown;
+};
+
+export type VerificationDetails = {
+  status?: string;
+  component_scores?: VerificationComponentScores;
+  passed?: boolean;
+  warnings?: string[];
+  [key: string]: unknown;
+};
+
 export type DesignGeneration = {
   id: number;
   room_project_id: number;
@@ -271,7 +289,7 @@ export type DesignGeneration = {
   generation_mode?: "CATALOG_ACCURATE" | "AI_PHOTOREALISTIC_PREVIEW" | string;
   is_ai_preview?: boolean;
   verification_status?: "VERIFIED" | "NEEDS_REVIEW" | "REJECTED" | "COMPOSITE_FALLBACK" | string;
-  verification_details?: Record<string, any>;
+  verification_details?: VerificationDetails | null;
   quality_score?: number | null;
   warnings?: string[];
   selection_mode?: "AUTO" | "MANUAL" | string | null;

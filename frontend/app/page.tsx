@@ -1,163 +1,155 @@
+"use client";
+
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import {
   ArrowRight,
   ArrowUpRight,
   Camera,
-  CheckCircle2,
-  Clock,
   Compass,
-  Eye,
-  History,
-  Layers3,
-  Palette,
-  ScanSearch,
-  ShoppingBag,
-  SlidersHorizontal,
   Sparkles,
   Wand2,
 } from "lucide-react";
+import { LuxuryButton } from "@/components/ui/LuxuryButton";
+import { EditorialHeading } from "@/components/ui/EditorialHeading";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { apiAssetUrl, apiFetch } from "@/lib/api";
+import { displayCategory } from "@/lib/display";
+import type { Paginated, Product } from "@/types/api";
+
+const FALLBACK_FEATURED_PRODUCTS = [
+  {
+    id: 1,
+    name: "Sofa Góc L-Shape Scandinavian Vải Nỉ Cao Cấp",
+    category: { name: "sofa" },
+    price: "18500000",
+    images: [{ image_url: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&q=80", is_primary: true }],
+    stock_quantity: 8,
+  },
+  {
+    id: 2,
+    name: "Ghế Thư Giãn Lounge Chair Tối Giản Khung Gỗ Sồi",
+    category: { name: "armchair" },
+    price: "6800000",
+    images: [{ image_url: "https://images.unsplash.com/photo-1580481077195-c228c2e646f9?w=800&q=80", is_primary: true }],
+    stock_quantity: 12,
+  },
+  {
+    id: 3,
+    name: "Bàn Trà Tròn Đôi Phong Cách Bắc Âu Mặt Gỗ",
+    category: { name: "coffee_table" },
+    price: "4200000",
+    images: [{ image_url: "https://images.unsplash.com/photo-1533090161767-e6ffed986b88?w=800&q=80", is_primary: true }],
+    stock_quantity: 15,
+  },
+  {
+    id: 4,
+    name: "Kệ Sách Gỗ Đứng Minimalist Đa Tầng",
+    category: { name: "bookshelf" },
+    price: "5500000",
+    images: [{ image_url: "https://images.unsplash.com/photo-1594643156337-671222450329?w=800&q=80", is_primary: true }],
+    stock_quantity: 6,
+  },
+];
 
 export default function HomePage() {
-  return (
-    <div className="homepage-fullwidth space-y-16 md:space-y-24">
-      {/* =========================================================
-          1. FULL-WIDTH SPLIT HERO — BRIGHT EDITORIAL LUXURY STUDIO
-      ========================================================= */}
-      <section className="relative overflow-hidden rounded-[2rem] border border-[#2D332C]/10 bg-gradient-to-br from-white via-[#FAF8F5] to-[#F2ECE3] p-5 shadow-soft sm:p-8 md:p-10 lg:p-12 xl:p-16">
-        {/* Subtle decorative background accents */}
-        <div className="pointer-events-none absolute -right-28 -top-28 h-96 w-96 rounded-full bg-[#C9A77A]/18 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-28 left-1/3 h-80 w-80 rounded-full bg-[#A68B6D]/12 blur-3xl" />
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>(FALLBACK_FEATURED_PRODUCTS as unknown as Product[]);
 
-        {/* Split Hero Grid: Left ~46%, Right Image ~54% on Desktop */}
-        <div className="relative grid grid-cols-1 items-center gap-8 sm:gap-10 lg:grid-cols-[0.88fr_1.12fr] lg:gap-10 xl:grid-cols-[0.85fr_1.15fr] xl:gap-14 w-full min-w-0">
-          {/* Left Column: Editorial Content */}
-          <div className="w-full min-w-0 space-y-6 sm:space-y-7">
-            <div className="motion-fade-up">
-              <span className="studio-pill">
-                <Sparkles size={14} className="text-[#C9A77A]" />
-                AI Interior Design Studio
+  useEffect(() => {
+    apiFetch<Paginated<Product>>("/api/products?page=1&page_size=4")
+      .then((data) => {
+        if (data?.items && data.items.length > 0) {
+          setFeaturedProducts(data.items);
+        }
+      })
+      .catch(() => {
+        // Retain verified fallback products
+      });
+  }, []);
+
+  return (
+    <div className="space-y-20 md:space-y-28 w-full max-w-full overflow-hidden">
+      {/* =========================================================
+          1. ARCHITECTURAL EDITORIAL HERO
+      ========================================================= */}
+      <section className="relative rounded-[2rem] border border-[#242B23]/10 bg-gradient-to-b from-white via-[#FBF9F5] to-[#F2ECE3]/60 p-6 sm:p-10 md:p-12 lg:p-16 shadow-soft">
+        <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-12 lg:gap-12 w-full min-w-0">
+          {/* Left Column (7 cols): Editorial Typography */}
+          <div className="w-full min-w-0 space-y-6 sm:space-y-8 lg:col-span-7">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#8A6B4E]/30 bg-white/90 px-3.5 py-1.5 shadow-sm">
+              <Sparkles size={14} className="text-[#8A6B4E]" />
+              <span className="text-xs font-semibold uppercase tracking-[0.15em] text-[#8A6B4E]">
+                Studio Thiết Kế Nội Thất AI
               </span>
             </div>
 
-            <h1 className="motion-fade-up motion-delay-100 w-full max-w-2xl text-2xl sm:text-4xl md:text-5xl xl:text-[3.4rem] 2xl:text-[3.75rem] font-bold leading-[1.15] tracking-tight text-[#242424] break-words">
+            <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl font-normal leading-[1.12] tracking-tight text-[#242B23] break-words">
               Kiến tạo không gian sống chuẩn mực cùng{" "}
-              <span className="relative inline-block text-[#2D332C]">
-                <span className="relative z-10 text-[#A68B6D]">Trí tuệ Nhân tạo</span>
-                <span className="pointer-events-none absolute bottom-1 left-0 -z-0 h-3 w-full rounded-sm bg-[#C9A77A]/25" />
-              </span>
+              <span className="italic text-[#8A6B4E]">Trí tuệ Nhân tạo</span>
             </h1>
 
-            <p className="motion-fade-up motion-delay-150 w-full max-w-2xl text-sm sm:text-base leading-7 sm:leading-8 text-[#777777] md:text-lg">
-              Tải lên bức ảnh căn phòng hiện tại, chọn ngân sách và phong cách yêu thích.{" "}
-              <strong className="font-semibold text-[#242424]">AI Room Decor</strong> phân tích bố cục không gian, gợi ý sản phẩm nội thất thật từ catalog và dựng phương án thiết kế trực quan ngay trước mắt bạn.
+            <p className="max-w-xl text-base sm:text-lg leading-relaxed text-[#5A6258]">
+              Tải lên hình ảnh căn phòng của bạn, xác định phong cách và ngân sách. Hệ thống phân tích bố cục không gian, gợi ý chính xác những sản phẩm nội thất thật từ catalog tuyển chọn và dựng phối cảnh trực quan.
             </p>
 
-            {/* Primary & Secondary CTAs */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 pt-1 w-full">
-              <Link
-                href="/room-projects/new"
-                className="motion-fade-up motion-delay-200 primary-cta group w-full sm:w-auto border border-[#C9A77A]/40 bg-[#2D332C] px-5 py-3.5 sm:px-7 sm:py-4 text-sm font-semibold text-[#FAF8F5] hover:bg-[#A68B6D] hover:text-white"
-              >
-                Bắt đầu thiết kế với AI
-                <ArrowRight size={18} className="transition-transform duration-300 group-hover:translate-x-1" />
+            {/* CTAs */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2 w-full">
+              <Link href="/room-projects/new" className="w-full sm:w-auto">
+                <LuxuryButton variant="primary" size="lg" className="w-full justify-center">
+                  <span>Tạo thiết kế AI</span>
+                  <ArrowRight size={18} />
+                </LuxuryButton>
               </Link>
-              <Link
-                href="/products"
-                className="motion-fade-up motion-delay-300 secondary-cta group w-full sm:w-auto px-5 py-3.5 sm:px-7 sm:py-4 text-sm font-semibold"
-              >
-                Khám phá nội thất
-                <ArrowUpRight
-                  size={17}
-                  className="text-[#A68B6D] transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
-                />
+
+              <Link href="/products" className="w-full sm:w-auto">
+                <LuxuryButton variant="secondary" size="lg" className="w-full justify-center">
+                  <span>Khám phá nội thất</span>
+                  <ArrowUpRight size={18} className="text-[#8A6B4E]" />
+                </LuxuryButton>
               </Link>
             </div>
 
-            {/* Real Architecture Capabilities Strip */}
-            <div className="motion-fade-up motion-delay-350 grid grid-cols-1 gap-4 border-t border-[#2D332C]/10 pt-7 sm:grid-cols-3 w-full min-w-0">
+            {/* Architectural Trust Metrics */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 border-t border-[#242B23]/10 pt-8 w-full min-w-0">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#A68B6D]">AI Vision</p>
-                <p className="mt-1 text-sm font-semibold text-[#242424]">Nhận diện bố cục & ánh sáng</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#8A6B4E]">01 · Thị giác AI</p>
+                <p className="mt-1 text-sm font-semibold text-[#242B23]">Nhận diện kiến trúc & ánh sáng thực</p>
               </div>
-              <div className="sm:border-l sm:border-[#2D332C]/10 sm:pl-4">
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#A68B6D]">Smart Matching</p>
-                <p className="mt-1 text-sm font-semibold text-[#242424]">Gợi ý nội thất từ Catalog thật</p>
+              <div className="sm:border-l sm:border-[#242B23]/10 sm:pl-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#8A6B4E]">02 · Catalog thật</p>
+                <p className="mt-1 text-sm font-semibold text-[#242B23]">100% kích thước & thông số từ kho</p>
               </div>
-              <div className="sm:border-l sm:border-[#2D332C]/10 sm:pl-4">
-                <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#A68B6D]">AI Visualization</p>
-                <p className="mt-1 text-sm font-semibold text-[#242424]">Tạo ảnh phối cảnh trực quan</p>
+              <div className="sm:border-l sm:border-[#242B23]/10 sm:pl-5">
+                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#8A6B4E]">03 · Độc bản</p>
+                <p className="mt-1 text-sm font-semibold text-[#242B23]">Phối cảnh độc quyền theo gu của bạn</p>
               </div>
             </div>
           </div>
 
-          {/* Right Column (~53-55% width): Large Interior Visual + Non-Overlapping Floating Cards */}
-          <div className="relative w-full min-w-0 xl:px-4 xl:py-3">
-            {/* Decorative Architectural Backplate */}
-            <div className="pointer-events-none absolute inset-1 hidden rounded-[2.25rem] border border-[#C9A77A]/35 bg-[#FAF8F5]/70 sm:block xl:inset-x-6 xl:inset-y-1 xl:rotate-1" />
-
-            {/* Main Large Showcase Frame */}
-            <div className="motion-image-reveal group relative overflow-hidden rounded-[2rem] border border-[#2D332C]/10 bg-white p-2.5 shadow-luxury sm:p-3.5">
-              <div className="relative aspect-[16/10] min-h-[260px] w-full overflow-hidden rounded-[1.5rem] bg-[#FAF8F5] sm:min-h-[360px] lg:min-h-[440px] xl:min-h-[520px]">
+          {/* Right Column (5 cols): Architectural Frame */}
+          <div className="w-full min-w-0 lg:col-span-5">
+            <div className="relative overflow-hidden rounded-3xl border border-[#242B23]/10 bg-white p-3 shadow-luxury">
+              <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl bg-[#DDD7CD]/30">
                 <img
-                  src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=80"
-                  alt="Không gian phòng khách phong cách Modern Luxury sáng và sang trọng"
-                  fetchPriority="high"
-                  className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                  src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=85"
+                  alt="Không gian phòng khách phong cách Quiet Luxury đương đại"
+                  className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
+                  loading="eager"
                 />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#2D332C]/50 via-transparent to-transparent" />
-                <div className="absolute bottom-2.5 left-2.5 right-2.5 sm:bottom-4 sm:left-4 sm:right-4 flex flex-wrap items-center justify-between gap-1.5 sm:gap-2 rounded-xl sm:rounded-2xl border border-white/25 bg-[#2D332C]/85 px-3 py-2 sm:px-4 sm:py-2.5 text-[11px] sm:text-xs text-[#FAF8F5] backdrop-blur-md">
-                  <span className="font-semibold tracking-wide truncate max-w-[210px] sm:max-w-none">
-                    Không gian tham khảo · Modern Luxury
-                  </span>
-                  <span className="rounded-full bg-[#C9A77A]/25 px-2.5 py-0.5 font-semibold text-[#C9A77A]">
-                    Interior Studio
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Floating Cards Container:
-                - Mobile/Tablet (<1280px): 2-column grid cleanly below the image (never covers image/text)
-                - Desktop (xl 1280px+): Anchored at top-left and top-right/bottom-right corners without covering left text or bottom caption */}
-            <div className="mt-4 grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:mt-0 w-full min-w-0">
-              {/* Floating Card 1: AI Vision */}
-              <div className="motion-fade-up motion-delay-250 xl:motion-float-slow z-10 rounded-2xl border border-[#C9A77A]/50 bg-white/95 p-4 shadow-soft backdrop-blur-md xl:absolute xl:left-0 xl:top-6 xl:w-64">
-                <div className="flex items-center gap-2.5">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#2D332C] text-[#C9A77A]">
-                    <ScanSearch size={18} />
-                  </span>
-                  <div>
-                    <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#A68B6D]">AI Vision</p>
-                    <p className="text-xs font-bold text-[#242424]">Phân tích không gian</p>
+                <div className="absolute inset-x-3 bottom-3 rounded-xl bg-white/95 p-3.5 shadow-sm backdrop-blur-md">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.15em] text-[#8A6B4E]">
+                        Phòng khách Minimalist
+                      </p>
+                      <p className="text-xs font-semibold text-[#242B23]">
+                        Gỗ sồi tự nhiên × Vải nỉ Scandinavian
+                      </p>
+                    </div>
+                    <StatusBadge variant="verified">Chuẩn Catalog</StatusBadge>
                   </div>
                 </div>
-                <p className="mt-2 text-xs leading-5 text-[#777777]">
-                  Nhận diện loại phòng, ánh sáng, vật thể hiện có & vùng trống.
-                </p>
-                <div className="mt-3 flex items-center gap-1.5">
-                  <span className="h-4 w-4 rounded-full border border-[#2D332C]/15 bg-[#FAF8F5]" title="Warm Ivory" />
-                  <span className="h-4 w-4 rounded-full border border-[#2D332C]/15 bg-[#E8E0D5]" title="Soft Sand" />
-                  <span className="h-4 w-4 rounded-full border border-[#2D332C]/15 bg-[#A68B6D]" title="Warm Wood" />
-                  <span className="h-4 w-4 rounded-full border border-[#2D332C]/15 bg-[#2D332C]" title="Deep Olive" />
-                  <span className="ml-auto text-[11px] font-semibold text-[#2D332C]">Bảng màu thực</span>
-                </div>
-              </div>
-
-              {/* Floating Card 2: AI Image */}
-              <div className="motion-fade-up motion-delay-350 xl:motion-float-reverse z-10 rounded-2xl border border-[#C9A77A]/50 bg-[#2D332C] p-4 text-[#FAF8F5] shadow-luxury xl:absolute xl:right-0 xl:top-6 xl:w-64">
-                <div className="flex items-center gap-2.5">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-[#C9A77A]/40 bg-white/10 text-[#C9A77A]">
-                    <Wand2 size={18} />
-                  </span>
-                  <div>
-                    <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#C9A77A]">AI Image</p>
-                    <p className="text-xs font-bold text-white">Tạo phương án Decor</p>
-                  </div>
-                </div>
-                <p className="mt-2 text-xs leading-5 text-[#FAF8F5]/80">
-                  Phối cảnh trực quan từ ảnh phòng gốc và ảnh sản phẩm tham chiếu.
-                </p>
               </div>
             </div>
           </div>
@@ -165,439 +157,210 @@ export default function HomePage() {
       </section>
 
       {/* =========================================================
-          2. FULL-WIDTH ASYMMETRIC BENTO GRID — 5 TÍNH NĂNG AI
+          2. THREE ARCHITECTURAL PILLARS (HOW IT WORKS)
       ========================================================= */}
-      <section className="space-y-10">
-        <div className="flex flex-col justify-between gap-4 border-b border-[#2D332C]/10 pb-6 lg:flex-row lg:items-end">
-          <div>
-            <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-[#A68B6D]">
-              <Compass size={15} /> Hệ sinh thái tính năng AI
-            </span>
-            <h2 className="mt-2.5 text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#242424] break-words">
-              Nền tảng thiết kế & mua sắm nội thất khép kín
-            </h2>
-          </div>
-          <p className="max-w-xl text-sm leading-6 text-[#777777] md:text-base">
-            Mỗi tính năng được thiết kế để giải quyết trọn vẹn bài toán từ lúc chụp ảnh căn phòng trống đến khi chọn mua từng món đồ nội thất.
-          </p>
+      <section className="space-y-12">
+        <div className="text-center max-w-2xl mx-auto space-y-3">
+          <StatusBadge variant="customer_pick">Quy Trình Kiến Tạo</StatusBadge>
+          <EditorialHeading
+            title="Thiết kế nội thất trực quan trong ba bước"
+            subtitle="Từ bức ảnh hiện trạng đến bản phối cảnh hoàn thiện với sản phẩm thật sẵn sàng mua sắm."
+            className="text-center"
+          />
         </div>
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 w-full min-w-0">
-          {/* Bento Card 1 (Span 7): AI Room Analysis */}
-          <article className="studio-bento-card motion-fade-up motion-delay-100 group lg:col-span-7">
-            <div className="grid grid-cols-1 h-full gap-6 md:grid-cols-[1.02fr_0.98fr] md:items-center">
-              <div className="flex flex-col justify-between space-y-5">
-                <div>
-                  <div className="inline-flex items-center gap-2 rounded-full bg-[#FAF8F5] px-3.5 py-1 text-xs font-bold uppercase tracking-[0.16em] text-[#A68B6D] ring-1 ring-[#C9A77A]/35">
-                    <ScanSearch size={14} /> 01 · AI Room Analysis
-                  </div>
-                  <h3 className="mt-4 text-xl sm:text-2xl font-bold text-[#242424] xl:text-3xl break-words">
-                    Phân tích không gian phòng bằng thị giác AI
-                  </h3>
-                  <p className="mt-3 text-sm leading-7 text-[#777777] md:text-base">
-                    Hệ thống đọc trực tiếp bức ảnh căn phòng bạn tải lên để nhận diện loại phòng, nguồn sáng, màu sắc chủ đạo, các vật thể hiện hữu và những vùng trống có thể bố trí thêm nội thất.
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap gap-2 pt-1">
-                  {["Loại phòng", "Ánh sáng tự nhiên", "Màu chủ đạo", "Vật thể hiện có", "Khoảng trống decor"].map(
-                    (tag) => (
-                      <span
-                        key={tag}
-                        className="rounded-full border border-[#2D332C]/10 bg-[#FAF8F5] px-3.5 py-1.5 text-xs font-semibold text-[#2D332C]"
-                      >
-                        {tag}
-                      </span>
-                    )
-                  )}
-                </div>
-              </div>
-
-              <div className="relative aspect-[16/11] min-h-[240px] overflow-hidden rounded-2xl border border-[#2D332C]/10 bg-[#FAF8F5] xl:min-h-[290px]">
-                <img
-                  src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=800&q=80"
-                  alt="Minh họa phân tích bố cục và ánh sáng căn phòng"
-                  loading="lazy"
-                  decoding="async"
-                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div className="absolute inset-x-3 bottom-3 rounded-xl bg-white/95 p-3 shadow-sm backdrop-blur-md">
-                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#A68B6D]">
-                    Gemini Vision Engine
-                  </p>
-                  <p className="mt-0.5 text-xs font-semibold text-[#242424]">
-                    Trích xuất cấu trúc & bảng màu tự động
-                  </p>
-                </div>
-              </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full min-w-0">
+          {/* Step 1 */}
+          <article className="surface-card p-6 sm:p-8 space-y-4 hover:border-[#8A6B4E]/40 transition duration-300">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#242B23] text-white">
+              <Camera size={22} />
             </div>
+            <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#8A6B4E]">Bước 01</p>
+            <h3 className="font-serif text-xl sm:text-2xl text-[#242B23]">Chụp hoặc tải ảnh phòng</h3>
+            <p className="text-sm leading-relaxed text-[#5A6258]">
+              Hệ thống phân tích vị trí cửa sổ, hướng chiếu sáng tự nhiên, góc tường và vật thể hiện có để xây dựng bản đồ không gian chuẩn xác.
+            </p>
           </article>
 
-          {/* Bento Card 2 (Span 5): Personalized Interior Recommendations */}
-          <article className="studio-bento-card motion-fade-up motion-delay-200 group flex flex-col justify-between bg-gradient-to-br from-white via-white to-[#FAF8F5] lg:col-span-5">
-            <div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-[#FAF8F5] px-3.5 py-1 text-xs font-bold uppercase tracking-[0.16em] text-[#A68B6D] ring-1 ring-[#C9A77A]/35">
-                <SlidersHorizontal size={14} /> 02 · Personalized Recommendations
-              </div>
-              <h3 className="mt-4 text-xl sm:text-2xl font-bold text-[#242424] xl:text-3xl break-words">
-                Gợi ý nội thất cá nhân hóa theo luật
-              </h3>
-              <p className="mt-3 text-sm leading-7 text-[#777777] md:text-base">
-                Kết hợp kết quả phân tích phòng với sở thích phong cách, màu sắc, chất liệu và ngân sách của bạn để chấm điểm mức độ phù hợp kèm giải thích rõ ràng cho từng sản phẩm.
-              </p>
+          {/* Step 2 */}
+          <article className="surface-card p-6 sm:p-8 space-y-4 hover:border-[#8A6B4E]/40 transition duration-300">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#8A6B4E] text-white">
+              <Compass size={22} />
             </div>
-
-            <div className="mt-6 space-y-3 rounded-2xl border border-[#2D332C]/10 bg-[#FAF8F5] p-5">
-              <div className="flex items-center justify-between text-xs font-bold text-[#242424]">
-                <span>Tiêu chí đối sánh đa chiều</span>
-                <span className="rounded-full bg-[#2D332C] px-3 py-1 text-[11px] text-[#C9A77A]">
-                  Chấm điểm 0–100%
-                </span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {["Modern Luxury", "Minimalist", "Japandi", "Scandinavian", "Gỗ tự nhiên", "Đúng ngân sách"].map(
-                  (chip) => (
-                    <span
-                      key={chip}
-                      className="rounded-lg border border-[#C9A77A]/35 bg-white px-3 py-1.5 text-xs font-medium text-[#242424]"
-                    >
-                      {chip}
-                    </span>
-                  )
-                )}
-              </div>
-            </div>
+            <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#8A6B4E]">Bước 02</p>
+            <h3 className="font-serif text-xl sm:text-2xl text-[#242B23]">Chọn nội thất từ Catalog</h3>
+            <p className="text-sm leading-relaxed text-[#5A6258]">
+              Tự do chọn 1–3 món nội thất thật yêu thích, hoặc để thuật toán đa tiêu chí (MCDA) gợi ý các món đồ hài hòa nhất với tỷ lệ phòng của bạn.
+            </p>
           </article>
 
-          {/* Bento Card 3 (Span 4): AI Image Generation */}
-          <article className="studio-bento-card motion-fade-up motion-delay-200 group flex flex-col justify-between lg:col-span-4">
-            <div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#C9A77A]/40 bg-[#2D332C] text-[#C9A77A] transition-transform duration-300 group-hover:scale-105">
-                <Layers3 size={22} />
-              </div>
-              <p className="mt-5 text-xs font-bold uppercase tracking-[0.18em] text-[#A68B6D]">
-                03 · AI Image Generation
-              </p>
-              <h3 className="mt-2 text-xl font-bold text-[#242424] xl:text-2xl">Tạo ảnh thiết kế AI trực quan</h3>
-              <p className="mt-2.5 text-sm leading-6 text-[#777777] md:text-base">
-                Sử dụng ảnh căn phòng gốc cùng ảnh tham chiếu của các sản phẩm bạn đã chọn để dựng phương án không gian hoàn chỉnh qua Cloudflare FLUX.2 Dev.
-              </p>
+          {/* Step 3 */}
+          <article className="surface-card p-6 sm:p-8 space-y-4 hover:border-[#8A6B4E]/40 transition duration-300">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#242B23] text-white">
+              <Wand2 size={22} />
             </div>
-            <div className="mt-6 border-t border-[#2D332C]/10 pt-4">
-              <Link
-                href="/room-projects/new"
-                className="inline-flex items-center gap-1.5 text-sm font-bold text-[#2D332C] transition-colors hover:text-[#A68B6D]"
-              >
-                Tạo dự án thiết kế <ArrowRight size={15} />
-              </Link>
-            </div>
-          </article>
-
-          {/* Bento Card 4 (Span 4): Furniture Catalog */}
-          <article className="studio-bento-card motion-fade-up motion-delay-300 group flex flex-col justify-between lg:col-span-4">
-            <div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#C9A77A]/40 bg-[#FAF8F5] text-[#2D332C] transition-colors duration-300 group-hover:bg-[#2D332C] group-hover:text-[#C9A77A]">
-                <ShoppingBag size={22} />
-              </div>
-              <p className="mt-5 text-xs font-bold uppercase tracking-[0.18em] text-[#A68B6D]">
-                04 · Furniture Catalog
-              </p>
-              <h3 className="mt-2 text-xl font-bold text-[#242424] xl:text-2xl">Catalog nội thất thật</h3>
-              <p className="mt-2.5 text-sm leading-6 text-[#777777] md:text-base">
-                Toàn bộ sản phẩm được truy xuất trực tiếp từ cơ sở dữ liệu thật. Hỗ trợ lọc theo danh mục, phong cách, vật liệu, màu sắc, loại phòng và khoảng giá.
-              </p>
-            </div>
-            <div className="mt-6 border-t border-[#2D332C]/10 pt-4">
-              <Link
-                href="/products"
-                className="inline-flex items-center gap-1.5 text-sm font-bold text-[#2D332C] transition-colors hover:text-[#A68B6D]"
-              >
-                Mở danh mục sản phẩm <ArrowRight size={15} />
-              </Link>
-            </div>
-          </article>
-
-          {/* Bento Card 5 (Span 4): Room Design History */}
-          <article className="studio-bento-card motion-fade-up motion-delay-400 group flex flex-col justify-between lg:col-span-4">
-            <div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#C9A77A]/40 bg-[#FAF8F5] text-[#2D332C] transition-colors duration-300 group-hover:bg-[#2D332C] group-hover:text-[#C9A77A]">
-                <History size={22} />
-              </div>
-              <p className="mt-5 text-xs font-bold uppercase tracking-[0.18em] text-[#A68B6D]">
-                05 · Room Design History
-              </p>
-              <h3 className="mt-2 text-xl font-bold text-[#242424] xl:text-2xl">Lưu trữ & lịch sử phương án</h3>
-              <p className="mt-2.5 text-sm leading-6 text-[#777777] md:text-base">
-                Quản lý nhiều dự án phòng, xem lại lịch sử các phương án AI đã tạo, đối chiếu danh sách nội thất đi kèm và thêm toàn bộ vào giỏ hàng.
-              </p>
-            </div>
-            <div className="mt-6 border-t border-[#2D332C]/10 pt-4">
-              <Link
-                href="/room-projects"
-                className="inline-flex items-center gap-1.5 text-sm font-bold text-[#2D332C] transition-colors hover:text-[#A68B6D]"
-              >
-                Quản lý dự án của tôi <ArrowRight size={15} />
-              </Link>
-            </div>
+            <p className="text-xs font-semibold uppercase tracking-[0.15em] text-[#8A6B4E]">Bước 03</p>
+            <h3 className="font-serif text-xl sm:text-2xl text-[#242B23]">Dựng phối cảnh trực quan</h3>
+            <p className="text-sm leading-relaxed text-[#5A6258]">
+              Ngắm nhìn phương án bài trí nội thất trực quan ngay trong chính căn phòng của mình trước khi quyết định đặt hàng COD thuận tiện.
+            </p>
           </article>
         </div>
       </section>
 
       {/* =========================================================
-          3. FULL-WIDTH AI DESIGN PROCESS — TIMELINE 5 BƯỚC
+          3. BEFORE / AFTER CONCEPT DEMONSTRATION (ILLUSTRATIVE)
       ========================================================= */}
-      <section className="rounded-[2rem] border border-[#2D332C]/10 bg-white p-6 shadow-card sm:p-8 md:p-12 xl:p-14">
-        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
-          <div>
-            <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-[#A68B6D]">
-              <Clock size={15} /> Quy trình thực tế trên hệ thống
-            </span>
-            <h2 className="mt-2.5 text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#242424] break-words">
-              5 bước từ bức ảnh căn phòng đến không gian hoàn thiện
-            </h2>
+      <section className="rounded-3xl border border-[#242B23]/10 bg-white p-6 sm:p-10 md:p-12 shadow-card space-y-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-[#242B23]/10 pb-6">
+          <div className="space-y-2">
+            <StatusBadge variant="pending">Mô Phỏng Ý Niệm Kiến Trúc</StatusBadge>
+            <h2 className="font-serif text-2xl sm:text-4xl text-[#242B23]">Quy trình trước và sau phối cảnh</h2>
+            <p className="text-sm text-[#5A6258] max-w-xl">
+              Minh họa nguyên lý giữ nguyên cấu trúc không gian và tích hợp nội thất hài hòa theo tỷ lệ thực tế.
+            </p>
           </div>
-          <Link
-            href="/room-projects/new"
-            className="inline-flex items-center gap-2 text-sm font-bold text-[#2D332C] transition-colors hover:text-[#A68B6D]"
-          >
-            Bắt đầu Bước 01 ngay <ArrowRight size={16} />
+          <span className="text-xs text-[#5A6258]">Tư liệu ý niệm: Unsplash Architecture</span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full min-w-0">
+          {/* Before */}
+          <div className="group space-y-3">
+            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-[#242B23]/10 bg-[#FBF9F5]">
+              <img
+                src="https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=85"
+                alt="Minh họa hiện trạng không gian thô trước khi bài trí"
+                className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                loading="lazy"
+              />
+              <span className="absolute left-3.5 top-3.5 rounded-full bg-[#242B23]/80 px-3.5 py-1 text-xs font-semibold text-white backdrop-blur-md">
+                Hiện trạng (Ảnh chụp mẫu)
+              </span>
+            </div>
+            <p className="text-sm font-semibold text-[#242B23]">Bước 1: Ảnh chụp thực tế của căn phòng</p>
+            <p className="text-xs text-[#5A6258]">
+              Hệ thống nhận diện sàn nhà, tường, cửa sổ và góc chiếu sáng để định vị vật thể decor.
+            </p>
+          </div>
+
+          {/* After */}
+          <div className="group space-y-3">
+            <div className="relative aspect-[4/3] w-full overflow-hidden rounded-2xl border border-[#8A6B4E]/40 bg-[#FBF9F5]">
+              <img
+                src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1200&q=85"
+                alt="Minh họa phương án phối cảnh nội thất sau hoàn thiện"
+                className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                loading="lazy"
+              />
+              <span className="absolute left-3.5 top-3.5 inline-flex items-center gap-1.5 rounded-full bg-[#8A6B4E]/90 px-3.5 py-1 text-xs font-semibold text-white backdrop-blur-md">
+                <Sparkles size={13} /> Phối cảnh minh họa
+              </span>
+            </div>
+            <p className="text-sm font-semibold text-[#242B23]">Bước 2: Phương án bài trí cùng nội thất catalog</p>
+            <p className="text-xs text-[#5A6258]">
+              Đặt các món nội thất thật với vật liệu và kích thước thực tế vào góc nhìn phối cảnh trực quan.
+            </p>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-[#8A6B4E]/25 bg-[#FBF9F5] p-4 text-xs leading-relaxed text-[#5A6258]">
+          <strong className="font-semibold text-[#242B23]">Minh bạch tư liệu:</strong> Hai hình ảnh trên là ảnh tư liệu kiến trúc mô phỏng quy trình thiết kế ý niệm. Khi khởi tạo dự án thực tế, AI Room Decor sẽ sử dụng trực tiếp hình ảnh căn phòng bạn tải lên và kết xuất phối cảnh từ chính những sản phẩm thật bạn chọn trong catalog.
+        </div>
+      </section>
+
+      {/* =========================================================
+          4. DYNAMIC FEATURED CATALOG PRODUCTS SHOWCASE
+      ========================================================= */}
+      <section className="space-y-8">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+          <div className="space-y-2">
+            <StatusBadge variant="verified">Catalog Tuyển Chọn Thực Tế</StatusBadge>
+            <h2 className="font-serif text-2xl sm:text-4xl text-[#242B23]">Nội thất tinh tuyển từ Kho</h2>
+            <p className="text-sm text-[#5A6258] max-w-xl">
+              Các sản phẩm thật sẵn sàng trong hệ thống kho để đưa vào dự án phối cảnh và mua sắm COD.
+            </p>
+          </div>
+          <Link href="/products">
+            <LuxuryButton variant="secondary" size="md">
+              <span>Xem toàn bộ catalog</span>
+              <ArrowRight size={16} />
+            </LuxuryButton>
           </Link>
         </div>
 
-        <div className="relative mt-10">
-          {/* Subtle Horizontal Connector Line on Desktop */}
-          <div className="pointer-events-none absolute left-10 right-10 top-11 hidden h-px bg-gradient-to-r from-[#C9A77A]/20 via-[#C9A77A]/60 to-[#C9A77A]/20 lg:block" />
-
-          <div className="grid grid-cols-1 gap-4 sm:gap-5 sm:grid-cols-2 lg:grid-cols-5 w-full min-w-0">
-            <ProcessStep
-              number="01"
-              icon={Camera}
-              title="Tải ảnh phòng"
-              description="Tạo dự án mới và tải lên ảnh chụp căn phòng hiện tại (JPG, PNG, WebP)."
-              delayClass="motion-delay-100"
-            />
-            <ProcessStep
-              number="02"
-              icon={ScanSearch}
-              title="AI phân tích"
-              description="Gemini Vision nhận diện loại phòng, ánh sáng, màu sắc và vùng trống."
-              delayClass="motion-delay-150"
-            />
-            <ProcessStep
-              number="03"
-              icon={Palette}
-              title="Chọn phong cách"
-              description="Thiết lập phong cách, màu sắc, vật liệu, mục đích và ngân sách decor."
-              delayClass="motion-delay-200"
-            />
-            <ProcessStep
-              number="04"
-              icon={ShoppingBag}
-              title="Chọn nội thất"
-              description="Xem gợi ý sản phẩm thật có điểm phù hợp cao và chọn các món yêu thích."
-              delayClass="motion-delay-250"
-            />
-            <ProcessStep
-              number="05"
-              icon={Sparkles}
-              title="Tạo thiết kế AI"
-              description="Sinh ảnh decor AI để xem trước, so sánh phương án và đặt mua sản phẩm."
-              delayClass="motion-delay-300"
-            />
-          </div>
+        {/* Live Product Cards Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full min-w-0">
+          {featuredProducts.map((item) => {
+            const primaryImg = item.images?.find((img) => img.is_primary)?.image_url || item.images?.[0]?.image_url;
+            return (
+              <Link
+                key={item.id}
+                href={`/products/${item.id}`}
+                className="group block overflow-hidden rounded-2xl border border-[#242B23]/10 bg-white shadow-sm hover:shadow-card hover:border-[#8A6B4E]/40 transition duration-300"
+              >
+                <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#FBF9F5]">
+                  {primaryImg ? (
+                    <img
+                      src={apiAssetUrl(primaryImg)}
+                      alt={item.name}
+                      className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-[#DDD7CD]/30 text-xs text-[#5A6258]">
+                      Nội thất catalog
+                    </div>
+                  )}
+                  <span className="absolute left-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-[#8A6B4E] shadow-sm backdrop-blur-sm">
+                    {displayCategory(item.category?.name || "Nội thất")}
+                  </span>
+                  {item.stock_quantity > 0 && (
+                    <span className="absolute right-3 top-3 rounded-full bg-[#242B23]/75 px-2.5 py-0.5 text-[11px] font-semibold text-white backdrop-blur-sm">
+                      Còn {item.stock_quantity}
+                    </span>
+                  )}
+                </div>
+                <div className="p-5 space-y-2">
+                  <h3 className="font-serif text-base font-normal text-[#242B23] line-clamp-1 group-hover:text-[#8A6B4E] transition">
+                    {item.name}
+                  </h3>
+                  <div className="flex items-center justify-between pt-2 border-t border-[#242B23]/5">
+                    <span className="text-sm font-semibold text-[#242B23]">
+                      {Number(item.price).toLocaleString("vi-VN")} đ
+                    </span>
+                    <span className="text-xs font-semibold text-[#8A6B4E] flex items-center gap-0.5 group-hover:translate-x-0.5 transition">
+                      Chi tiết <ArrowUpRight size={14} />
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
       {/* =========================================================
-          4. FULL-WIDTH BEFORE / AFTER SHOWCASE — ẢNH LỚN & RÕ NÉT
+          5. QUIET LUXURY EDITORIAL CALL TO ACTION
       ========================================================= */}
-      <section className="overflow-hidden rounded-[2rem] border border-[#2D332C]/10 bg-gradient-to-br from-[#FAF8F5] via-white to-[#F3EFEA] p-6 shadow-soft sm:p-8 md:p-12 xl:p-14">
-        <div className="grid grid-cols-1 items-center gap-8 sm:gap-10 xl:grid-cols-[1.22fr_0.78fr] xl:gap-14 w-full min-w-0">
-          {/* Left (~61% on Desktop): Large Before / After Visual Comparison */}
-          <div className="space-y-5 w-full min-w-0">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="inline-flex items-center gap-2 rounded-full border border-[#C9A77A]/40 bg-white px-3.5 py-1.5 text-xs font-semibold text-[#2D332C]">
-                <Eye size={14} className="text-[#A68B6D]" /> Minh họa trực quan chế độ đối chiếu Before / After
-              </span>
-              <span className="text-xs font-medium text-[#777777]">
-                Nguồn ảnh minh họa: Unsplash Interior Architecture
-              </span>
-            </div>
-
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 w-full min-w-0">
-              {/* Before Panel */}
-              <div className="group relative overflow-hidden rounded-3xl border border-[#2D332C]/10 bg-white p-3 shadow-card">
-                <div className="relative aspect-[16/11] min-h-[240px] overflow-hidden rounded-2xl bg-[#FAF8F5] sm:min-h-[280px]">
-                  <img
-                    src="https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80"
-                    alt="Minh họa không gian phòng trước khi bổ sung nội thất"
-                    loading="lazy"
-                    decoding="async"
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <span className="absolute left-3.5 top-3.5 rounded-full bg-[#242424]/80 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-md">
-                    Trước (Không gian gốc)
-                  </span>
-                </div>
-                <div className="px-2 pb-1 pt-3.5">
-                  <p className="text-sm font-bold text-[#242424]">Bước đầu vào: Ảnh chụp hiện trạng</p>
-                  <p className="mt-1 text-xs leading-5 text-[#777777]">
-                    AI giữ nguyên cấu trúc tường, cửa sổ và hướng sáng tự nhiên.
-                  </p>
-                </div>
-              </div>
-
-              {/* After Panel */}
-              <div className="group relative overflow-hidden rounded-3xl border border-[#C9A77A]/60 bg-white p-3 shadow-soft">
-                <div className="relative aspect-[16/11] min-h-[240px] overflow-hidden rounded-2xl bg-[#FAF8F5] sm:min-h-[280px]">
-                  <img
-                    src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=800&q=80"
-                    alt="Minh họa không gian phòng sau khi phối cảnh nội thất"
-                    loading="lazy"
-                    decoding="async"
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <span className="absolute left-3.5 top-3.5 inline-flex items-center gap-1.5 rounded-full bg-[#2D332C]/90 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-[#C9A77A] backdrop-blur-md">
-                    <Sparkles size={12} /> Sau (Phối cảnh nội thất)
-                  </span>
-                </div>
-                <div className="px-2 pb-1 pt-3.5">
-                  <p className="text-sm font-bold text-[#242424]">Kết quả: Phương án bố trí trực quan</p>
-                  <p className="mt-1 text-xs leading-5 text-[#777777]">
-                    Kết hợp các sản phẩm tham chiếu đã chọn từ catalog thật.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Reference Product Workflow Strip */}
-            <div className="rounded-2xl border border-[#2D332C]/10 bg-white/90 px-4 py-3.5 text-xs leading-5 text-[#777777] shadow-sm sm:text-sm">
-              <span className="font-bold text-[#2D332C]">Lưu ý minh bạch:</span> Hình ảnh trên minh họa bố cục giao diện so sánh Before/After. Khi sử dụng thực tế, hệ thống sẽ tạo phương án trực tiếp từ{" "}
-              <strong className="font-semibold text-[#242424]">ảnh căn phòng bạn tải lên</strong> và{" "}
-              <strong className="font-semibold text-[#242424]">các sản phẩm thật bạn chọn</strong> trong dự án.
-            </div>
-          </div>
-
-          {/* Right (~39% on Desktop): Explanation & Direct Action */}
-          <div className="space-y-6 w-full min-w-0">
-            <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.22em] text-[#A68B6D]">
-              <Wand2 size={15} /> Trực quan hóa trước khi mua
-            </span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#242424] break-words">
-              So sánh trực diện Trước & Sau ngay trên từng dự án phòng
-            </h2>
-            <p className="text-base leading-7 text-[#777777]">
-              Không còn phải tưởng tượng món đồ nội thất có hợp với căn phòng của mình hay không. Tại trang kết quả thiết kế, bạn có thể đối chiếu song song ảnh phòng gốc và phương án decor AI, xem danh sách sản phẩm đã dùng và thêm tất cả vào giỏ hàng.
-            </p>
-
-            <ul className="space-y-3.5 pt-1 text-sm leading-6 text-[#242424] md:text-base">
-              <li className="flex items-start gap-3">
-                <CheckCircle2 size={19} className="mt-1 shrink-0 text-[#A68B6D]" />
-                <span>
-                  <strong>Ảnh tham chiếu sản phẩm thật:</strong> Giữ kiểu dáng, màu sắc và đặc điểm nội thất sát với catalog nhất có thể.
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <CheckCircle2 size={19} className="mt-1 shrink-0 text-[#A68B6D]" />
-                <span>
-                  <strong>Lưu lịch sử nhiều phương án:</strong> Dễ dàng tạo thêm phương án mới với tổ hợp sản phẩm khác để so sánh.
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <CheckCircle2 size={19} className="mt-1 shrink-0 text-[#A68B6D]" />
-                <span>
-                  <strong>Mua sắm liền mạch:</strong> Thêm lẻ từng món hoặc thêm toàn bộ sản phẩm trong bản thiết kế vào giỏ hàng.
-                </span>
-              </li>
-            </ul>
-
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
-              <Link href="/room-projects/new" className="primary-cta group w-full sm:w-auto px-6 py-3.5">
-                Tạo dự án phòng của bạn
-                <ArrowRight size={17} className="transition-transform duration-300 group-hover:translate-x-1" />
-              </Link>
-              <Link href="/room-projects" className="secondary-cta w-full sm:w-auto px-6 py-3.5">
-                Xem các dự án đã lưu
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* =========================================================
-          5. FULL-WIDTH FINAL STUDIO CALL TO ACTION BANNER
-      ========================================================= */}
-      <section className="relative overflow-hidden rounded-[2rem] border border-[#C9A77A]/35 bg-[#2D332C] px-5 py-10 sm:px-10 md:px-14 md:py-16 text-[#FAF8F5] shadow-luxury">
-        <div className="pointer-events-none absolute -right-20 -top-20 h-80 w-80 rounded-full bg-[#C9A77A]/15 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 -left-20 h-80 w-80 rounded-full bg-[#A68B6D]/15 blur-3xl" />
-
-        <div className="relative flex flex-col items-start justify-between gap-8 lg:flex-row lg:items-center">
-          <div className="max-w-3xl space-y-3">
-            <span className="inline-flex items-center gap-2 rounded-full border border-[#C9A77A]/40 bg-white/10 px-3.5 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#C9A77A]">
-              <Sparkles size={14} /> Bắt đầu hành trình Decor
-            </span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-white break-words">
-              Sẵn sàng biến căn phòng của bạn thành không gian đáng sống?
-            </h2>
-            <p className="text-base leading-7 text-[#FAF8F5]/80 md:text-lg">
-              Khởi tạo dự án phòng mới để trải nghiệm trọn vẹn quy trình phân tích AI Vision, gợi ý nội thất cá nhân hóa và dựng ảnh thiết kế AI.
-            </p>
-          </div>
-
-          <div className="flex w-full shrink-0 flex-col gap-3 sm:w-auto sm:flex-row">
-            <Link
-              href="/room-projects/new"
-              className="group inline-flex items-center justify-center gap-2.5 rounded-xl border border-[#C9A77A]/50 bg-[#A68B6D] px-5 py-3.5 sm:px-7 sm:py-4 text-sm font-semibold tracking-wide text-white shadow-soft transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#C9A77A] hover:text-[#242424] active:scale-[0.98]"
-            >
-              Bắt đầu thiết kế với AI
-              <ArrowRight size={18} className="transition-transform duration-300 group-hover:translate-x-1" />
-            </Link>
-            <Link
-              href="/products"
-              className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/10 px-5 py-3.5 sm:px-7 sm:py-4 text-sm font-semibold tracking-wide text-[#FAF8F5] backdrop-blur-md transition-all duration-300 hover:-translate-y-0.5 hover:border-[#C9A77A] hover:bg-white hover:text-[#242424] active:scale-[0.98]"
-            >
-              Khám phá Catalog
-            </Link>
-          </div>
+      <section className="rounded-3xl border border-[#8A6B4E]/30 bg-gradient-to-br from-[#242B23] to-[#1A2019] p-8 sm:p-12 md:p-16 text-white text-center space-y-6 shadow-luxury">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#DDD7CD]">
+          Quiet Luxury Philosophy
+        </p>
+        <h2 className="font-serif text-3xl sm:text-5xl max-w-2xl mx-auto leading-tight text-[#FBF9F5]">
+          Không gian hoàn hảo bắt đầu từ một ý tưởng đúng đắn
+        </h2>
+        <p className="max-w-xl mx-auto text-sm sm:text-base text-[#DDD7CD]/80 leading-relaxed">
+          Tạo dự án phòng mới ngay hôm nay. Trải nghiệm dịch vụ phối cảnh nội thất thông minh với sản phẩm thật và dịch vụ giao hàng COD tận nơi tin cậy.
+        </p>
+        <div className="pt-2">
+          <Link href="/room-projects/new">
+            <LuxuryButton variant="bronze" size="lg" className="mx-auto">
+              <span>Bắt đầu thiết kế phòng của bạn</span>
+              <ArrowRight size={18} />
+            </LuxuryButton>
+          </Link>
         </div>
       </section>
     </div>
   );
 }
-
-function ProcessStep({
-  number,
-  icon: Icon,
-  title,
-  description,
-  delayClass,
-}: {
-  number: string;
-  icon: typeof Camera;
-  title: string;
-  description: string;
-  delayClass: string;
-}) {
-  return (
-    <div
-      className={`motion-fade-up ${delayClass} group relative flex flex-col justify-between rounded-2xl border border-[#2D332C]/10 bg-[#FAF8F5]/85 p-6 transition-all duration-300 hover:-translate-y-1 hover:border-[#C9A77A] hover:bg-white hover:shadow-soft`}
-    >
-      <div>
-        <div className="flex items-center justify-between gap-3">
-          <span className="flex h-12 w-12 items-center justify-center rounded-xl border border-[#C9A77A]/40 bg-white text-[#2D332C] shadow-sm transition-colors duration-300 group-hover:bg-[#2D332C] group-hover:text-[#C9A77A]">
-            <Icon size={21} />
-          </span>
-          <span className="text-2xl font-bold tracking-tight text-[#C9A77A]/80 transition-colors duration-300 group-hover:text-[#A68B6D]">
-            {number}
-          </span>
-        </div>
-        <h3 className="mt-5 text-lg font-bold text-[#242424]">{title}</h3>
-        <p className="mt-2 text-sm leading-6 text-[#777777]">{description}</p>
-      </div>
-    </div>
-  );
-}
-
-
-
-

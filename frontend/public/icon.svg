@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <defs>
+    <linearGradient id="bronzeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C9A77A" />
+      <stop offset="100%" stop-color="#8A6B4E" />
+    </linearGradient>
+  </defs>
+  <!-- Background Rounded Frame -->
+  <rect x="2" y="2" width="44" height="44" rx="12" fill="#242B23" stroke="#8A6B4E" stroke-width="1.5" stroke-opacity="0.4"/>
+  <!-- Primary Sparkle -->
+  <path d="M24 10 C24 16 26 20 32 24 C26 28 24 32 24 38 C24 32 22 28 16 24 C22 20 24 16 24 10 Z" fill="url(#bronzeGrad)"/>
+  <!-- Secondary Sparkle -->
+  <path d="M33 13 C33 16 34 18 37 20 C34 22 33 24 33 27 C33 24 32 22 29 20 C32 18 33 16 33 13 Z" fill="#C9A77A" opacity="0.85"/>
+</svg>

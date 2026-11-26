@@ -1,0 +1,445 @@
+{
+  "provinceCode": "22",
+  "provinceName": "Tỉnh Quảng Ninh",
+  "provinceShort": "Quảng Ninh",
+  "resolutionNumber": "1679/NQ-UBTVQH15",
+  "authority": "Quyết định số 19/2025/QĐ-TTg của Thủ tướng Chính phủ",
+  "effectiveDate": "2025-07-01",
+  "totalWards": 54,
+  "wards": [
+    "Phường Hà Tu",
+    "Phường Cao Xanh",
+    "Phường Việt Hưng",
+    "Phường Bãi Cháy",
+    "Phường Hà Lầm",
+    "Phường Hồng Gai",
+    "Phường Hạ Long",
+    "Phường Tuần Châu",
+    "Phường Móng Cái 2",
+    "Phường Móng Cái 1",
+    "Xã Hải Sơn",
+    "Xã Hải Ninh",
+    "Phường Móng Cái 3",
+    "Xã Vĩnh Thực",
+    "Phường Mông Dương",
+    "Phường Quang Hanh",
+    "Phường Cửa Ông",
+    "Phường Cẩm Phả",
+    "Xã Hải Hòa",
+    "Phường Uông Bí",
+    "Phường Vàng Danh",
+    "Phường Yên Tử",
+    "Xã Bình Liêu",
+    "Xã Hoành Mô",
+    "Xã Lục Hồn",
+    "Xã Tiên Yên",
+    "Xã Điền Xá",
+    "Xã Đông Ngũ",
+    "Xã Hải Lạng",
+    "Xã Đầm Hà",
+    "Xã Quảng Tân",
+    "Xã Quảng Hà",
+    "Xã Quảng Đức",
+    "Xã Đường Hoa",
+    "Xã Cái Chiên",
+    "Xã Ba Chẽ",
+    "Xã Kỳ Thượng",
+    "Xã Lương Minh",
+    "Đặc khu Vân Đồn",
+    "Phường Hoành Bồ",
+    "Xã Quảng La",
+    "Xã Thống Nhất",
+    "Phường Mạo Khê",
+    "Phường Bình Khê",
+    "Phường An Sinh",
+    "Phường Đông Triều",
+    "Phường Hoàng Quế",
+    "Phường Quảng Yên",
+    "Phường Đông Mai",
+    "Phường Hiệp Hòa",
+    "Phường Hà An",
+    "Phường Liên Hòa",
+    "Phường Phong Cốc",
+    "Đặc khu Cô Tô"
+  ],
+  "wardDetails": [
+    {
+      "code": "06652",
+      "name": "Phường Hà Tu",
+      "shortName": "Hà Tu",
+      "type": "Phường",
+      "areaKm2": 37.6
+    },
+    {
+      "code": "06658",
+      "name": "Phường Cao Xanh",
+      "shortName": "Cao Xanh",
+      "type": "Phường",
+      "areaKm2": 38.89
+    },
+    {
+      "code": "06661",
+      "name": "Phường Việt Hưng",
+      "shortName": "Việt Hưng",
+      "type": "Phường",
+      "areaKm2": 41.39
+    },
+    {
+      "code": "06673",
+      "name": "Phường Bãi Cháy",
+      "shortName": "Bãi Cháy",
+      "type": "Phường",
+      "areaKm2": 25.39
+    },
+    {
+      "code": "06676",
+      "name": "Phường Hà Lầm",
+      "shortName": "Hà Lầm",
+      "type": "Phường",
+      "areaKm2": 11.99
+    },
+    {
+      "code": "06685",
+      "name": "Phường Hồng Gai",
+      "shortName": "Hồng Gai",
+      "type": "Phường",
+      "areaKm2": 5.0
+    },
+    {
+      "code": "06688",
+      "name": "Phường Hạ Long",
+      "shortName": "Hạ Long",
+      "type": "Phường",
+      "areaKm2": 6.08
+    },
+    {
+      "code": "06706",
+      "name": "Phường Tuần Châu",
+      "shortName": "Tuần Châu",
+      "type": "Phường",
+      "areaKm2": 62.08
+    },
+    {
+      "code": "06709",
+      "name": "Phường Móng Cái 2",
+      "shortName": "Móng Cái 2",
+      "type": "Phường",
+      "areaKm2": 72.97
+    },
+    {
+      "code": "06712",
+      "name": "Phường Móng Cái 1",
+      "shortName": "Móng Cái 1",
+      "type": "Phường",
+      "areaKm2": 82.47
+    },
+    {
+      "code": "06724",
+      "name": "Xã Hải Sơn",
+      "shortName": "Hải Sơn",
+      "type": "Xã",
+      "areaKm2": 132.04
+    },
+    {
+      "code": "06733",
+      "name": "Xã Hải Ninh",
+      "shortName": "Hải Ninh",
+      "type": "Xã",
+      "areaKm2": 93.18
+    },
+    {
+      "code": "06736",
+      "name": "Phường Móng Cái 3",
+      "shortName": "Móng Cái 3",
+      "type": "Phường",
+      "areaKm2": 90.03
+    },
+    {
+      "code": "06757",
+      "name": "Xã Vĩnh Thực",
+      "shortName": "Vĩnh Thực",
+      "type": "Xã",
+      "areaKm2": 49.11
+    },
+    {
+      "code": "06760",
+      "name": "Phường Mông Dương",
+      "shortName": "Mông Dương",
+      "type": "Phường",
+      "areaKm2": 167.16
+    },
+    {
+      "code": "06778",
+      "name": "Phường Quang Hanh",
+      "shortName": "Quang Hanh",
+      "type": "Phường",
+      "areaKm2": 63.63
+    },
+    {
+      "code": "06781",
+      "name": "Phường Cửa Ông",
+      "shortName": "Cửa Ông",
+      "type": "Phường",
+      "areaKm2": 41.07
+    },
+    {
+      "code": "06793",
+      "name": "Phường Cẩm Phả",
+      "shortName": "Cẩm Phả",
+      "type": "Phường",
+      "areaKm2": 17.52
+    },
+    {
+      "code": "06799",
+      "name": "Xã Hải Hòa",
+      "shortName": "Hải Hòa",
+      "type": "Xã",
+      "areaKm2": 95.87
+    },
+    {
+      "code": "06811",
+      "name": "Phường Uông Bí",
+      "shortName": "Uông Bí",
+      "type": "Phường",
+      "areaKm2": 49.81
+    },
+    {
+      "code": "06820",
+      "name": "Phường Vàng Danh",
+      "shortName": "Vàng Danh",
+      "type": "Phường",
+      "areaKm2": 93.77
+    },
+    {
+      "code": "06832",
+      "name": "Phường Yên Tử",
+      "shortName": "Yên Tử",
+      "type": "Phường",
+      "areaKm2": 113.23
+    },
+    {
+      "code": "06838",
+      "name": "Xã Bình Liêu",
+      "shortName": "Bình Liêu",
+      "type": "Xã",
+      "areaKm2": 225.29
+    },
+    {
+      "code": "06841",
+      "name": "Xã Hoành Mô",
+      "shortName": "Hoành Mô",
+      "type": "Xã",
+      "areaKm2": 137.91
+    },
+    {
+      "code": "06856",
+      "name": "Xã Lục Hồn",
+      "shortName": "Lục Hồn",
+      "type": "Xã",
+      "areaKm2": 107.13
+    },
+    {
+      "code": "06862",
+      "name": "Xã Tiên Yên",
+      "shortName": "Tiên Yên",
+      "type": "Xã",
+      "areaKm2": 137.87
+    },
+    {
+      "code": "06874",
+      "name": "Xã Điền Xá",
+      "shortName": "Điền Xá",
+      "type": "Xã",
+      "areaKm2": 240.49
+    },
+    {
+      "code": "06877",
+      "name": "Xã Đông Ngũ",
+      "shortName": "Đông Ngũ",
+      "type": "Xã",
+      "areaKm2": 142.8
+    },
+    {
+      "code": "06886",
+      "name": "Xã Hải Lạng",
+      "shortName": "Hải Lạng",
+      "type": "Xã",
+      "areaKm2": 131.03
+    },
+    {
+      "code": "06895",
+      "name": "Xã Đầm Hà",
+      "shortName": "Đầm Hà",
+      "type": "Xã",
+      "areaKm2": 142.43
+    },
+    {
+      "code": "06913",
+      "name": "Xã Quảng Tân",
+      "shortName": "Quảng Tân",
+      "type": "Xã",
+      "areaKm2": 184.81
+    },
+    {
+      "code": "06922",
+      "name": "Xã Quảng Hà",
+      "shortName": "Quảng Hà",
+      "type": "Xã",
+      "areaKm2": 134.37
+    },
+    {
+      "code": "06931",
+      "name": "Xã Quảng Đức",
+      "shortName": "Quảng Đức",
+      "type": "Xã",
+      "areaKm2": 131.48
+    },
+    {
+      "code": "06946",
+      "name": "Xã Đường Hoa",
+      "shortName": "Đường Hoa",
+      "type": "Xã",
+      "areaKm2": 220.38
+    },
+    {
+      "code": "06967",
+      "name": "Xã Cái Chiên",
+      "shortName": "Cái Chiên",
+      "type": "Xã",
+      "areaKm2": 25.9
+    },
+    {
+      "code": "06970",
+      "name": "Xã Ba Chẽ",
+      "shortName": "Ba Chẽ",
+      "type": "Xã",
+      "areaKm2": 332.68
+    },
+    {
+      "code": "06979",
+      "name": "Xã Kỳ Thượng",
+      "shortName": "Kỳ Thượng",
+      "type": "Xã",
+      "areaKm2": 273.5
+    },
+    {
+      "code": "06985",
+      "name": "Xã Lương Minh",
+      "shortName": "Lương Minh",
+      "type": "Xã",
+      "areaKm2": 225.28
+    },
+    {
+      "code": "06994",
+      "name": "Đặc khu Vân Đồn",
+      "shortName": "Vân Đồn",
+      "type": "Đặc khu",
+      "areaKm2": 538.92
+    },
+    {
+      "code": "07030",
+      "name": "Phường Hoành Bồ",
+      "shortName": "Hoành Bồ",
+      "type": "Phường",
+      "areaKm2": 276.12
+    },
+    {
+      "code": "07054",
+      "name": "Xã Quảng La",
+      "shortName": "Quảng La",
+      "type": "Xã",
+      "areaKm2": 165.67
+    },
+    {
+      "code": "07060",
+      "name": "Xã Thống Nhất",
+      "shortName": "Thống Nhất",
+      "type": "Xã",
+      "areaKm2": 276.12
+    },
+    {
+      "code": "07069",
+      "name": "Phường Mạo Khê",
+      "shortName": "Mạo Khê",
+      "type": "Phường",
+      "areaKm2": 46.55
+    },
+    {
+      "code": "07081",
+      "name": "Phường Bình Khê",
+      "shortName": "Bình Khê",
+      "type": "Phường",
+      "areaKm2": 138.74
+    },
+    {
+      "code": "07090",
+      "name": "Phường An Sinh",
+      "shortName": "An Sinh",
+      "type": "Phường",
+      "areaKm2": 106.42
+    },
+    {
+      "code": "07093",
+      "name": "Phường Đông Triều",
+      "shortName": "Đông Triều",
+      "type": "Phường",
+      "areaKm2": 40.42
+    },
+    {
+      "code": "07114",
+      "name": "Phường Hoàng Quế",
+      "shortName": "Hoàng Quế",
+      "type": "Phường",
+      "areaKm2": 63.83
+    },
+    {
+      "code": "07132",
+      "name": "Phường Quảng Yên",
+      "shortName": "Quảng Yên",
+      "type": "Phường",
+      "areaKm2": 20.69
+    },
+    {
+      "code": "07135",
+      "name": "Phường Đông Mai",
+      "shortName": "Đông Mai",
+      "type": "Phường",
+      "areaKm2": 50.61
+    },
+    {
+      "code": "07147",
+      "name": "Phường Hiệp Hòa",
+      "shortName": "Hiệp Hòa",
+      "type": "Phường",
+      "areaKm2": 35.83
+    },
+    {
+      "code": "07168",
+      "name": "Phường Hà An",
+      "shortName": "Hà An",
+      "type": "Phường",
+      "areaKm2": 100.18
+    },
+    {
+      "code": "07180",
+      "name": "Phường Liên Hòa",
+      "shortName": "Liên Hòa",
+      "type": "Phường",
+      "areaKm2": 71.44
+    },
+    {
+      "code": "07183",
+      "name": "Phường Phong Cốc",
+      "shortName": "Phong Cốc",
+      "type": "Phường",
+      "areaKm2": 42.17
+    },
+    {
+      "code": "07192",
+      "name": "Đặc khu Cô Tô",
+      "shortName": "Cô Tô",
+      "type": "Đặc khu",
+      "areaKm2": 53.68
+    }
+  ]
+}

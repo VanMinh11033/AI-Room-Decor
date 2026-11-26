@@ -3,8 +3,24 @@
 import Link from "next/link";
 import { ChangeEvent, DragEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
-import { AlertCircle, BrainCircuit, ChevronLeft, ImagePlus, Loader2, Palette, RefreshCw, Upload } from "lucide-react";
-import { EmptyImagePlaceholder, PageHeader, RoomFlowStepper, SectionCard } from "@/components/customer/DesignPrimitives";
+import {
+  AlertCircle,
+  ArrowRight,
+  BrainCircuit,
+  Camera,
+  ChevronLeft,
+  ImagePlus,
+  Loader2,
+  Palette,
+  RefreshCw,
+  Sparkles,
+  Upload,
+} from "lucide-react";
+import { EmptyImagePlaceholder, SectionCard } from "@/components/customer/DesignPrimitives";
+import { EditorialHeading } from "@/components/ui/EditorialHeading";
+import { LuxuryButton } from "@/components/ui/LuxuryButton";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { StudioNavHeader } from "@/components/studio/StudioNavHeader";
 import { apiAssetUrl, apiFetch } from "@/lib/api";
 import { displayColor, displayRoomType } from "@/lib/display";
 import { useAuth } from "@/hooks/useAuth";
@@ -13,8 +29,6 @@ import type { RoomAnalysis, RoomProject } from "@/types/api";
 export default function RoomProjectDetailPage() {
   const params = useParams<{ id: string }>();
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const uploadInFlight = useRef(false);
-  const analyzeInFlight = useRef(false);
   const { loading: authLoading } = useAuth("CUSTOMER");
   const [project, setProject] = useState<RoomProject | null>(null);
   const [analysis, setAnalysis] = useState<RoomAnalysis | null>(null);
@@ -26,33 +40,26 @@ export default function RoomProjectDetailPage() {
   const [pageError, setPageError] = useState("");
   const [actionError, setActionError] = useState("");
 
-  const load = useCallback(async (signal?: AbortSignal) => {
+  const load = useCallback(async () => {
     setLoading(true);
     setPageError("");
     try {
-      const [projectData, analysisData] = await Promise.all([
-        apiFetch<RoomProject>(`/api/room-projects/${params.id}`, { signal }),
-        apiFetch<RoomAnalysis>(`/api/room-projects/${params.id}/analysis`, { signal }).catch(() => null),
-      ]);
-      setProject(projectData);
-      setAnalysis(analysisData);
+      const data = await apiFetch<RoomProject>(`/api/room-projects/${params.id}`);
+      setProject(data);
+      try {
+        setAnalysis(await apiFetch<RoomAnalysis>(`/api/room-projects/${params.id}/analysis`));
+      } catch {
+        setAnalysis(null);
+      }
     } catch (err) {
-      if (signal?.aborted) return;
       setPageError(err instanceof Error ? err.message : "Không tải được dự án phòng");
     } finally {
-      if (!signal?.aborted) {
-        setLoading(false);
-      }
+      setLoading(false);
     }
   }, [params.id]);
 
   useEffect(() => {
-    if (authLoading) return;
-    const controller = new AbortController();
-    load(controller.signal);
-    return () => {
-      controller.abort();
-    };
+    if (!authLoading) load();
   }, [authLoading, load]);
 
   useEffect(() => {
@@ -66,23 +73,11 @@ export default function RoomProjectDetailPage() {
   }, [file]);
 
   async function uploadImage() {
-    if (!file || uploadInFlight.current) return;
-    // Client-side pre-validation: size <= 15MB, valid image type
-    if (file.size > 15 * 1024 * 1024) {
-      setActionError("Kích thước tệp quá lớn (tối đa 15MB). Vui lòng chọn ảnh nhỏ hơn.");
-      return;
-    }
-    const validMimes = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
-    if (file.type && !validMimes.includes(file.type.toLowerCase())) {
-      setActionError("Định dạng ảnh không hợp lệ. Vui lòng tải ảnh JPG, PNG hoặc WEBP.");
-      return;
-    }
-
-    uploadInFlight.current = true;
-    setUploading(true);
-    setActionError("");
+    if (!file) return;
     const formData = new FormData();
     formData.append("file", file);
+    setUploading(true);
+    setActionError("");
     try {
       const updated = await apiFetch<RoomProject>(`/api/room-projects/${params.id}/image`, { method: "POST", body: formData });
       setProject(updated);
@@ -91,14 +86,11 @@ export default function RoomProjectDetailPage() {
     } catch (err) {
       setActionError(mapUploadError(err instanceof Error ? err.message : ""));
     } finally {
-      uploadInFlight.current = false;
       setUploading(false);
     }
   }
 
   async function analyze(force = false) {
-    if (analyzeInFlight.current) return;
-    analyzeInFlight.current = true;
     setAnalyzing(true);
     setActionError("");
     try {
@@ -109,7 +101,6 @@ export default function RoomProjectDetailPage() {
       setActionError(mapAnalysisError(err instanceof Error ? err.message : ""));
       await load();
     } finally {
-      analyzeInFlight.current = false;
       setAnalyzing(false);
     }
   }
@@ -129,314 +120,311 @@ export default function RoomProjectDetailPage() {
   const hasImage = Boolean(project?.room_image_url);
   const analysisCompleted = analysis?.status === "COMPLETED";
   const analysisFailed = analysis?.status === "FAILED";
-  const canSeeRecommendations = Boolean(project?.preference_configured && analysisCompleted);
-  const status = useMemo(() => projectStatusLabel(project, analysis), [project, analysis]);
 
-  if (authLoading || loading) return <p className="font-semibold text-charcoal/60">Đang tải dự án...</p>;
-  if (!project) return <p className="text-red-600">{pageError || "Không tìm thấy dự án phòng"}</p>;
+  if (authLoading || loading) {
+    return (
+      <div className="py-16 text-center space-y-3">
+        <p className="font-serif text-lg text-[#242B23]">Đang tải không gian phòng...</p>
+      </div>
+    );
+  }
+
+  if (!project) {
+    return (
+      <div className="py-16 text-center space-y-3">
+        <p className="text-red-600 font-semibold">{pageError || "Không tìm thấy dự án phòng"}</p>
+        <Link href="/room-projects">
+          <LuxuryButton variant="secondary" size="md">Về danh sách dự án</LuxuryButton>
+        </Link>
+      </div>
+    );
+  }
 
   return (
-    <section className="space-y-8">
-      <Link href="/room-projects" className="inline-flex items-center gap-2 text-sm font-bold text-charcoal/60 hover:text-ink">
-        <ChevronLeft size={16} /> Dự án của tôi
-      </Link>
-      <PageHeader
-        eyebrow={status.label}
-        title={project.title}
-        description={displayRoomType(project.room_type) || "Chưa chọn loại phòng"}
+    <section className="space-y-8 w-full max-w-full">
+      {/* Studio Navigation Header */}
+      <StudioNavHeader
+        projectId={project.id}
+        projectTitle={project.title}
+        roomImageUrl={project.room_image_url}
+        currentStep={1}
+        hasRoomImage={hasImage}
+        hasPreferences={Boolean(project.preference_configured)}
+        selectedProductsCount={0}
+        saveState="saved"
       />
 
-      <RoomFlowStepper steps={[
-        { label: "Ảnh phòng", state: hasImage ? "done" : "current" },
-        { label: "Phân tích AI", state: analysisCompleted ? "done" : analysisFailed ? "error" : hasImage ? "current" : "pending" },
-        { label: "Cá nhân hóa", state: project.preference_configured ? "done" : analysisCompleted ? "current" : "pending" },
-        { label: "Gợi ý nội thất", state: canSeeRecommendations ? "current" : "pending" },
-        { label: "Thiết kế AI", state: "pending" },
-      ]} />
-
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.35fr)_minmax(360px,0.9fr)] w-full min-w-0">
-        <div className="space-y-5 w-full min-w-0">
-          <div className="overflow-hidden rounded-3xl border border-ink/10 bg-white shadow-soft">
-            <div className="aspect-[16/10] bg-stone/20 flex items-center justify-center">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12 w-full min-w-0">
+        {/* LEFT COLUMN: Room Showcase & Upload Card (7 cols) */}
+        <div className="space-y-6 lg:col-span-7 w-full min-w-0">
+          <div className="overflow-hidden rounded-3xl border border-[#242B23]/10 bg-white p-3 shadow-soft">
+            <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl bg-[#FBF9F5] flex items-center justify-center">
               {project.room_image_url ? (
                 <img
-                  src={apiAssetUrl(project.room_image_url, { width: 1000 })}
+                  src={apiAssetUrl(project.room_image_url)}
                   alt={project.title}
-                  fetchPriority="high"
-                  decoding="async"
                   className="h-full w-full object-contain"
                 />
               ) : (
-                <EmptyImagePlaceholder label="Chưa có ảnh phòng" />
+                <EmptyImagePlaceholder label="Chưa có ảnh không gian phòng" />
+              )}
+              {hasImage && (
+                <div className="absolute left-3.5 top-3.5">
+                  <StatusBadge variant={analysisCompleted ? "verified" : "pending"}>
+                    {analysisCompleted ? "Đã phân tích bố cục" : "Ảnh hiện trạng gốc"}
+                  </StatusBadge>
+                </div>
               )}
             </div>
           </div>
-          <UploadCard
-            file={file}
-            previewUrl={previewUrl}
-            uploading={uploading}
-            onFileChange={onFileChange}
+
+          {/* Upload Card */}
+          <section
             onDrop={onDrop}
-            onPick={() => inputRef.current?.click()}
-            onUpload={uploadImage}
-            inputRef={inputRef}
-          />
+            onDragOver={(e) => e.preventDefault()}
+            className="rounded-3xl border border-dashed border-[#8A6B4E]/30 bg-white p-6 shadow-sm space-y-4"
+          >
+            <input
+              ref={inputRef}
+              onChange={onFileChange}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+            />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[#8A6B4E]/10 text-[#8A6B4E]">
+                  <Camera size={22} />
+                </div>
+                <div>
+                  <h2 className="font-serif text-lg text-[#242B23]">
+                    {hasImage ? "Thay đổi ảnh không gian" : "Tải ảnh căn phòng của bạn"}
+                  </h2>
+                  <p className="text-xs text-[#5A6258] mt-0.5">
+                    Kéo thả file ảnh chụp thực tế hoặc chọn từ máy (JPG, PNG, WebP tối đa 15MB).
+                  </p>
+                </div>
+              </div>
+              <LuxuryButton
+                type="button"
+                variant="secondary"
+                size="sm"
+                onClick={() => inputRef.current?.click()}
+                className="shrink-0"
+              >
+                <ImagePlus size={16} />
+                <span>{hasImage ? "Đổi ảnh" : "Chọn ảnh"}</span>
+              </LuxuryButton>
+            </div>
+
+            {/* Selected File Pending Upload */}
+            {file && (
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-[#8A6B4E]/20 bg-[#FBF9F5] p-3.5">
+                <div className="flex min-w-0 items-center gap-3">
+                  {previewUrl && (
+                    <img
+                      src={previewUrl}
+                      alt={file.name}
+                      className="h-14 w-18 rounded-xl object-cover border border-[#242B23]/10"
+                    />
+                  )}
+                  <div className="min-w-0">
+                    <p className="truncate text-xs font-semibold text-[#242B23]">{file.name}</p>
+                    <p className="text-[11px] text-[#5A6258] mt-0.5">{formatBytes(file.size)}</p>
+                  </div>
+                </div>
+                <LuxuryButton
+                  variant="primary"
+                  size="sm"
+                  loading={uploading}
+                  disabled={uploading}
+                  onClick={uploadImage}
+                  className="shrink-0"
+                >
+                  <Upload size={14} />
+                  <span>Xác nhận tải lên</span>
+                </LuxuryButton>
+              </div>
+            )}
+          </section>
         </div>
 
-        <aside className="space-y-5 w-full min-w-0">
-          <SectionCard
-            title="Phân tích không gian"
-            subtitle="AI đọc ảnh phòng để xác định bố cục, ánh sáng, màu chủ đạo và các khu vực có thể decor."
-          >
-            {!hasImage && <EmptyState text="Tải ảnh căn phòng trước khi phân tích." />}
-            {hasImage && !analysis && (
-              <ActionState title="Chưa có kết quả phân tích" text="Phân tích ảnh phòng hiện tại để mở bước gợi ý nội thất." buttonLabel="Phân tích căn phòng" loading={analyzing} onClick={() => analyze(false)} />
-            )}
-            {analysisFailed && <FailedState error={analysis} loading={analyzing} onRetry={() => analyze(true)} />}
-            {analysisCompleted && <AnalysisResult analysis={analysis} />}
-          </SectionCard>
-
-          {actionError && <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">{actionError}</div>}
-
-          <SectionCard title="Bước tiếp theo">
-            <div className="space-y-3">
-              {!analysisCompleted && hasImage && (
-                <button disabled={analyzing} onClick={() => analyze(analysisFailed)} className="primary-cta w-full">
-                  {analyzing ? <Loader2 size={18} className="animate-spin" /> : <BrainCircuit size={18} />}
-                  {analysisFailed ? "Thử phân tích lại" : "Phân tích căn phòng"}
-                </button>
-              )}
-              {analysisCompleted && !project.preference_configured && (
-                <Link href={`/room-projects/${project.id}/preferences`} className="primary-cta w-full">
-                  <Palette size={18} /> Tiếp tục cá nhân hóa
-                </Link>
-              )}
-              {canSeeRecommendations && (
-                <Link href={`/room-projects/${project.id}/recommendations`} className="primary-cta w-full">
-                  <Palette size={18} /> Xem gợi ý nội thất
-                </Link>
-              )}
-              <button type="button" onClick={() => inputRef.current?.click()} className="secondary-cta w-full">
-                <ImagePlus size={18} /> {hasImage ? "Thay ảnh" : "Chọn ảnh"}
-              </button>
+        {/* RIGHT COLUMN: AI Analysis & Step Progression (5 cols) */}
+        <aside className="space-y-6 lg:col-span-5 w-full min-w-0">
+          <div className="rounded-3xl border border-[#242B23]/10 bg-white p-6 sm:p-8 shadow-card space-y-6">
+            <div className="space-y-2 border-b border-[#242B23]/10 pb-5">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-[#8A6B4E]">
+                Thị Giác AI Không Gian
+              </span>
+              <h3 className="font-serif text-xl sm:text-2xl text-[#242B23]">
+                Phân tích cấu trúc & ánh sáng
+              </h3>
+              <p className="text-xs text-[#5A6258] leading-relaxed">
+                Hệ thống tự động phát hiện ánh sáng, màu chủ đạo và nhận diện các diện tích trống có thể trang trí.
+              </p>
             </div>
-          </SectionCard>
+
+            {!hasImage && (
+              <div className="rounded-2xl border border-[#242B23]/10 bg-[#FBF9F5] p-5 text-center space-y-2">
+                <p className="text-xs text-[#5A6258]">
+                  Vui lòng tải ảnh phòng ở khung bên cạnh để AI tiến hành phân tích không gian.
+                </p>
+              </div>
+            )}
+
+            {hasImage && !analysis && (
+              <div className="rounded-2xl border border-[#8A6B4E]/20 bg-[#FBF9F5] p-5 space-y-3">
+                <p className="text-xs font-semibold text-[#242B23]">Ảnh đã sẵn sàng phân tích</p>
+                <p className="text-xs text-[#5A6258]">
+                  Bấm nút bên dưới để AI quét kết cấu phòng và mở khóa bước gợi ý nội thất catalog.
+                </p>
+                <LuxuryButton
+                  variant="primary"
+                  size="md"
+                  loading={analyzing}
+                  disabled={analyzing}
+                  onClick={() => analyze(false)}
+                  className="w-full justify-center"
+                >
+                  <BrainCircuit size={16} />
+                  <span>Phân tích căn phòng</span>
+                </LuxuryButton>
+              </div>
+            )}
+
+            {analysisFailed && (
+              <div className="rounded-2xl border border-red-200 bg-red-50 p-4 space-y-3">
+                <div className="flex gap-2.5">
+                  <AlertCircle size={18} className="text-red-700 shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-xs font-semibold text-red-800">Phân tích chưa hoàn tất</p>
+                    <p className="text-xs text-red-700 mt-0.5">
+                      {mapAnalysisError(analysis?.error_code || analysis?.error_message || "")}
+                    </p>
+                  </div>
+                </div>
+                <LuxuryButton
+                  variant="secondary"
+                  size="sm"
+                  loading={analyzing}
+                  onClick={() => analyze(true)}
+                  className="w-full justify-center"
+                >
+                  <RefreshCw size={14} />
+                  <span>Thử phân tích lại</span>
+                </LuxuryButton>
+              </div>
+            )}
+
+            {analysisCompleted && <AnalysisResult analysis={analysis} />}
+
+            {actionError && (
+              <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700 font-semibold">
+                {actionError}
+              </div>
+            )}
+
+            {/* Progression CTAs */}
+            <div className="border-t border-[#242B23]/10 pt-5 space-y-3">
+              {analysisCompleted ? (
+                <Link href={`/room-projects/${project.id}/preferences`} className="block w-full">
+                  <LuxuryButton variant="primary" size="lg" className="w-full justify-center">
+                    <span>Tiếp tục chọn phong cách & màu sắc</span>
+                    <ArrowRight size={18} />
+                  </LuxuryButton>
+                </Link>
+              ) : hasImage ? (
+                <LuxuryButton
+                  variant="primary"
+                  size="lg"
+                  loading={analyzing}
+                  disabled={analyzing}
+                  onClick={() => analyze(false)}
+                  className="w-full justify-center"
+                >
+                  <BrainCircuit size={18} />
+                  <span>Phân tích căn phòng để tiếp tục</span>
+                </LuxuryButton>
+              ) : null}
+            </div>
+          </div>
         </aside>
       </div>
     </section>
   );
 }
 
-function UploadCard({ file, previewUrl, uploading, onFileChange, onDrop, onPick, onUpload, inputRef }: {
-  file: File | null;
-  previewUrl: string;
-  uploading: boolean;
-  onFileChange: (event: ChangeEvent<HTMLInputElement>) => void;
-  onDrop: (event: DragEvent<HTMLDivElement>) => void;
-  onPick: () => void;
-  onUpload: () => void;
-  inputRef: React.MutableRefObject<HTMLInputElement | null>;
-}) {
-  return (
-    <section onDrop={onDrop} onDragOver={(event) => event.preventDefault()} className="rounded-3xl border border-dashed border-clay/30 bg-white/85 p-5 shadow-card">
-      <input ref={inputRef} onChange={onFileChange} type="file" accept="image/jpeg,image/png,image/webp" className="hidden" />
-      <div className="grid gap-4 md:grid-cols-[1fr_auto] md:items-center">
-        <div className="flex gap-4">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-clay/10 text-clay">
-            <Upload size={24} />
-          </div>
-          <div>
-            <h2 className="font-black text-ink">Tải ảnh căn phòng</h2>
-            <p className="mt-1 text-sm leading-6 text-charcoal/60">Kéo thả ảnh vào đây hoặc chọn từ máy tính. JPG, PNG, WebP.</p>
-          </div>
-        </div>
-        <button type="button" onClick={onPick} className="secondary-cta px-4 py-2">Chọn ảnh</button>
-      </div>
-      {file && (
-        <div className="mt-4 flex flex-col gap-4 rounded-2xl bg-ivory p-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex min-w-0 items-center gap-3">
-            {previewUrl && <img src={previewUrl} alt={file.name} className="h-16 w-20 rounded-xl object-cover" />}
-            <div className="min-w-0">
-              <p className="truncate text-sm font-black text-ink">{file.name}</p>
-              <p className="mt-1 text-xs text-charcoal/55">{formatBytes(file.size)}</p>
-            </div>
-          </div>
-          <button disabled={uploading} onClick={onUpload} className="primary-cta px-4 py-2">
-            {uploading ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}
-            Tải ảnh lên
-          </button>
-        </div>
-      )}
-    </section>
-  );
-}
-
-function ActionState({ title, text, buttonLabel, loading, onClick }: { title: string; text: string; buttonLabel: string; loading: boolean; onClick: () => void }) {
-  return (
-    <div className="rounded-2xl bg-ivory p-4">
-      <p className="font-black text-ink">{title}</p>
-      <p className="mt-1 text-sm leading-6 text-charcoal/60">{text}</p>
-      <button disabled={loading} onClick={onClick} className="primary-cta mt-4 px-4 py-2">
-        {loading ? <Loader2 size={16} className="animate-spin" /> : <BrainCircuit size={16} />}
-        {buttonLabel}
-      </button>
-    </div>
-  );
-}
-
-function FailedState({ error, loading, onRetry }: { error: RoomAnalysis; loading: boolean; onRetry: () => void }) {
-  return (
-    <div className="rounded-2xl border border-red-200 bg-red-50 p-4">
-      <div className="flex gap-3">
-        <AlertCircle className="mt-0.5 text-red-600" size={20} />
-        <div>
-          <p className="font-black text-red-800">Phân tích thất bại</p>
-          <p className="mt-1 text-sm leading-6 text-red-700">{mapAnalysisError(error.error_code || error.error_message || "")}</p>
-          <button disabled={loading} onClick={onRetry} className="mt-4 inline-flex items-center gap-2 rounded-xl bg-red-700 px-4 py-2 text-sm font-bold text-white disabled:bg-red-300">
-            {loading ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}
-            Thử phân tích lại
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function renderFallbackBanner(analysis: RoomAnalysis) {
-  if (analysis.provider !== "local_fallback") return null;
-
-  const reason = String(analysis.raw_response?.reason || "LOCAL_MODE");
-
-  if (reason === "CLOUDFLARE_VISION_AGREEMENT_REQUIRED") {
-    return (
-      <div className="rounded-2xl border border-blue-200 bg-blue-50 p-3 text-sm font-bold text-blue-800">
-        Cần kích hoạt điều khoản Meta Llama trên tài khoản Cloudflare Workers AI. Hệ thống đang sử dụng Chế độ Phân tích Thị giác Cục bộ (Local CV) để bạn tiếp tục decor không bị gián đoạn.
-      </div>
-    );
-  }
-
-  if (reason === "CLOUDFLARE_VISION_QUOTA_ERROR" || reason === "QUOTA_EXCEEDED" || reason === "GEMINI_PROVIDER_QUOTA_ERROR") {
-    return (
-      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm font-bold text-amber-800">
-        Hạn mức gọi Cloud AI hôm nay đã đạt giới hạn. Hệ thống đang sử dụng Chế độ Phân tích Thị giác Cục bộ (Local CV Engine - 0đ chi phí).
-      </div>
-    );
-  }
-
-  if (reason === "CLOUDFLARE_VISION_UNAVAILABLE" || reason === "GEMINI_PROVIDER_UNAVAILABLE" || reason === "TEMPORARILY_OVERLOADED") {
-    return (
-      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-3 text-sm font-bold text-amber-800">
-        Dịch vụ Cloud AI đang tạm thời bận. Hệ thống đã tự động chuyển sang Chế độ Phân tích Thị giác Cục bộ (Local CV Engine) để bạn tiếp tục decor không bị gián đoạn.
-      </div>
-    );
-  }
-
-  if (reason === "CLOUD_AI_DISABLED") {
-    return (
-      <div className="rounded-2xl border border-blue-200 bg-blue-50 p-3 text-sm font-bold text-blue-800">
-        Chế độ Cloud AI đang tắt. Hệ thống đang sử dụng Chế độ Phân tích Thị giác Cục bộ (Local CV Engine - An toàn & Miễn phí).
-      </div>
-    );
-  }
-
-  if (reason === "MISSING_API_KEY" || reason === "AI_PROVIDER_NOT_CONFIGURED" || reason === "INVALID_API_KEY") {
-    return (
-      <div className="rounded-2xl border border-sky-200 bg-sky-50 p-3 text-sm font-bold text-sky-800">
-        Hệ thống đang hoạt động ở Chế độ Phân tích Thị giác Cục bộ (Local Computer Vision Engine - Miễn phí & An toàn).
-      </div>
-    );
-  }
-
-  return (
-    <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-3 text-sm font-bold text-emerald-800">
-      Đang sử dụng Chế độ Phân tích Thị giác Cục bộ (Local Computer Vision Engine - 0đ chi phí).
-    </div>
-  );
-}
-
 function AnalysisResult({ analysis }: { analysis: RoomAnalysis }) {
   return (
     <div className="space-y-4">
-      {analysis.provider === "cloudflare" && (
-        <div className="rounded-2xl border border-clay/20 bg-gradient-to-r from-clay/10 via-amber-50 to-ivory p-3 text-sm font-bold text-ink flex items-center justify-between">
-          <span>✨ Phân tích Không gian AI: Cloudflare Llama 3.2 Vision kết hợp Local CV</span>
-          <span className="text-xs font-semibold text-charcoal/60">Độ tin cậy: {Math.round(Number(analysis.confidence || 0.9) * 100)}%</span>
+      <div className="grid grid-cols-2 gap-3">
+        <StatusTile
+          label="Loại phòng"
+          value={displayRoomType(analysis.room_type) || analysis.room_type || "Chưa xác định"}
+        />
+        <StatusTile
+          label="Ánh sáng tự nhiên"
+          value={analysis.lighting ? `${analysis.lighting.type} (${analysis.lighting.level})` : "Tự nhiên"}
+        />
+      </div>
+
+      {/* Dominant Palette */}
+      <div className="rounded-2xl border border-[#242B23]/10 bg-[#FBF9F5] p-4 space-y-2">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-[#5A6258]">
+          Bảng màu sắc nhận diện
+        </p>
+        <div className="flex flex-wrap gap-2 pt-1">
+          {analysis.dominant_colors.length > 0 ? (
+            analysis.dominant_colors.map((color, index) => (
+              <span
+                key={`${index}-${color.name}`}
+                className="inline-flex items-center gap-1.5 rounded-full border border-[#242B23]/10 bg-white px-3 py-1 text-xs font-semibold text-[#242B23]"
+              >
+                <span
+                  className="h-3.5 w-3.5 rounded-full border border-black/10 shrink-0"
+                  style={{ backgroundColor: color.hex || "#e0dacf" }}
+                />
+                {displayColor(color.name) || color.name}
+              </span>
+            ))
+          ) : (
+            <span className="text-xs text-[#5A6258]">Tự nhiên trung tính</span>
+          )}
+        </div>
+      </div>
+
+      {/* Spatial Details */}
+      {analysis.layout_summary && (
+        <div className="rounded-2xl border border-[#242B23]/10 bg-[#FBF9F5] p-4 text-xs leading-relaxed text-[#5A6258]">
+          <p className="font-semibold text-[#242B23] mb-1">Mô tả cấu trúc phòng</p>
+          <p>{analysis.layout_summary}</p>
         </div>
       )}
-      {renderFallbackBanner(analysis)}
-      <div className="grid gap-3 sm:grid-cols-2">
-        <StatusTile label="Loại phòng" value={displayRoomType(analysis.room_type) || analysis.room_type || "-"} />
-        <StatusTile label="Ánh sáng" value={analysis.lighting ? `${analysis.lighting.type} · ${analysis.lighting.level}` : "-"} />
-      </div>
-      <div className="rounded-2xl bg-ivory p-4">
-        <h3 className="font-black text-ink">Màu chủ đạo</h3>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {(analysis.dominant_colors || []).length > 0 ? (analysis.dominant_colors || []).map((color, index) => (
-            <span key={`${index}-${color.name}-${color.hex || ""}`} className="inline-flex items-center gap-2 rounded-full border border-ink/10 bg-white px-3 py-1 text-sm font-bold">
-              <span className="h-5 w-5 rounded-full border border-ink/10" style={{ backgroundColor: color.hex || "#ffffff" }} />
-              {displayColor(color.name) || color.name} {color.percentage ? `${color.percentage}%` : ""}
-            </span>
-          )) : <span className="text-sm text-charcoal/50">-</span>}
-        </div>
-      </div>
-      <Panel title="Vật thể hiện có" items={(analysis.existing_objects || []).map((item) => `${item.name} (${Math.round(item.confidence * 100)}%)`)} />
-      <Panel title="Khu vực trống" items={(analysis.empty_areas || []).map((area) => `${area.location}: ${area.description || "-"}`)} />
-      <Panel title="Mô tả bố cục" items={[analysis.layout_summary || "-"]} />
     </div>
   );
 }
 
 function StatusTile({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-2xl bg-ivory px-4 py-3">
-      <p className="text-xs font-black uppercase text-charcoal/45">{label}</p>
-      <p className="mt-1 font-black text-ink">{value}</p>
+    <div className="rounded-2xl border border-[#242B23]/10 bg-[#FBF9F5] p-3.5">
+      <p className="text-[10px] font-semibold uppercase tracking-wider text-[#5A6258]">{label}</p>
+      <p className="mt-1 text-xs font-semibold text-[#242B23] truncate">{value}</p>
     </div>
   );
-}
-
-function Panel({ title, items }: { title: string; items: string[] }) {
-  return (
-    <div className="rounded-2xl bg-ivory p-4">
-      <h3 className="font-black text-ink">{title}</h3>
-      <ul className="mt-3 space-y-2 text-sm text-charcoal/70">
-        {items.length > 0 ? items.map((item) => <li key={item}>{item}</li>) : <li>-</li>}
-      </ul>
-    </div>
-  );
-}
-
-function EmptyState({ text }: { text: string }) {
-  return <div className="rounded-2xl bg-ivory p-4 text-sm leading-6 text-charcoal/60">{text}</div>;
-}
-
-function projectStatusLabel(project: RoomProject | null, analysis: RoomAnalysis | null) {
-  if (analysis?.status === "COMPLETED") return { label: "Đã phân tích" };
-  if (analysis?.status === "FAILED" || project?.status === "FAILED") return { label: "Phân tích thất bại" };
-  if (project?.status === "ANALYZING") return { label: "Đang phân tích" };
-  if (project?.room_image_url) return { label: "Sẵn sàng phân tích" };
-  return { label: "Cần ảnh phòng" };
 }
 
 function mapAnalysisError(message: string) {
-  if (message === "AI_PROVIDER_NOT_CONFIGURED") return "AI phân tích phòng chưa được cấu hình.";
-  if (message === "GEMINI_PROVIDER_AUTH_ERROR" || message === "CLOUDFLARE_VISION_AUTH_ERROR") return "Dịch vụ phân tích AI đang gặp lỗi xác thực. Vui lòng liên hệ quản trị viên.";
-  if (message === "GEMINI_PROVIDER_MODEL_ERROR" || message === "CLOUDFLARE_VISION_MODEL_ERROR") return "Model phân tích AI hiện không khả dụng. Vui lòng liên hệ quản trị viên.";
-  if (message === "GEMINI_PROVIDER_UNAVAILABLE" || message === "CLOUDFLARE_VISION_UNAVAILABLE") return "Dịch vụ AI đang tạm thời bận. Vui lòng thử lại sau ít phút.";
-  if (message === "GEMINI_PROVIDER_QUOTA_ERROR" || message === "CLOUDFLARE_VISION_QUOTA_ERROR" || message === "CLOUDFLARE_VISION_DAILY_QUOTA_EXCEEDED") return "Đã vượt hạn mức phân tích AI. Vui lòng thử lại sau.";
-  if (message === "CLOUDFLARE_VISION_INVALID_PAYLOAD") return "Cấu trúc dữ liệu ảnh không được AI chấp nhận. Vui lòng thử lại ảnh khác.";
-  if (message === "CLOUDFLARE_VISION_SOURCE_NOT_FOUND" || message === "ROOM_IMAGE_NOT_FOUND") return "Không tìm thấy file ảnh căn phòng. Vui lòng tải lại ảnh.";
-  if (message.includes("AI_ANALYSIS_IN_PROGRESS")) return "Yêu cầu phân tích phòng đang được xử lý, vui lòng chờ trong giây lát.";
-  if (message === "VISION_PROVIDER_REQUEST_FAILED" || message === "VISION_PROVIDER_HTTP_ERROR" || message === "CLOUDFLARE_VISION_API_ERROR" || message === "CLOUDFLARE_VISION_REQUEST_FAILED") return "Không thể phân tích ảnh lúc này. Vui lòng thử lại.";
-  if (message === "CLOUDFLARE_VISION_AGREEMENT_REQUIRED") return "Cần chấp nhận điều khoản Meta Llama trước khi sử dụng model Vision này.";
-  if (message === "VISION_PROVIDER_MALFORMED_RESPONSE") return "Kết quả AI chưa đúng định dạng. Vui lòng thử lại.";
-  if (message === "AI_ANALYSIS_FAILED") return "Phân tích ảnh thất bại. Vui lòng thử lại.";
-  return "Không thể phân tích ảnh lúc này. Vui lòng thử lại.";
+  if (message.includes("quota") || message.includes("QUOTA")) {
+    return "Hạn mức gọi AI phân tích đã đạt giới hạn hôm nay. Hệ thống đang chuyển sang phân tích cục bộ.";
+  }
+  return "Không thể phân tích ảnh lúc này. Vui lòng thử lại sau giây lát.";
 }
 
 function mapUploadError(message: string) {
-  if (message.includes("image") || message.includes("extension") || message.includes("corrupt")) return "Ảnh không hợp lệ. Vui lòng chọn JPG, PNG hoặc WebP.";
-  return "Tải ảnh lên thất bại. Vui lòng thử lại.";
+  if (message.includes("image") || message.includes("extension")) {
+    return "Ảnh không hợp lệ. Vui lòng chọn định dạng JPG, PNG hoặc WebP.";
+  }
+  return "Tải ảnh lên chưa thành công. Vui lòng thử lại.";
 }
 
 function formatBytes(size: number) {

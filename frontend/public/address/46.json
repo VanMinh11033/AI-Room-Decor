@@ -1,0 +1,333 @@
+{
+  "provinceCode": "46",
+  "provinceName": "Thành phố Huế",
+  "provinceShort": "Huế",
+  "resolutionNumber": "1675/NQ-UBTVQH15",
+  "authority": "Quyết định số 19/2025/QĐ-TTg của Thủ tướng Chính phủ",
+  "effectiveDate": "2025-07-01",
+  "totalWards": 40,
+  "wards": [
+    "Phường Phú Xuân",
+    "Phường Kim Long",
+    "Phường Vỹ Dạ",
+    "Phường Thuận Hóa",
+    "Phường Hương An",
+    "Phường Thủy Xuân",
+    "Phường An Cựu",
+    "Phường Phong Điền",
+    "Phường Phong Phú",
+    "Phường Phong Dinh",
+    "Phường Phong Thái",
+    "Xã Quảng Điền",
+    "Phường Phong Quảng",
+    "Xã Đan Điền",
+    "Phường Thuận An",
+    "Phường Dương Nỗ",
+    "Xã Phú Hồ",
+    "Phường Mỹ Thượng",
+    "Xã Phú Vang",
+    "Xã Phú Vinh",
+    "Phường Phú Bài",
+    "Phường Thanh Thủy",
+    "Phường Hương Thủy",
+    "Phường Hương Trà",
+    "Phường Hóa Châu",
+    "Phường Kim Trà",
+    "Xã Bình Điền",
+    "Xã A Lưới 2",
+    "Xã A Lưới 5",
+    "Xã A Lưới 1",
+    "Xã A Lưới 3",
+    "Xã A Lưới 4",
+    "Xã Phú Lộc",
+    "Xã Vinh Lộc",
+    "Xã Hưng Lộc",
+    "Xã Chân Mây - Lăng Cô",
+    "Xã Lộc An",
+    "Xã Khe Tre",
+    "Xã Nam Đông",
+    "Xã Long Quảng"
+  ],
+  "wardDetails": [
+    {
+      "code": "19753",
+      "name": "Phường Phú Xuân",
+      "shortName": "Phú Xuân",
+      "type": "Phường",
+      "areaKm2": 10.38
+    },
+    {
+      "code": "19774",
+      "name": "Phường Kim Long",
+      "shortName": "Kim Long",
+      "type": "Phường",
+      "areaKm2": 90.14
+    },
+    {
+      "code": "19777",
+      "name": "Phường Vỹ Dạ",
+      "shortName": "Vỹ Dạ",
+      "type": "Phường",
+      "areaKm2": 8.93
+    },
+    {
+      "code": "19789",
+      "name": "Phường Thuận Hóa",
+      "shortName": "Thuận Hóa",
+      "type": "Phường",
+      "areaKm2": 7.57
+    },
+    {
+      "code": "19804",
+      "name": "Phường Hương An",
+      "shortName": "Hương An",
+      "type": "Phường",
+      "areaKm2": 19.43
+    },
+    {
+      "code": "19813",
+      "name": "Phường Thủy Xuân",
+      "shortName": "Thủy Xuân",
+      "type": "Phường",
+      "areaKm2": 37.03
+    },
+    {
+      "code": "19815",
+      "name": "Phường An Cựu",
+      "shortName": "An Cựu",
+      "type": "Phường",
+      "areaKm2": 16.71
+    },
+    {
+      "code": "19819",
+      "name": "Phường Phong Điền",
+      "shortName": "Phong Điền",
+      "type": "Phường",
+      "areaKm2": 592.48
+    },
+    {
+      "code": "19828",
+      "name": "Phường Phong Phú",
+      "shortName": "Phong Phú",
+      "type": "Phường",
+      "areaKm2": 60.85
+    },
+    {
+      "code": "19831",
+      "name": "Phường Phong Dinh",
+      "shortName": "Phong Dinh",
+      "type": "Phường",
+      "areaKm2": 87.17
+    },
+    {
+      "code": "19858",
+      "name": "Phường Phong Thái",
+      "shortName": "Phong Thái",
+      "type": "Phường",
+      "areaKm2": 187.02
+    },
+    {
+      "code": "19867",
+      "name": "Xã Quảng Điền",
+      "shortName": "Quảng Điền",
+      "type": "Xã",
+      "areaKm2": 45.93
+    },
+    {
+      "code": "19873",
+      "name": "Phường Phong Quảng",
+      "shortName": "Phong Quảng",
+      "type": "Phường",
+      "areaKm2": 41.7
+    },
+    {
+      "code": "19885",
+      "name": "Xã Đan Điền",
+      "shortName": "Đan Điền",
+      "type": "Xã",
+      "areaKm2": 82.62
+    },
+    {
+      "code": "19900",
+      "name": "Phường Thuận An",
+      "shortName": "Thuận An",
+      "type": "Phường",
+      "areaKm2": 36.48
+    },
+    {
+      "code": "19909",
+      "name": "Phường Dương Nỗ",
+      "shortName": "Dương Nỗ",
+      "type": "Phường",
+      "areaKm2": 20.63
+    },
+    {
+      "code": "19918",
+      "name": "Xã Phú Hồ",
+      "shortName": "Phú Hồ",
+      "type": "Xã",
+      "areaKm2": 57.72
+    },
+    {
+      "code": "19930",
+      "name": "Phường Mỹ Thượng",
+      "shortName": "Mỹ Thượng",
+      "type": "Phường",
+      "areaKm2": 28.83
+    },
+    {
+      "code": "19942",
+      "name": "Xã Phú Vang",
+      "shortName": "Phú Vang",
+      "type": "Xã",
+      "areaKm2": 86.19
+    },
+    {
+      "code": "19945",
+      "name": "Xã Phú Vinh",
+      "shortName": "Phú Vinh",
+      "type": "Xã",
+      "areaKm2": 57.95
+    },
+    {
+      "code": "19960",
+      "name": "Phường Phú Bài",
+      "shortName": "Phú Bài",
+      "type": "Phường",
+      "areaKm2": 344.63
+    },
+    {
+      "code": "19969",
+      "name": "Phường Thanh Thủy",
+      "shortName": "Thanh Thủy",
+      "type": "Phường",
+      "areaKm2": 48.92
+    },
+    {
+      "code": "19975",
+      "name": "Phường Hương Thủy",
+      "shortName": "Hương Thủy",
+      "type": "Phường",
+      "areaKm2": 33.93
+    },
+    {
+      "code": "19996",
+      "name": "Phường Hương Trà",
+      "shortName": "Hương Trà",
+      "type": "Phường",
+      "areaKm2": 83.28
+    },
+    {
+      "code": "20014",
+      "name": "Phường Hóa Châu",
+      "shortName": "Hóa Châu",
+      "type": "Phường",
+      "areaKm2": 34.6
+    },
+    {
+      "code": "20017",
+      "name": "Phường Kim Trà",
+      "shortName": "Kim Trà",
+      "type": "Phường",
+      "areaKm2": 42.8
+    },
+    {
+      "code": "20035",
+      "name": "Xã Bình Điền",
+      "shortName": "Bình Điền",
+      "type": "Xã",
+      "areaKm2": 266.5
+    },
+    {
+      "code": "20044",
+      "name": "Xã A Lưới 2",
+      "shortName": "A Lưới 2",
+      "type": "Xã",
+      "areaKm2": 97.62
+    },
+    {
+      "code": "20050",
+      "name": "Xã A Lưới 5",
+      "shortName": "A Lưới 5",
+      "type": "Xã",
+      "areaKm2": 464.4
+    },
+    {
+      "code": "20056",
+      "name": "Xã A Lưới 1",
+      "shortName": "A Lưới 1",
+      "type": "Xã",
+      "areaKm2": 198.59
+    },
+    {
+      "code": "20071",
+      "name": "Xã A Lưới 3",
+      "shortName": "A Lưới 3",
+      "type": "Xã",
+      "areaKm2": 154.23
+    },
+    {
+      "code": "20101",
+      "name": "Xã A Lưới 4",
+      "shortName": "A Lưới 4",
+      "type": "Xã",
+      "areaKm2": 233.65
+    },
+    {
+      "code": "20107",
+      "name": "Xã Phú Lộc",
+      "shortName": "Phú Lộc",
+      "type": "Xã",
+      "areaKm2": 119.3
+    },
+    {
+      "code": "20122",
+      "name": "Xã Vinh Lộc",
+      "shortName": "Vinh Lộc",
+      "type": "Xã",
+      "areaKm2": 66.53
+    },
+    {
+      "code": "20131",
+      "name": "Xã Hưng Lộc",
+      "shortName": "Hưng Lộc",
+      "type": "Xã",
+      "areaKm2": 95.62
+    },
+    {
+      "code": "20137",
+      "name": "Xã Chân Mây - Lăng Cô",
+      "shortName": "Chân Mây - Lăng Cô",
+      "type": "Xã",
+      "areaKm2": 261.38
+    },
+    {
+      "code": "20140",
+      "name": "Xã Lộc An",
+      "shortName": "Lộc An",
+      "type": "Xã",
+      "areaKm2": 177.58
+    },
+    {
+      "code": "20161",
+      "name": "Xã Khe Tre",
+      "shortName": "Khe Tre",
+      "type": "Xã",
+      "areaKm2": 256.02
+    },
+    {
+      "code": "20179",
+      "name": "Xã Nam Đông",
+      "shortName": "Nam Đông",
+      "type": "Xã",
+      "areaKm2": 175.95
+    },
+    {
+      "code": "20182",
+      "name": "Xã Long Quảng",
+      "shortName": "Long Quảng",
+      "type": "Xã",
+      "areaKm2": 215.85
+    }
+  ]
+}

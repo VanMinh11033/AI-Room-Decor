@@ -11,46 +11,57 @@ html {
 body {
   overflow-x: hidden;
   min-height: 100vh;
-  background-color: #FAF8F5;
+  background-color: #FBF9F5;
   background-image:
-    radial-gradient(circle at 12% 0%, rgba(201, 167, 122, 0.14), transparent 34rem),
-    radial-gradient(circle at 88% 8%, rgba(166, 139, 109, 0.10), transparent 32rem),
-    linear-gradient(180deg, #FAF8F5 0%, #FAF8F5 55%, #F3EFEA 100%);
+    radial-gradient(circle at 14% 0%, rgba(138, 107, 78, 0.08), transparent 36rem),
+    radial-gradient(circle at 86% 6%, rgba(79, 93, 78, 0.06), transparent 34rem),
+    linear-gradient(180deg, #FBF9F5 0%, #FBF9F5 60%, #F5F0E8 100%);
   color: #242424;
+  font-family: var(--font-plus-jakarta), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .editorial-serif {
+  font-family: var(--font-newsreader), Georgia, Cambria, "Times New Roman", serif;
 }
 
 input,
 textarea,
 select {
   color: #242424;
+  font-family: var(--font-plus-jakarta), system-ui, -apple-system, sans-serif;
 }
 
 ::selection {
-  background: #C9A77A;
+  background: #8A6B4E;
   color: #FFFFFF;
 }
 
 @layer components {
+  /* Architectural Surface Card */
   .surface-card {
-    @apply rounded-2xl border border-[#2D332C]/10 bg-white/95 shadow-card backdrop-blur-sm transition-all duration-300;
+    @apply rounded-2xl border border-[#DDD7CD] bg-white/95 shadow-card backdrop-blur-sm transition-all duration-300;
   }
 
+  /* Quiet Luxury Form Input with WCAG 2.2 AA Contrast */
   .premium-input {
-    @apply rounded-xl border border-[#2D332C]/15 bg-[#FAF8F5] px-4 py-3 text-sm text-[#242424] placeholder:text-[#777777] outline-none transition-all duration-200 focus:border-[#A68B6D] focus:bg-white focus:ring-2 focus:ring-[#C9A77A]/25;
+    @apply rounded-xl border border-[#DDD7CD] bg-[#FBF9F5] px-4 py-3 text-sm text-[#242424] placeholder:text-[#5A6258] outline-none transition-all duration-200 focus:border-[#8A6B4E] focus:bg-white focus:ring-2 focus:ring-[#8A6B4E]/25;
   }
 
+  /* Primary Editorial CTA */
   .primary-cta {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-[#2D332C] px-5 py-3 text-sm font-semibold tracking-wide text-white shadow-card transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#3B433A] hover:shadow-soft active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A77A] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:translate-y-0 disabled:scale-100 disabled:bg-[#2D332C]/35 disabled:shadow-none;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-[#242B23] px-5 py-3 text-sm font-semibold tracking-wide text-white shadow-card transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#343D32] hover:shadow-soft active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6B4E] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:translate-y-0 disabled:scale-100 disabled:bg-[#242B23]/35 disabled:shadow-none;
   }
 
+  /* Secondary Architectural CTA */
   .secondary-cta {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-[#2D332C]/15 bg-white px-5 py-3 text-sm font-semibold tracking-wide text-[#242424] shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[#C9A77A] hover:bg-[#FAF8F5] hover:text-[#2D332C] active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A77A] focus-visible:ring-offset-2;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-[#DDD7CD] bg-white px-5 py-3 text-sm font-semibold tracking-wide text-[#242424] shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[#8A6B4E] hover:bg-[#FBF9F5] hover:text-[#242B23] active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6B4E] focus-visible:ring-offset-2;
   }
 
+  /* Luxury Link with Editorial Underline */
   .luxury-footer-link {
-    @apply relative inline-block text-[#777777] transition-colors duration-200 hover:text-[#242424] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C9A77A] focus-visible:ring-offset-2;
+    @apply relative inline-block text-[#5A6258] transition-colors duration-200 hover:text-[#242B23] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8A6B4E] focus-visible:ring-offset-2;
   }
 
   .luxury-footer-link::after {
@@ -60,7 +71,7 @@ select {
     bottom: -2px;
     width: 100%;
     height: 1.5px;
-    background-color: #C9A77A;
+    background-color: #8A6B4E;
     transform: scaleX(0);
     transform-origin: right center;
     transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -72,24 +83,27 @@ select {
     transform-origin: left center;
   }
 
+  /* Bento Studio Card */
   .studio-bento-card {
-    @apply rounded-[1.75rem] border border-[#2D332C]/10 bg-white p-6 shadow-card transition-all duration-300 hover:-translate-y-1 hover:border-[#C9A77A]/65 hover:shadow-soft md:p-8;
+    @apply rounded-[1.75rem] border border-[#DDD7CD] bg-white p-6 shadow-card transition-all duration-300 hover:-translate-y-1 hover:border-[#8A6B4E]/65 hover:shadow-soft md:p-8;
   }
 
+  /* Studio Pill Tag */
   .studio-pill {
-    @apply inline-flex items-center gap-2 rounded-full border border-[#C9A77A]/45 bg-white/90 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-[#2D332C] shadow-sm backdrop-blur-md;
+    @apply inline-flex items-center gap-2 rounded-full border border-[#8A6B4E]/30 bg-white/95 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-[#242B23] shadow-sm backdrop-blur-md;
   }
 
+  /* Admin Studio Cards */
   .admin-surface-card {
-    @apply rounded-[1.5rem] border border-[#2D332C]/10 bg-white p-6 shadow-card transition-all duration-300;
+    @apply rounded-[1.5rem] border border-[#DDD7CD] bg-white p-6 shadow-card transition-all duration-300;
   }
 
   .admin-kpi-card {
-    @apply rounded-[1.5rem] border border-[#2D332C]/10 bg-white p-5 shadow-card transition-all duration-300 hover:-translate-y-1 hover:border-[#C9A77A]/65 hover:shadow-soft md:p-6;
+    @apply rounded-[1.5rem] border border-[#DDD7CD] bg-white p-5 shadow-card transition-all duration-300 hover:-translate-y-1 hover:border-[#8A6B4E]/65 hover:shadow-soft md:p-6;
   }
 
   .admin-activity-item {
-    @apply block rounded-2xl border border-[#2D332C]/10 bg-[#FAF8F5]/65 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-[#C9A77A]/60 hover:bg-white hover:shadow-sm;
+    @apply block rounded-2xl border border-[#DDD7CD] bg-[#FBF9F5]/70 p-4 transition-all duration-200 hover:-translate-y-0.5 hover:border-[#8A6B4E]/60 hover:bg-white hover:shadow-sm;
   }
 }
 
@@ -167,11 +181,11 @@ main:has(> .admin-command-shell) {
   overflow-x: clip;
 }
 
-
+/* Micro-interactions & Accessible Motion */
 @keyframes luxuryFadeUp {
   0% {
     opacity: 0;
-    transform: translate3d(0, 18px, 0);
+    transform: translate3d(0, 16px, 0);
   }
   100% {
     opacity: 1;
@@ -181,7 +195,7 @@ main:has(> .admin-command-shell) {
 
 @keyframes luxuryHeroBgSettle {
   0% {
-    transform: scale(1.03);
+    transform: scale(1.02);
   }
   100% {
     transform: scale(1);
@@ -191,7 +205,7 @@ main:has(> .admin-command-shell) {
 @keyframes luxuryImageReveal {
   0% {
     opacity: 0;
-    transform: scale(1.04) translate3d(0, 12px, 0);
+    transform: scale(1.03) translate3d(0, 10px, 0);
   }
   100% {
     opacity: 1;
@@ -205,7 +219,7 @@ main:has(> .admin-command-shell) {
     transform: translate3d(0, 0, 0);
   }
   50% {
-    transform: translate3d(0, -6px, 0);
+    transform: translate3d(0, -5px, 0);
   }
 }
 
@@ -215,28 +229,28 @@ main:has(> .admin-command-shell) {
     transform: translate3d(0, 0, 0);
   }
   50% {
-    transform: translate3d(0, 5px, 0);
+    transform: translate3d(0, 4px, 0);
   }
 }
 
 .motion-fade-up {
-  animation: luxuryFadeUp 650ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: luxuryFadeUp 600ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .motion-hero-bg {
-  animation: luxuryHeroBgSettle 1400ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: luxuryHeroBgSettle 1200ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .motion-image-reveal {
-  animation: luxuryImageReveal 850ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: luxuryImageReveal 800ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .motion-float-slow {
-  animation: luxuryFloatSlow 5.5s ease-in-out infinite;
+  animation: luxuryFloatSlow 6s ease-in-out infinite;
 }
 
 .motion-float-reverse {
-  animation: luxuryFloatSlowReverse 6.2s ease-in-out infinite;
+  animation: luxuryFloatSlowReverse 6.5s ease-in-out infinite;
 }
 
 .motion-delay-100 {
@@ -272,6 +286,15 @@ main:has(> .admin-command-shell) {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
   .motion-fade-up,
   .motion-hero-bg,
   .motion-image-reveal,
@@ -281,19 +304,4 @@ main:has(> .admin-command-shell) {
     opacity: 1 !important;
     transform: none !important;
   }
-
-  .surface-card,
-  .studio-bento-card,
-  .admin-surface-card,
-  .admin-kpi-card,
-  .admin-activity-item,
-  .primary-cta,
-  .secondary-cta,
-  .luxury-footer-link,
-  .luxury-footer-link::after {
-    transition-duration: 0.01ms !important;
-  }
 }
-
-
-

@@ -1,0 +1,1197 @@
+{
+  "provinceCode": "25",
+  "provinceName": "Tỉnh Phú Thọ",
+  "provinceShort": "Phú Thọ",
+  "resolutionNumber": "1676/NQ-UBTVQH15",
+  "authority": "Quyết định số 19/2025/QĐ-TTg của Thủ tướng Chính phủ",
+  "effectiveDate": "2025-07-01",
+  "totalWards": 148,
+  "wards": [
+    "Phường Tân Hòa",
+    "Phường Hòa Bình",
+    "Phường Thống Nhất",
+    "Xã Đà Bắc",
+    "Xã Đức Nhàn",
+    "Xã Tân Pheo",
+    "Xã Quy Đức",
+    "Xã Cao Sơn",
+    "Xã Tiền Phong",
+    "Phường Kỳ Sơn",
+    "Xã Thịnh Minh",
+    "Xã Lương Sơn",
+    "Xã Liên Sơn",
+    "Xã Kim Bôi",
+    "Xã Nật Sơn",
+    "Xã Mường Động",
+    "Xã Cao Dương",
+    "Xã Hợp Kim",
+    "Xã Dũng Tiến",
+    "Xã Cao Phong",
+    "Xã Thung Nai",
+    "Xã Mường Thàng",
+    "Xã Tân Lạc",
+    "Xã Mường Hoa",
+    "Xã Vân Sơn",
+    "Xã Mường Bi",
+    "Xã Toàn Thắng",
+    "Xã Mai Châu",
+    "Xã Tân Mai",
+    "Xã Pà Cò",
+    "Xã Bao La",
+    "Xã Mai Hạ",
+    "Xã Lạc Sơn",
+    "Xã Mường Vang",
+    "Xã Nhân Nghĩa",
+    "Xã Thượng Cốc",
+    "Xã Yên Phú",
+    "Xã Quyết Thắng",
+    "Xã Ngọc Sơn",
+    "Xã Đại Đồng",
+    "Xã Yên Thủy",
+    "Xã Lạc Lương",
+    "Xã Yên Trị",
+    "Xã Lạc Thủy",
+    "Xã An Nghĩa",
+    "Xã An Bình",
+    "Phường Nông Trang",
+    "Phường Việt Trì",
+    "Phường Thanh Miếu",
+    "Phường Vân Phú",
+    "Phường Phú Thọ",
+    "Phường Âu Cơ",
+    "Phường Phong Châu",
+    "Xã Đoan Hùng",
+    "Xã Bằng Luân",
+    "Xã Chí Đám",
+    "Xã Tây Cốc",
+    "Xã Chân Mộng",
+    "Xã Hạ Hòa",
+    "Xã Đan Thượng",
+    "Xã Hiền Lương",
+    "Xã Yên Kỳ",
+    "Xã Văn Lang",
+    "Xã Vĩnh Chân",
+    "Xã Thanh Ba",
+    "Xã Quảng Yên",
+    "Xã Hoàng Cương",
+    "Xã Đông Thành",
+    "Xã Chí Tiên",
+    "Xã Liên Minh",
+    "Xã Phù Ninh",
+    "Xã Phú Mỹ",
+    "Xã Trạm Thản",
+    "Xã Dân Chủ",
+    "Xã Bình Phú",
+    "Xã Yên Lập",
+    "Xã Sơn Lương",
+    "Xã Xuân Viên",
+    "Xã Trung Sơn",
+    "Xã Thượng Long",
+    "Xã Minh Hòa",
+    "Xã Cẩm Khê",
+    "Xã Tiên Lương",
+    "Xã Vân Bán",
+    "Xã Phú Khê",
+    "Xã Hùng Việt",
+    "Xã Đồng Lương",
+    "Xã Tam Nông",
+    "Xã Hiền Quan",
+    "Xã Vạn Xuân",
+    "Xã Thọ Văn",
+    "Xã Lâm Thao",
+    "Xã Xuân Lũng",
+    "Xã Hy Cương",
+    "Xã Phùng Nguyên",
+    "Xã Bản Nguyên",
+    "Xã Thanh Sơn",
+    "Xã Thu Cúc",
+    "Xã Lai Đồng",
+    "Xã Tân Sơn",
+    "Xã Võ Miếu",
+    "Xã Xuân Đài",
+    "Xã Minh Đài",
+    "Xã Văn Miếu",
+    "Xã Cự Đồng",
+    "Xã Long Cốc",
+    "Xã Hương Cần",
+    "Xã Khả Cửu",
+    "Xã Yên Sơn",
+    "Xã Đào Xá",
+    "Xã Thanh Thủy",
+    "Xã Tu Vũ",
+    "Phường Vĩnh Yên",
+    "Phường Vĩnh Phúc",
+    "Phường Phúc Yên",
+    "Phường Xuân Hòa",
+    "Xã Lập Thạch",
+    "Xã Hợp Lý",
+    "Xã Yên Lãng",
+    "Xã Hải Lựu",
+    "Xã Thái Hòa",
+    "Xã Liên Hòa",
+    "Xã Tam Sơn",
+    "Xã Tiên Lữ",
+    "Xã Sông Lô",
+    "Xã Sơn Đông",
+    "Xã Tam Dương",
+    "Xã Tam Dương Bắc",
+    "Xã Hoàng An",
+    "Xã Hội Thịnh",
+    "Xã Tam Đảo",
+    "Xã Đạo Trù",
+    "Xã Đại Đình",
+    "Xã Bình Nguyên",
+    "Xã Bình Tuyền",
+    "Xã Bình Xuyên",
+    "Xã Xuân Lãng",
+    "Xã Yên Lạc",
+    "Xã Tề Lỗ",
+    "Xã Tam Hồng",
+    "Xã Nguyệt Đức",
+    "Xã Liên Châu",
+    "Xã Vĩnh Tường",
+    "Xã Vĩnh An",
+    "Xã Vĩnh Hưng",
+    "Xã Vĩnh Thành",
+    "Xã Thổ Tang",
+    "Xã Vĩnh Phú"
+  ],
+  "wardDetails": [
+    {
+      "code": "04792",
+      "name": "Phường Tân Hòa",
+      "shortName": "Tân Hòa",
+      "type": "Phường",
+      "areaKm2": 56.98
+    },
+    {
+      "code": "04795",
+      "name": "Phường Hòa Bình",
+      "shortName": "Hòa Bình",
+      "type": "Phường",
+      "areaKm2": 39.32
+    },
+    {
+      "code": "04828",
+      "name": "Phường Thống Nhất",
+      "shortName": "Thống Nhất",
+      "type": "Phường",
+      "areaKm2": 55.21
+    },
+    {
+      "code": "04831",
+      "name": "Xã Đà Bắc",
+      "shortName": "Đà Bắc",
+      "type": "Xã",
+      "areaKm2": 136.8
+    },
+    {
+      "code": "04846",
+      "name": "Xã Đức Nhàn",
+      "shortName": "Đức Nhàn",
+      "type": "Xã",
+      "areaKm2": 107.6
+    },
+    {
+      "code": "04849",
+      "name": "Xã Tân Pheo",
+      "shortName": "Tân Pheo",
+      "type": "Xã",
+      "areaKm2": 139.38
+    },
+    {
+      "code": "04873",
+      "name": "Xã Quy Đức",
+      "shortName": "Quy Đức",
+      "type": "Xã",
+      "areaKm2": 146.97
+    },
+    {
+      "code": "04876",
+      "name": "Xã Cao Sơn",
+      "shortName": "Cao Sơn",
+      "type": "Xã",
+      "areaKm2": 124.93
+    },
+    {
+      "code": "04891",
+      "name": "Xã Tiền Phong",
+      "shortName": "Tiền Phong",
+      "type": "Xã",
+      "areaKm2": 116.31
+    },
+    {
+      "code": "04894",
+      "name": "Phường Kỳ Sơn",
+      "shortName": "Kỳ Sơn",
+      "type": "Phường",
+      "areaKm2": 115.7
+    },
+    {
+      "code": "04897",
+      "name": "Xã Thịnh Minh",
+      "shortName": "Thịnh Minh",
+      "type": "Xã",
+      "areaKm2": 89.21
+    },
+    {
+      "code": "04924",
+      "name": "Xã Lương Sơn",
+      "shortName": "Lương Sơn",
+      "type": "Xã",
+      "areaKm2": 131.24
+    },
+    {
+      "code": "04960",
+      "name": "Xã Liên Sơn",
+      "shortName": "Liên Sơn",
+      "type": "Xã",
+      "areaKm2": 120.21
+    },
+    {
+      "code": "04978",
+      "name": "Xã Kim Bôi",
+      "shortName": "Kim Bôi",
+      "type": "Xã",
+      "areaKm2": 64.57
+    },
+    {
+      "code": "04990",
+      "name": "Xã Nật Sơn",
+      "shortName": "Nật Sơn",
+      "type": "Xã",
+      "areaKm2": 154.65
+    },
+    {
+      "code": "05014",
+      "name": "Xã Mường Động",
+      "shortName": "Mường Động",
+      "type": "Xã",
+      "areaKm2": 144.69
+    },
+    {
+      "code": "05047",
+      "name": "Xã Cao Dương",
+      "shortName": "Cao Dương",
+      "type": "Xã",
+      "areaKm2": 113.38
+    },
+    {
+      "code": "05068",
+      "name": "Xã Hợp Kim",
+      "shortName": "Hợp Kim",
+      "type": "Xã",
+      "areaKm2": 86.29
+    },
+    {
+      "code": "05086",
+      "name": "Xã Dũng Tiến",
+      "shortName": "Dũng Tiến",
+      "type": "Xã",
+      "areaKm2": 101.1
+    },
+    {
+      "code": "05089",
+      "name": "Xã Cao Phong",
+      "shortName": "Cao Phong",
+      "type": "Xã",
+      "areaKm2": 77.76
+    },
+    {
+      "code": "05092",
+      "name": "Xã Thung Nai",
+      "shortName": "Thung Nai",
+      "type": "Xã",
+      "areaKm2": 86.34
+    },
+    {
+      "code": "05116",
+      "name": "Xã Mường Thàng",
+      "shortName": "Mường Thàng",
+      "type": "Xã",
+      "areaKm2": 91.58
+    },
+    {
+      "code": "05128",
+      "name": "Xã Tân Lạc",
+      "shortName": "Tân Lạc",
+      "type": "Xã",
+      "areaKm2": 139.9
+    },
+    {
+      "code": "05134",
+      "name": "Xã Mường Hoa",
+      "shortName": "Mường Hoa",
+      "type": "Xã",
+      "areaKm2": 104.54
+    },
+    {
+      "code": "05152",
+      "name": "Xã Vân Sơn",
+      "shortName": "Vân Sơn",
+      "type": "Xã",
+      "areaKm2": 120.53
+    },
+    {
+      "code": "05158",
+      "name": "Xã Mường Bi",
+      "shortName": "Mường Bi",
+      "type": "Xã",
+      "areaKm2": 94.79
+    },
+    {
+      "code": "05191",
+      "name": "Xã Toàn Thắng",
+      "shortName": "Toàn Thắng",
+      "type": "Xã",
+      "areaKm2": 71.11
+    },
+    {
+      "code": "05200",
+      "name": "Xã Mai Châu",
+      "shortName": "Mai Châu",
+      "type": "Xã",
+      "areaKm2": 147.74
+    },
+    {
+      "code": "05206",
+      "name": "Xã Tân Mai",
+      "shortName": "Tân Mai",
+      "type": "Xã",
+      "areaKm2": 130.71
+    },
+    {
+      "code": "05212",
+      "name": "Xã Pà Cò",
+      "shortName": "Pà Cò",
+      "type": "Xã",
+      "areaKm2": 115.76
+    },
+    {
+      "code": "05245",
+      "name": "Xã Bao La",
+      "shortName": "Bao La",
+      "type": "Xã",
+      "areaKm2": 104.27
+    },
+    {
+      "code": "05251",
+      "name": "Xã Mai Hạ",
+      "shortName": "Mai Hạ",
+      "type": "Xã",
+      "areaKm2": 71.86
+    },
+    {
+      "code": "05266",
+      "name": "Xã Lạc Sơn",
+      "shortName": "Lạc Sơn",
+      "type": "Xã",
+      "areaKm2": 58.1
+    },
+    {
+      "code": "05287",
+      "name": "Xã Mường Vang",
+      "shortName": "Mường Vang",
+      "type": "Xã",
+      "areaKm2": 69.79
+    },
+    {
+      "code": "05290",
+      "name": "Xã Nhân Nghĩa",
+      "shortName": "Nhân Nghĩa",
+      "type": "Xã",
+      "areaKm2": 81.37
+    },
+    {
+      "code": "05293",
+      "name": "Xã Thượng Cốc",
+      "shortName": "Thượng Cốc",
+      "type": "Xã",
+      "areaKm2": 58.38
+    },
+    {
+      "code": "05305",
+      "name": "Xã Yên Phú",
+      "shortName": "Yên Phú",
+      "type": "Xã",
+      "areaKm2": 63.7
+    },
+    {
+      "code": "05323",
+      "name": "Xã Quyết Thắng",
+      "shortName": "Quyết Thắng",
+      "type": "Xã",
+      "areaKm2": 59.66
+    },
+    {
+      "code": "05329",
+      "name": "Xã Ngọc Sơn",
+      "shortName": "Ngọc Sơn",
+      "type": "Xã",
+      "areaKm2": 114.63
+    },
+    {
+      "code": "05347",
+      "name": "Xã Đại Đồng",
+      "shortName": "Đại Đồng",
+      "type": "Xã",
+      "areaKm2": 81.37
+    },
+    {
+      "code": "05353",
+      "name": "Xã Yên Thủy",
+      "shortName": "Yên Thủy",
+      "type": "Xã",
+      "areaKm2": 76.19
+    },
+    {
+      "code": "05362",
+      "name": "Xã Lạc Lương",
+      "shortName": "Lạc Lương",
+      "type": "Xã",
+      "areaKm2": 130.41
+    },
+    {
+      "code": "05386",
+      "name": "Xã Yên Trị",
+      "shortName": "Yên Trị",
+      "type": "Xã",
+      "areaKm2": 89.21
+    },
+    {
+      "code": "05392",
+      "name": "Xã Lạc Thủy",
+      "shortName": "Lạc Thủy",
+      "type": "Xã",
+      "areaKm2": 90.69
+    },
+    {
+      "code": "05395",
+      "name": "Xã An Nghĩa",
+      "shortName": "An Nghĩa",
+      "type": "Xã",
+      "areaKm2": 95.73
+    },
+    {
+      "code": "05425",
+      "name": "Xã An Bình",
+      "shortName": "An Bình",
+      "type": "Xã",
+      "areaKm2": 127.41
+    },
+    {
+      "code": "07894",
+      "name": "Phường Nông Trang",
+      "shortName": "Nông Trang",
+      "type": "Phường",
+      "areaKm2": 15.89
+    },
+    {
+      "code": "07900",
+      "name": "Phường Việt Trì",
+      "shortName": "Việt Trì",
+      "type": "Phường",
+      "areaKm2": 25.83
+    },
+    {
+      "code": "07909",
+      "name": "Phường Thanh Miếu",
+      "shortName": "Thanh Miếu",
+      "type": "Phường",
+      "areaKm2": 19.57
+    },
+    {
+      "code": "07918",
+      "name": "Phường Vân Phú",
+      "shortName": "Vân Phú",
+      "type": "Phường",
+      "areaKm2": 26.26
+    },
+    {
+      "code": "07942",
+      "name": "Phường Phú Thọ",
+      "shortName": "Phú Thọ",
+      "type": "Phường",
+      "areaKm2": 23.07
+    },
+    {
+      "code": "07948",
+      "name": "Phường Âu Cơ",
+      "shortName": "Âu Cơ",
+      "type": "Phường",
+      "areaKm2": 12.51
+    },
+    {
+      "code": "07954",
+      "name": "Phường Phong Châu",
+      "shortName": "Phong Châu",
+      "type": "Phường",
+      "areaKm2": 29.61
+    },
+    {
+      "code": "07969",
+      "name": "Xã Đoan Hùng",
+      "shortName": "Đoan Hùng",
+      "type": "Xã",
+      "areaKm2": 44.8
+    },
+    {
+      "code": "07996",
+      "name": "Xã Bằng Luân",
+      "shortName": "Bằng Luân",
+      "type": "Xã",
+      "areaKm2": 59.77
+    },
+    {
+      "code": "07999",
+      "name": "Xã Chí Đám",
+      "shortName": "Chí Đám",
+      "type": "Xã",
+      "areaKm2": 49.36
+    },
+    {
+      "code": "08023",
+      "name": "Xã Tây Cốc",
+      "shortName": "Tây Cốc",
+      "type": "Xã",
+      "areaKm2": 59.07
+    },
+    {
+      "code": "08038",
+      "name": "Xã Chân Mộng",
+      "shortName": "Chân Mộng",
+      "type": "Xã",
+      "areaKm2": 89.85
+    },
+    {
+      "code": "08053",
+      "name": "Xã Hạ Hòa",
+      "shortName": "Hạ Hòa",
+      "type": "Xã",
+      "areaKm2": 41.23
+    },
+    {
+      "code": "08071",
+      "name": "Xã Đan Thượng",
+      "shortName": "Đan Thượng",
+      "type": "Xã",
+      "areaKm2": 84.15
+    },
+    {
+      "code": "08110",
+      "name": "Xã Hiền Lương",
+      "shortName": "Hiền Lương",
+      "type": "Xã",
+      "areaKm2": 81.93
+    },
+    {
+      "code": "08113",
+      "name": "Xã Yên Kỳ",
+      "shortName": "Yên Kỳ",
+      "type": "Xã",
+      "areaKm2": 53.58
+    },
+    {
+      "code": "08134",
+      "name": "Xã Văn Lang",
+      "shortName": "Văn Lang",
+      "type": "Xã",
+      "areaKm2": 54.06
+    },
+    {
+      "code": "08143",
+      "name": "Xã Vĩnh Chân",
+      "shortName": "Vĩnh Chân",
+      "type": "Xã",
+      "areaKm2": 27.12
+    },
+    {
+      "code": "08152",
+      "name": "Xã Thanh Ba",
+      "shortName": "Thanh Ba",
+      "type": "Xã",
+      "areaKm2": 38.6
+    },
+    {
+      "code": "08173",
+      "name": "Xã Quảng Yên",
+      "shortName": "Quảng Yên",
+      "type": "Xã",
+      "areaKm2": 39.58
+    },
+    {
+      "code": "08203",
+      "name": "Xã Hoàng Cương",
+      "shortName": "Hoàng Cương",
+      "type": "Xã",
+      "areaKm2": 39.51
+    },
+    {
+      "code": "08209",
+      "name": "Xã Đông Thành",
+      "shortName": "Đông Thành",
+      "type": "Xã",
+      "areaKm2": 32.25
+    },
+    {
+      "code": "08218",
+      "name": "Xã Chí Tiên",
+      "shortName": "Chí Tiên",
+      "type": "Xã",
+      "areaKm2": 23.75
+    },
+    {
+      "code": "08227",
+      "name": "Xã Liên Minh",
+      "shortName": "Liên Minh",
+      "type": "Xã",
+      "areaKm2": 20.98
+    },
+    {
+      "code": "08230",
+      "name": "Xã Phù Ninh",
+      "shortName": "Phù Ninh",
+      "type": "Xã",
+      "areaKm2": 39.28
+    },
+    {
+      "code": "08236",
+      "name": "Xã Phú Mỹ",
+      "shortName": "Phú Mỹ",
+      "type": "Xã",
+      "areaKm2": 27.36
+    },
+    {
+      "code": "08245",
+      "name": "Xã Trạm Thản",
+      "shortName": "Trạm Thản",
+      "type": "Xã",
+      "areaKm2": 32.6
+    },
+    {
+      "code": "08254",
+      "name": "Xã Dân Chủ",
+      "shortName": "Dân Chủ",
+      "type": "Xã",
+      "areaKm2": 29.85
+    },
+    {
+      "code": "08275",
+      "name": "Xã Bình Phú",
+      "shortName": "Bình Phú",
+      "type": "Xã",
+      "areaKm2": 28.28
+    },
+    {
+      "code": "08290",
+      "name": "Xã Yên Lập",
+      "shortName": "Yên Lập",
+      "type": "Xã",
+      "areaKm2": 69.05
+    },
+    {
+      "code": "08296",
+      "name": "Xã Sơn Lương",
+      "shortName": "Sơn Lương",
+      "type": "Xã",
+      "areaKm2": 96.92
+    },
+    {
+      "code": "08305",
+      "name": "Xã Xuân Viên",
+      "shortName": "Xuân Viên",
+      "type": "Xã",
+      "areaKm2": 46.19
+    },
+    {
+      "code": "08311",
+      "name": "Xã Trung Sơn",
+      "shortName": "Trung Sơn",
+      "type": "Xã",
+      "areaKm2": 97.29
+    },
+    {
+      "code": "08323",
+      "name": "Xã Thượng Long",
+      "shortName": "Thượng Long",
+      "type": "Xã",
+      "areaKm2": 60.36
+    },
+    {
+      "code": "08338",
+      "name": "Xã Minh Hòa",
+      "shortName": "Minh Hòa",
+      "type": "Xã",
+      "areaKm2": 68.44
+    },
+    {
+      "code": "08341",
+      "name": "Xã Cẩm Khê",
+      "shortName": "Cẩm Khê",
+      "type": "Xã",
+      "areaKm2": 50.44
+    },
+    {
+      "code": "08344",
+      "name": "Xã Tiên Lương",
+      "shortName": "Tiên Lương",
+      "type": "Xã",
+      "areaKm2": 54.55
+    },
+    {
+      "code": "08377",
+      "name": "Xã Vân Bán",
+      "shortName": "Vân Bán",
+      "type": "Xã",
+      "areaKm2": 22.72
+    },
+    {
+      "code": "08398",
+      "name": "Xã Phú Khê",
+      "shortName": "Phú Khê",
+      "type": "Xã",
+      "areaKm2": 37.11
+    },
+    {
+      "code": "08416",
+      "name": "Xã Hùng Việt",
+      "shortName": "Hùng Việt",
+      "type": "Xã",
+      "areaKm2": 32.77
+    },
+    {
+      "code": "08431",
+      "name": "Xã Đồng Lương",
+      "shortName": "Đồng Lương",
+      "type": "Xã",
+      "areaKm2": 36.33
+    },
+    {
+      "code": "08434",
+      "name": "Xã Tam Nông",
+      "shortName": "Tam Nông",
+      "type": "Xã",
+      "areaKm2": 28.25
+    },
+    {
+      "code": "08443",
+      "name": "Xã Hiền Quan",
+      "shortName": "Hiền Quan",
+      "type": "Xã",
+      "areaKm2": 31.38
+    },
+    {
+      "code": "08467",
+      "name": "Xã Vạn Xuân",
+      "shortName": "Vạn Xuân",
+      "type": "Xã",
+      "areaKm2": 52.43
+    },
+    {
+      "code": "08479",
+      "name": "Xã Thọ Văn",
+      "shortName": "Thọ Văn",
+      "type": "Xã",
+      "areaKm2": 43.54
+    },
+    {
+      "code": "08494",
+      "name": "Xã Lâm Thao",
+      "shortName": "Lâm Thao",
+      "type": "Xã",
+      "areaKm2": 15.45
+    },
+    {
+      "code": "08500",
+      "name": "Xã Xuân Lũng",
+      "shortName": "Xuân Lũng",
+      "type": "Xã",
+      "areaKm2": 24.03
+    },
+    {
+      "code": "08515",
+      "name": "Xã Hy Cương",
+      "shortName": "Hy Cương",
+      "type": "Xã",
+      "areaKm2": 23.95
+    },
+    {
+      "code": "08521",
+      "name": "Xã Phùng Nguyên",
+      "shortName": "Phùng Nguyên",
+      "type": "Xã",
+      "areaKm2": 30.57
+    },
+    {
+      "code": "08527",
+      "name": "Xã Bản Nguyên",
+      "shortName": "Bản Nguyên",
+      "type": "Xã",
+      "areaKm2": 28.29
+    },
+    {
+      "code": "08542",
+      "name": "Xã Thanh Sơn",
+      "shortName": "Thanh Sơn",
+      "type": "Xã",
+      "areaKm2": 84.55
+    },
+    {
+      "code": "08545",
+      "name": "Xã Thu Cúc",
+      "shortName": "Thu Cúc",
+      "type": "Xã",
+      "areaKm2": 100.51
+    },
+    {
+      "code": "08560",
+      "name": "Xã Lai Đồng",
+      "shortName": "Lai Đồng",
+      "type": "Xã",
+      "areaKm2": 108.45
+    },
+    {
+      "code": "08566",
+      "name": "Xã Tân Sơn",
+      "shortName": "Tân Sơn",
+      "type": "Xã",
+      "areaKm2": 118.21
+    },
+    {
+      "code": "08584",
+      "name": "Xã Võ Miếu",
+      "shortName": "Võ Miếu",
+      "type": "Xã",
+      "areaKm2": 96.36
+    },
+    {
+      "code": "08590",
+      "name": "Xã Xuân Đài",
+      "shortName": "Xuân Đài",
+      "type": "Xã",
+      "areaKm2": 209.6
+    },
+    {
+      "code": "08593",
+      "name": "Xã Minh Đài",
+      "shortName": "Minh Đài",
+      "type": "Xã",
+      "areaKm2": 84.74
+    },
+    {
+      "code": "08611",
+      "name": "Xã Văn Miếu",
+      "shortName": "Văn Miếu",
+      "type": "Xã",
+      "areaKm2": 89.11
+    },
+    {
+      "code": "08614",
+      "name": "Xã Cự Đồng",
+      "shortName": "Cự Đồng",
+      "type": "Xã",
+      "areaKm2": 45.77
+    },
+    {
+      "code": "08620",
+      "name": "Xã Long Cốc",
+      "shortName": "Long Cốc",
+      "type": "Xã",
+      "areaKm2": 67.09
+    },
+    {
+      "code": "08632",
+      "name": "Xã Hương Cần",
+      "shortName": "Hương Cần",
+      "type": "Xã",
+      "areaKm2": 81.3
+    },
+    {
+      "code": "08635",
+      "name": "Xã Khả Cửu",
+      "shortName": "Khả Cửu",
+      "type": "Xã",
+      "areaKm2": 148.48
+    },
+    {
+      "code": "08656",
+      "name": "Xã Yên Sơn",
+      "shortName": "Yên Sơn",
+      "type": "Xã",
+      "areaKm2": 75.52
+    },
+    {
+      "code": "08662",
+      "name": "Xã Đào Xá",
+      "shortName": "Đào Xá",
+      "type": "Xã",
+      "areaKm2": 45.53
+    },
+    {
+      "code": "08674",
+      "name": "Xã Thanh Thủy",
+      "shortName": "Thanh Thủy",
+      "type": "Xã",
+      "areaKm2": 31.08
+    },
+    {
+      "code": "08686",
+      "name": "Xã Tu Vũ",
+      "shortName": "Tu Vũ",
+      "type": "Xã",
+      "areaKm2": 49.07
+    },
+    {
+      "code": "08707",
+      "name": "Phường Vĩnh Yên",
+      "shortName": "Vĩnh Yên",
+      "type": "Phường",
+      "areaKm2": 25.0
+    },
+    {
+      "code": "08716",
+      "name": "Phường Vĩnh Phúc",
+      "shortName": "Vĩnh Phúc",
+      "type": "Phường",
+      "areaKm2": 25.3
+    },
+    {
+      "code": "08740",
+      "name": "Phường Phúc Yên",
+      "shortName": "Phúc Yên",
+      "type": "Phường",
+      "areaKm2": 23.4
+    },
+    {
+      "code": "08746",
+      "name": "Phường Xuân Hòa",
+      "shortName": "Xuân Hòa",
+      "type": "Phường",
+      "areaKm2": 96.0
+    },
+    {
+      "code": "08761",
+      "name": "Xã Lập Thạch",
+      "shortName": "Lập Thạch",
+      "type": "Xã",
+      "areaKm2": 39.1
+    },
+    {
+      "code": "08770",
+      "name": "Xã Hợp Lý",
+      "shortName": "Hợp Lý",
+      "type": "Xã",
+      "areaKm2": 34.1
+    },
+    {
+      "code": "08773",
+      "name": "Xã Yên Lãng",
+      "shortName": "Yên Lãng",
+      "type": "Xã",
+      "areaKm2": 38.2
+    },
+    {
+      "code": "08782",
+      "name": "Xã Hải Lựu",
+      "shortName": "Hải Lựu",
+      "type": "Xã",
+      "areaKm2": 38.8
+    },
+    {
+      "code": "08788",
+      "name": "Xã Thái Hòa",
+      "shortName": "Thái Hòa",
+      "type": "Xã",
+      "areaKm2": 29.0
+    },
+    {
+      "code": "08812",
+      "name": "Xã Liên Hòa",
+      "shortName": "Liên Hòa",
+      "type": "Xã",
+      "areaKm2": 18.8
+    },
+    {
+      "code": "08824",
+      "name": "Xã Tam Sơn",
+      "shortName": "Tam Sơn",
+      "type": "Xã",
+      "areaKm2": 33.1
+    },
+    {
+      "code": "08842",
+      "name": "Xã Tiên Lữ",
+      "shortName": "Tiên Lữ",
+      "type": "Xã",
+      "areaKm2": 31.8
+    },
+    {
+      "code": "08848",
+      "name": "Xã Sông Lô",
+      "shortName": "Sông Lô",
+      "type": "Xã",
+      "areaKm2": 33.4
+    },
+    {
+      "code": "08866",
+      "name": "Xã Sơn Đông",
+      "shortName": "Sơn Đông",
+      "type": "Xã",
+      "areaKm2": 26.7
+    },
+    {
+      "code": "08869",
+      "name": "Xã Tam Dương",
+      "shortName": "Tam Dương",
+      "type": "Xã",
+      "areaKm2": 44.3
+    },
+    {
+      "code": "08872",
+      "name": "Xã Tam Dương Bắc",
+      "shortName": "Tam Dương Bắc",
+      "type": "Xã",
+      "areaKm2": 45.8
+    },
+    {
+      "code": "08896",
+      "name": "Xã Hoàng An",
+      "shortName": "Hoàng An",
+      "type": "Xã",
+      "areaKm2": 20.8
+    },
+    {
+      "code": "08905",
+      "name": "Xã Hội Thịnh",
+      "shortName": "Hội Thịnh",
+      "type": "Xã",
+      "areaKm2": 25.1
+    },
+    {
+      "code": "08911",
+      "name": "Xã Tam Đảo",
+      "shortName": "Tam Đảo",
+      "type": "Xã",
+      "areaKm2": 79.2
+    },
+    {
+      "code": "08914",
+      "name": "Xã Đạo Trù",
+      "shortName": "Đạo Trù",
+      "type": "Xã",
+      "areaKm2": 83.8
+    },
+    {
+      "code": "08923",
+      "name": "Xã Đại Đình",
+      "shortName": "Đại Đình",
+      "type": "Xã",
+      "areaKm2": 44.0
+    },
+    {
+      "code": "08935",
+      "name": "Xã Bình Nguyên",
+      "shortName": "Bình Nguyên",
+      "type": "Xã",
+      "areaKm2": 30.6
+    },
+    {
+      "code": "08944",
+      "name": "Xã Bình Tuyền",
+      "shortName": "Bình Tuyền",
+      "type": "Xã",
+      "areaKm2": 58.5
+    },
+    {
+      "code": "08950",
+      "name": "Xã Bình Xuyên",
+      "shortName": "Bình Xuyên",
+      "type": "Xã",
+      "areaKm2": 29.5
+    },
+    {
+      "code": "08971",
+      "name": "Xã Xuân Lãng",
+      "shortName": "Xuân Lãng",
+      "type": "Xã",
+      "areaKm2": 29.9
+    },
+    {
+      "code": "09025",
+      "name": "Xã Yên Lạc",
+      "shortName": "Yên Lạc",
+      "type": "Xã",
+      "areaKm2": 21.7
+    },
+    {
+      "code": "09040",
+      "name": "Xã Tề Lỗ",
+      "shortName": "Tề Lỗ",
+      "type": "Xã",
+      "areaKm2": 18.3
+    },
+    {
+      "code": "09043",
+      "name": "Xã Tam Hồng",
+      "shortName": "Tam Hồng",
+      "type": "Xã",
+      "areaKm2": 22.6
+    },
+    {
+      "code": "09052",
+      "name": "Xã Nguyệt Đức",
+      "shortName": "Nguyệt Đức",
+      "type": "Xã",
+      "areaKm2": 19.0
+    },
+    {
+      "code": "09064",
+      "name": "Xã Liên Châu",
+      "shortName": "Liên Châu",
+      "type": "Xã",
+      "areaKm2": 26.0
+    },
+    {
+      "code": "09076",
+      "name": "Xã Vĩnh Tường",
+      "shortName": "Vĩnh Tường",
+      "type": "Xã",
+      "areaKm2": 26.2
+    },
+    {
+      "code": "09079",
+      "name": "Xã Vĩnh An",
+      "shortName": "Vĩnh An",
+      "type": "Xã",
+      "areaKm2": 21.4
+    },
+    {
+      "code": "09100",
+      "name": "Xã Vĩnh Hưng",
+      "shortName": "Vĩnh Hưng",
+      "type": "Xã",
+      "areaKm2": 18.7
+    },
+    {
+      "code": "09106",
+      "name": "Xã Vĩnh Thành",
+      "shortName": "Vĩnh Thành",
+      "type": "Xã",
+      "areaKm2": 22.0
+    },
+    {
+      "code": "09112",
+      "name": "Xã Thổ Tang",
+      "shortName": "Thổ Tang",
+      "type": "Xã",
+      "areaKm2": 21.3
+    },
+    {
+      "code": "09154",
+      "name": "Xã Vĩnh Phú",
+      "shortName": "Vĩnh Phú",
+      "type": "Xã",
+      "areaKm2": 34.6
+    }
+  ]
+}
