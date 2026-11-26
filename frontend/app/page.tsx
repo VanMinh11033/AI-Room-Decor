@@ -100,8 +100,9 @@ export default function HomePage() {
             <div className="motion-image-reveal group relative overflow-hidden rounded-[2rem] border border-[#2D332C]/10 bg-white p-2.5 shadow-luxury sm:p-3.5">
               <div className="relative aspect-[16/10] min-h-[260px] w-full overflow-hidden rounded-[1.5rem] bg-[#FAF8F5] sm:min-h-[360px] lg:min-h-[440px] xl:min-h-[520px]">
                 <img
-                  src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=2000&q=85"
+                  src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?auto=format&fit=crop&w=1200&q=80"
                   alt="Không gian phòng khách phong cách Modern Luxury sáng và sang trọng"
+                  fetchPriority="high"
                   className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
                 />
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#2D332C]/50 via-transparent to-transparent" />
@@ -214,8 +215,10 @@ export default function HomePage() {
 
               <div className="relative aspect-[16/11] min-h-[240px] overflow-hidden rounded-2xl border border-[#2D332C]/10 bg-[#FAF8F5] xl:min-h-[290px]">
                 <img
-                  src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=1200&q=85"
+                  src="https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=800&q=80"
                   alt="Minh họa phân tích bố cục và ánh sáng căn phòng"
+                  loading="lazy"
+                  decoding="async"
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-x-3 bottom-3 rounded-xl bg-white/95 p-3 shadow-sm backdrop-blur-md">
@@ -426,8 +429,10 @@ export default function HomePage() {
               <div className="group relative overflow-hidden rounded-3xl border border-[#2D332C]/10 bg-white p-3 shadow-card">
                 <div className="relative aspect-[16/11] min-h-[240px] overflow-hidden rounded-2xl bg-[#FAF8F5] sm:min-h-[280px]">
                   <img
-                    src="https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1400&q=85"
+                    src="https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=800&q=80"
                     alt="Minh họa không gian phòng trước khi bổ sung nội thất"
+                    loading="lazy"
+                    decoding="async"
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <span className="absolute left-3.5 top-3.5 rounded-full bg-[#242424]/80 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-md">
@@ -446,8 +451,10 @@ export default function HomePage() {
               <div className="group relative overflow-hidden rounded-3xl border border-[#C9A77A]/60 bg-white p-3 shadow-soft">
                 <div className="relative aspect-[16/11] min-h-[240px] overflow-hidden rounded-2xl bg-[#FAF8F5] sm:min-h-[280px]">
                   <img
-                    src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1400&q=85"
+                    src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=800&q=80"
                     alt="Minh họa không gian phòng sau khi phối cảnh nội thất"
+                    loading="lazy"
+                    decoding="async"
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <span className="absolute left-3.5 top-3.5 inline-flex items-center gap-1.5 rounded-full bg-[#2D332C]/90 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-[#C9A77A] backdrop-blur-md">

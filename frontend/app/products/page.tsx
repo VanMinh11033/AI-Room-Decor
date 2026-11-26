@@ -68,6 +68,7 @@ export default function ProductsPage() {
         signal: controller.signal,
         timeoutMs: 32000,
         retries: 1,
+        bypassCache: isManualRetry,
       });
 
       // Stale check & abort check

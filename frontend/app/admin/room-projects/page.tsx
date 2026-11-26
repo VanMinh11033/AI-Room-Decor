@@ -224,8 +224,10 @@ export default function AdminRoomProjectsPage() {
                       <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-[#2D332C]/10 bg-[#FAF8F5] shadow-2xs">
                         {item.project.room_image_url ? (
                           <img
-                            src={apiAssetUrl(item.project.room_image_url)}
+                            src={apiAssetUrl(item.project.room_image_url, { width: 120 })}
                             alt={item.project.title}
+                            loading="lazy"
+                            decoding="async"
                             className="h-full w-full object-cover transition duration-300 hover:scale-105"
                           />
                         ) : (

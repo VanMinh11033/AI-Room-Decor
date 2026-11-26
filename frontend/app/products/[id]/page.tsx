@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { Package, Ruler, ShoppingCart } from "lucide-react";
+import { AlertCircle, Loader2, Package, RotateCw, Ruler, ShoppingCart } from "lucide-react";
 import { EmptyImagePlaceholder, SectionCard } from "@/components/customer/DesignPrimitives";
 import { apiAssetUrl, apiFetch } from "@/lib/api";
 import { addToCart } from "@/lib/cart";
@@ -15,15 +15,35 @@ export default function ProductDetailPage() {
   const [selectedImage, setSelectedImage] = useState("");
   const [cartMessage, setCartMessage] = useState("");
   const [adding, setAdding] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  useEffect(() => {
-    apiFetch<Product>(`/api/products/${params.id}`)
+  const loadProduct = useCallback((isManualRetry = false) => {
+    if (!params?.id) return;
+    setLoading(true);
+    setError("");
+
+    apiFetch<Product>(`/api/products/${params.id}`, {
+      timeoutMs: 32000,
+      retries: 1,
+      bypassCache: isManualRetry,
+    })
       .then((data) => {
         setProduct(data);
-        setSelectedImage(data.images.find((item) => item.is_primary)?.image_url || data.images[0]?.image_url || "");
+        const primary = data.images.find((item) => item.is_primary)?.image_url || data.images[0]?.image_url || "";
+        setSelectedImage(primary);
+        setError("");
       })
-      .catch(() => setProduct(null));
-  }, [params.id]);
+      .catch((err) => {
+        setError(err instanceof Error ? err.message : "Không tải được sản phẩm.");
+        setProduct(null);
+      })
+      .finally(() => setLoading(false));
+  }, [params?.id]);
+
+  useEffect(() => {
+    loadProduct();
+  }, [loadProduct]);
 
   async function handleAddToCart() {
     if (!product) return;
@@ -39,7 +59,41 @@ export default function ProductDetailPage() {
     }
   }
 
-  if (!product) return <p className="font-semibold text-charcoal/60">Đang tải sản phẩm...</p>;
+  if (loading && !product) {
+    return (
+      <div className="flex items-center gap-3 rounded-2xl border border-[#2D332C]/10 bg-white p-6 shadow-card">
+        <Loader2 size={22} className="animate-spin text-[#C9A77A]" />
+        <p className="text-sm font-semibold text-ink">Đang tải thông tin sản phẩm...</p>
+      </div>
+    );
+  }
+
+  if (error && !product) {
+    return (
+      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 shadow-soft space-y-4 text-center sm:text-left">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-3.5">
+          <AlertCircle size={24} className="text-amber-600 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <h3 className="font-bold text-amber-900 text-base">{error}</h3>
+            <p className="text-sm text-amber-800/80 leading-relaxed">
+              Máy chủ có thể đang tải hoặc trong quá trình khởi động. Dữ liệu sản phẩm không bị ảnh hưởng.
+            </p>
+          </div>
+        </div>
+        <div className="pt-2 flex justify-center sm:justify-start">
+          <button
+            type="button"
+            onClick={() => loadProduct(true)}
+            className="inline-flex items-center gap-2 rounded-xl border border-[#C9A77A]/40 bg-[#2D332C] px-5 py-2.5 text-sm font-semibold text-[#FAF8F5] shadow-sm transition-all hover:bg-[#A68B6D] active:scale-[0.98]"
+          >
+            <RotateCw size={16} /> Thử tải lại sản phẩm
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!product) return null;
 
   return (
     <section className="grid gap-8 lg:grid-cols-[1.05fr_0.95fr]">
@@ -47,7 +101,13 @@ export default function ProductDetailPage() {
         <div className="overflow-hidden rounded-3xl border border-ink/10 bg-white shadow-soft">
           <div className="aspect-[4/3] bg-ivory">
             {selectedImage ? (
-              <img src={apiAssetUrl(selectedImage)} alt={product.name} className="h-full w-full object-cover" />
+              <img
+                src={apiAssetUrl(selectedImage, { width: 900 })}
+                alt={product.name}
+                loading="eager"
+                fetchPriority="high"
+                className="h-full w-full object-cover"
+              />
             ) : (
               <EmptyImagePlaceholder />
             )}
@@ -63,7 +123,13 @@ export default function ProductDetailPage() {
                   selectedImage === image.image_url ? "border-clay shadow-card" : "border-ink/10 hover:border-clay/40"
                 }`}
               >
-                <img src={apiAssetUrl(image.image_url)} alt={image.alt_text || product.name} className="h-full w-full object-cover" />
+                <img
+                  src={apiAssetUrl(image.image_url, { width: 160 })}
+                  alt={image.alt_text || product.name}
+                  loading="lazy"
+                  decoding="async"
+                  className="h-full w-full object-cover"
+                />
               </button>
             ))}
           </div>
@@ -88,7 +154,11 @@ export default function ProductDetailPage() {
             <Info label="Màu sắc" value={joinDisplay(product.colors, (item) => displayColor(item.name))} />
             <Info label="Vật liệu" value={joinDisplay(product.materials, (item) => displayMaterial(item.name))} />
             <Info label="Loại phòng" value={joinDisplay(product.room_types, (item) => displayRoomType(item.name))} />
-            <Info label="Tồn kho" value={String(product.stock_quantity)} icon={<Package size={16} />} />
+            <Info
+              label="Tồn kho"
+              value={`${product.stock_quantity} (chỉ báo tồn kho, xác thực khi thanh toán)`}
+              icon={<Package size={16} />}
+            />
             <Info label="Trạng thái" value={displayStatus(product.status)} />
             <Info label="Kích thước" value={[product.width, product.height, product.depth].filter(Boolean).join(" x ") || "-"} icon={<Ruler size={16} />} />
             <Info label="Khối lượng" value={product.weight ? `${product.weight} kg` : "-"} />

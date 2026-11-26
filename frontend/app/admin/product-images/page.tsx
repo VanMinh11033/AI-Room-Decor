@@ -284,8 +284,10 @@ export default function AdminProductImagesPage() {
                     {hasUrl ? (
                       <>
                         <img
-                          src={apiAssetUrl(candidate.public_url!)}
+                          src={apiAssetUrl(candidate.public_url!, { width: 400 })}
                           alt={candidate.product_name || "Ứng viên ảnh"}
+                          loading="lazy"
+                          decoding="async"
                           className="h-full w-full object-cover transition duration-300 hover:scale-105"
                         />
                         <button

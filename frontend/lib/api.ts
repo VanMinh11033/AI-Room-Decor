@@ -69,6 +69,28 @@ export function apiAssetUrl(path?: string | null, options?: { width?: number }) 
 export interface ApiFetchOptions extends RequestInit {
   timeoutMs?: number;
   retries?: number;
+  bypassCache?: boolean;
+}
+
+function isPublicCatalogPath(normalizedPath: string): boolean {
+  return (
+    normalizedPath.startsWith("/api/products") ||
+    normalizedPath.startsWith("/api/categories") ||
+    normalizedPath.startsWith("/api/materials") ||
+    normalizedPath.startsWith("/api/styles") ||
+    normalizedPath.startsWith("/api/room-types") ||
+    normalizedPath.startsWith("/api/colors")
+  );
+}
+
+function resolveFetchUrl(normalizedPath: string, isSafeRead: boolean, bypassCache?: boolean): string {
+  // If running in browser, safe read (GET), and public catalog resource, route through Next.js edge-cached route handler
+  if (typeof window !== "undefined" && isSafeRead && isPublicCatalogPath(normalizedPath)) {
+    const separator = normalizedPath.includes("?") ? "&" : "?";
+    const cacheParam = bypassCache ? `${separator}bypass_cache=1` : "";
+    return `/api/public${normalizedPath.replace(/^\/api/, "")}${cacheParam}`;
+  }
+  return `${API_URL}${normalizedPath}`;
 }
 
 export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): Promise<T> {
@@ -87,15 +109,16 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
   const fetchOptions: RequestInit = { ...options };
   delete (fetchOptions as ApiFetchOptions).timeoutMs;
   delete (fetchOptions as ApiFetchOptions).retries;
+  delete (fetchOptions as ApiFetchOptions).bypassCache;
 
   const headers = new Headers(fetchOptions.headers);
   if (!(fetchOptions.body instanceof FormData)) {
     headers.set("Content-Type", "application/json");
   }
-  const token = getAccessToken();
-  if (token) headers.set("Authorization", `Bearer ${token}`);
-
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  const isPublicCall = isSafeRead && isPublicCatalogPath(normalizedPath);
+  const token = getAccessToken();
+  if (token && !isPublicCall) headers.set("Authorization", `Bearer ${token}`);
 
   let attempt = 0;
   while (attempt <= maxRetries) {
@@ -125,7 +148,8 @@ export async function apiFetch<T>(path: string, options: ApiFetchOptions = {}): 
     }
 
     try {
-      const response = await fetch(`${API_URL}${normalizedPath}`, {
+      const targetUrl = resolveFetchUrl(normalizedPath, isSafeRead, options.bypassCache);
+      const response = await fetch(targetUrl, {
         ...fetchOptions,
         headers,
         signal: combinedSignal,
