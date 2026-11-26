@@ -2,9 +2,37 @@ import os
 import tempfile
 from pathlib import Path
 
+# Passlib 1.7.4 + bcrypt 5.x Python 3.13 wrap bug patch
+import bcrypt
+if not hasattr(bcrypt, "__about__"):
+    class _About:
+        __version__ = getattr(bcrypt, "__version__", "5.0.0")
+    bcrypt.__about__ = _About()
+_orig_hashpw = bcrypt.hashpw
+def _safe_hashpw(password, salt):
+    if len(password) > 72:
+        password = password[:72]
+    return _orig_hashpw(password, salt)
+bcrypt.hashpw = _safe_hashpw
+
 os.environ.setdefault("JWT_SECRET_KEY", "test-only-secret")
-os.environ.setdefault("TEST_DATABASE_URL", "mysql+pymysql://root:@127.0.0.1:3306/ai_room_decor_test?charset=utf8mb4")
-os.environ["DATABASE_URL"] = os.environ["TEST_DATABASE_URL"]
+# Database URL determination with graceful SQLite fallback for local test runners
+_default_mysql = "mysql+pymysql://root:@127.0.0.1:3306/ai_room_decor_test?charset=utf8mb4"
+_test_db_url = os.environ.get("TEST_DATABASE_URL")
+if not _test_db_url:
+    try:
+        from sqlalchemy import create_engine as _ce
+        from sqlalchemy.pool import NullPool as _np
+        _probe = _ce(_default_mysql, poolclass=_np)
+        with _probe.connect() as _c:
+            pass
+        _probe.dispose()
+        _test_db_url = _default_mysql
+    except Exception:
+        _test_db_url = f"sqlite:///{Path(tempfile.gettempdir()) / 'ai_room_decor_test.db'}"
+
+os.environ["TEST_DATABASE_URL"] = _test_db_url
+os.environ["DATABASE_URL"] = _test_db_url
 os.environ.setdefault("APP_ENV", "test")
 os.environ["PRODUCT_STORAGE_DIR"] = "test_storage/products"
 os.environ["ROOM_STORAGE_DIR"] = str(Path(tempfile.gettempdir()) / "ai_room_decor_test_rooms")
@@ -37,6 +65,8 @@ TEST_DATABASE_URL = os.environ["TEST_DATABASE_URL"]
 
 def ensure_test_database() -> None:
     url = make_url(TEST_DATABASE_URL)
+    if url.get_backend_name() == "sqlite":
+        return
     database = url.database
     if not database:
         raise RuntimeError("TEST_DATABASE_URL must include a database name")
@@ -55,11 +85,19 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 
 @pytest.fixture()
 def db_session():
+    url = make_url(TEST_DATABASE_URL)
+    is_sqlite = url.get_backend_name() == "sqlite"
     with engine.begin() as connection:
-        connection.execute(text("SET FOREIGN_KEY_CHECKS=0"))
+        if is_sqlite:
+            connection.execute(text("PRAGMA foreign_keys=OFF"))
+        else:
+            connection.execute(text("SET FOREIGN_KEY_CHECKS=0"))
         Base.metadata.drop_all(bind=connection)
         Base.metadata.create_all(bind=connection)
-        connection.execute(text("SET FOREIGN_KEY_CHECKS=1"))
+        if is_sqlite:
+            connection.execute(text("PRAGMA foreign_keys=ON"))
+        else:
+            connection.execute(text("SET FOREIGN_KEY_CHECKS=1"))
     db = TestingSessionLocal()
     seed_initial_data(db)
     try:

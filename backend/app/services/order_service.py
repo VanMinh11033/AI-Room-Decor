@@ -102,7 +102,11 @@ def _serialize_order(order: Order) -> OrderRead:
         shipping_fee=Decimal(str(order.shipping_fee)) if order.shipping_fee is not None else None,
         shipping_fee_status=getattr(order, "shipping_fee_status", ShippingFeeStatus.CALCULATED.value)
         or ShippingFeeStatus.CALCULATED.value,
-        total_amount=Decimal(str(order.total_amount)) if order.total_amount is not None else None,
+        total_amount=(
+            None
+            if (getattr(order, "shipping_fee_status", None) == ShippingFeeStatus.PENDING_CALCULATION.value)
+            else (Decimal(str(order.total_amount)) if order.total_amount is not None else None)
+        ),
         payment_method=order.payment_method or PaymentMethod.COD.value,
         payment_status=order.payment_status or PaymentStatus.UNPAID.value,
         customer=customer_read,
